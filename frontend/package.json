@@ -7,7 +7,7 @@
     "dev": "vite --host localhost --port 5123 --strictPort",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint src/App.jsx"
+    "lint": "eslint src/App.jsx src/components/BlueprintSitePlan.jsx src/components/CampusExperience.jsx src/components/WorkspacePages.jsx"
   },
   "dependencies": {
     "@paper-design/shaders-react": "0.0.82",

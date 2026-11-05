@@ -104,7 +104,8 @@ function RoomQuickFind({rooms,onFindRoom}){
       event.preventDefault();pick(results[Math.min(highlight,results.length-1)]);
     }
   };
-  return <div className="bp-quick-find" ref={outerRef}>
+  return <div className="bp-quick-find" ref={outerRef}
+    onBlur={event=>{if(!event.currentTarget.contains(event.relatedTarget))setOpen(false)}}>
     <div className={'bp-search-field'+(open?' is-open':'')}>
       <Search size={16} aria-hidden="true"/>
       <input ref={inputRef} type="search" autoComplete="off" spellCheck={false}

@@ -1,7 +1,8 @@
 // Check the main signed-in page for undefined variables that a Vite build
 // would otherwise accept, leaving users with a white screen at runtime.
 export default [{
-  files:['src/App.jsx'],
+  files:['src/App.jsx','src/components/BlueprintSitePlan.jsx',
+    'src/components/CampusExperience.jsx','src/components/WorkspacePages.jsx'],
   languageOptions:{
     ecmaVersion:'latest',
     sourceType:'module',

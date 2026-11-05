@@ -285,6 +285,10 @@ try {
     const html=renderToString(React.createElement(Component,shared));
     assert.ok(html.length>300,name+' rendered too little UI');
     assert.ok(html.includes(needle),name+' missing expected heading: '+needle);
+    if(name==='Calendar')assert.ok(html.includes('is-today'),
+      'Calendar should distinguish the current day with restrained visual styling');
+    if(name==='My bookings'||name==='Announcements')assert.ok(html.includes('ig-tab-counter'),
+      'Record filters should display accurate, server-backed item counts');
     console.log('PASS',name,'rendered',html.length,'characters');
   }
 }finally{
