@@ -10,7 +10,7 @@ const menu=[['Overview',LayoutDashboard],['Explore rooms',MapIcon],['Calendar',C
 const fmt=(v,opts)=>new Date(v).toLocaleString('en-IN',opts||{hour:'numeric',minute:'2-digit'});
 function IconTag({children}){return <span className="tag">{children}</span>}
 export default function App(){
-const [session,setSession]=useState(null);const [recovering,setRecovering]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='reset');const [guest,setGuest]=useState(()=>import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview')==='1');const [profile,setProfile]=useState(null);const [rooms,setRooms]=useState(configured?[]:sampleRooms);const [bookings,setBookings]=useState(configured?[]:demoBookings);const [notices,setNotices]=useState(configured?[]:demoNotices);const [view,setView]=useState('Overview');const [building,setBuilding]=useState('IET');const [floor,setFloor]=useState('First');const [date,setDate]=useState(initialDate);const [hour,setHour]=useState('11');const [duration,setDuration]=useState(1);const [capacity,setCapacity]=useState(75);const [selected,setSelected]=useState('IET19');const [toast,setToast]=useState('');const [loading,setLoading]=useState(false);const [mobile,setMobile]=useState(false);const [showBooking,setShowBooking]=useState(false);const [bookingTitle,setBookingTitle]=useState('Extra lecture');const [bookingKind,setBookingKind]=useState('lecture');const [report,setReport]=useState(false);const [noticeTitle,setNoticeTitle]=useState('');const [noticeBody,setNoticeBody]=useState('');
+const [session,setSession]=useState(null);const [recovering,setRecovering]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='reset');const [guest,setGuest]=useState(()=>import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview')==='1');const [profile,setProfile]=useState(null);const [rooms,setRooms]=useState(configured?[]:sampleRooms);const [bookings,setBookings]=useState(configured?[]:demoBookings);const [notices,setNotices]=useState(configured?[]:demoNotices);const [view,setView]=useState('Overview');const [building,setBuilding]=useState('IET');const [floor,setFloor]=useState('First');const [date,setDate]=useState(initialDate);const [hour,setHour]=useState('11');const [duration,setDuration]=useState(1);const [capacity,setCapacity]=useState(75);const [requiredEquipment,setRequiredEquipment]=useState('');const [selected,setSelected]=useState('IET19');const [toast,setToast]=useState('');const [loading,setLoading]=useState(false);const [mobile,setMobile]=useState(false);const [showBooking,setShowBooking]=useState(false);const [bookingTitle,setBookingTitle]=useState('Extra lecture');const [bookingKind,setBookingKind]=useState('lecture');const [report,setReport]=useState(false);const [noticeTitle,setNoticeTitle]=useState('');const [noticeBody,setNoticeBody]=useState('');
 const [noticePriority,setNoticePriority]=useState('normal');
 const [noticeBusy,setNoticeBusy]=useState(false);
 const [pendingQueue,setPendingQueue]=useState([]);
@@ -29,6 +29,13 @@ const [apiAvailability,setApiAvailability]=useState(null);
 const [apiRecommendations,setApiRecommendations]=useState([]);
 const [apiWarning,setApiWarning]=useState('');
 const [refreshTick,setRefreshTick]=useState(0);
+const [auditRows,setAuditRows]=useState([]);
+const [auditTotal,setAuditTotal]=useState(0);
+const [auditOffset,setAuditOffset]=useState(0);
+const [auditRoom,setAuditRoom]=useState('');
+const [auditAction,setAuditAction]=useState('');
+const [auditLoading,setAuditLoading]=useState(false);
+const [auditError,setAuditError]=useState('');
 async function apiFetch(route,opts={}){
  if(!API_BASE||!session?.access_token)throw new Error('IET Grid API or sign-in is unavailable');
  const response=await fetch(API_BASE.replace(/\/$/,'')+route,{
@@ -71,7 +78,8 @@ useEffect(()=>{
  let disposed=false;
  setApiAvailability(null);setApiRecommendations([]);setApiWarning('');
  const query='start='+encodeURIComponent(start)+'&end='+encodeURIComponent(end)+
- '&capacity='+encodeURIComponent(capacity)+'&kind='+encodeURIComponent(bookingKind);
+ '&capacity='+encodeURIComponent(capacity)+'&kind='+encodeURIComponent(bookingKind)+
+ '&equipment='+encodeURIComponent(requiredEquipment);
  Promise.all([apiFetch('/api/v1/availability?'+query),
    apiFetch('/api/v1/recommendations?'+query+'&building='+encodeURIComponent(building))])
    .then(([availability,recs])=>{if(disposed)return;
@@ -81,7 +89,7 @@ useEffect(()=>{
    .catch(e=>{if(disposed)return;setApiAvailability(null);setApiRecommendations([]);
      setApiWarning('Live availability could not be verified: '+e.message)});
  return()=>{disposed=true};
-},[demo,session?.access_token,start,end,capacity,building,bookingKind,refreshTick]);
+},[demo,session?.access_token,start,end,capacity,building,bookingKind,requiredEquipment,refreshTick]);
 const [liveCalendar,setLiveCalendar]=useState([]);
 useEffect(()=>{
  if(demo||!session?.access_token)return;
@@ -101,12 +109,31 @@ const calendarBookings=demo?bookings:liveCalendar;
 const current=rooms.find(r=>r.id===selected);
 const isAvailable=r=>demo?!occupancy(r.id,start,end,bookings):
     apiAvailability?.some(x=>x.id===r.id&&x.available===true)===true;
-const matching=useMemo(()=>demo?recommend(rooms,bookings,start,end,capacity,building):
- apiRecommendations,[demo,rooms,bookings,start,end,capacity,building,apiRecommendations]);
+const matching=useMemo(()=>demo?
+  recommend(rooms,bookings,start,end,capacity,building).filter(r=>!requiredEquipment||r.verified&&(r.equipment||[]).includes(requiredEquipment)):
+  apiRecommendations,[demo,rooms,bookings,start,end,capacity,building,requiredEquipment,apiRecommendations]);
 const filtered=rooms.filter(r=>r.building===building&&r.floor===floor);
 const userRole=demo?'faculty':profile?.role||'student';
 const canBook=demo||(['faculty','coordinator','admin'].includes(userRole)&&profile?.verified);
 const canAdmin=demo||(['coordinator','admin'].includes(userRole)&&profile?.verified);
+
+useEffect(()=>{
+  if(demo||!session?.access_token||view!=='Admin'||!canAdmin){
+    setAuditRows([]);setAuditTotal(0);setAuditError('');return;
+  }
+  let ignore=false;
+  setAuditLoading(true);setAuditError('');
+  const params=new URLSearchParams({limit:'20',offset:String(auditOffset)});
+  if(auditRoom.trim())params.set('room_id',auditRoom.trim().toUpperCase());
+  if(auditAction)params.set('action',auditAction);
+  apiFetch('/api/v1/admin/audit?'+params.toString()).then(data=>{
+    if(!ignore){setAuditRows(data.events||[]);setAuditTotal(data.total||0);}
+  }).catch(err=>{
+    if(!ignore){setAuditRows([]);setAuditTotal(0);setAuditError('Audit history could not be loaded: '+err.message);}
+  }).finally(()=>{if(!ignore)setAuditLoading(false)});
+  return()=>{ignore=true;};
+},[demo,session?.access_token,view,canAdmin,auditOffset,auditRoom,auditAction,refreshTick]);
+
 
 useEffect(()=>{
  if(demo||!session?.access_token||view!=='Admin'||!canAdmin){setPendingQueue([]);setPendingError('');return;}
@@ -187,7 +214,7 @@ async function doBook(){
   }else{
    const result=await apiFetch('/api/v1/bookings',{method:'POST',body:JSON.stringify({
      room_id:current.id,title,starts_at:start,ends_at:end,kind:bookingKind,required_capacity:capacity,
-     idempotency_key:crypto.randomUUID()})});
+     idempotency_key:crypto.randomUUID(),required_equipment:requiredEquipment?[requiredEquipment]:[]})});
    const b=await supabase.from('bookings').select('*').order('starts_at');
    if(b.data)setBookings(b.data);
    setRefreshTick(v=>v+1);
@@ -274,6 +301,8 @@ return <div className="app-shell"><aside className={'sidebar '+(mobile?'mobile-o
     setBuilding={setBuilding} floor={floor} setFloor={setFloor} selected={selected} setSelected={setSelected}
     date={date} setDate={setDate} hour={hour} setHour={setHour} duration={duration}
     setDuration={setDuration} capacity={capacity} setCapacity={setCapacity}
+    bookingKind={bookingKind} setBookingKind={setBookingKind}
+    requiredEquipment={requiredEquipment} setRequiredEquipment={setRequiredEquipment}
     apiAvailability={apiAvailability} apiWarning={apiWarning} isAvailable={isAvailable}
     matching={matching} current={current} canBook={canBook}
     setShowBooking={setShowBooking} setView={setView} demo={demo}/>}
@@ -292,9 +321,13 @@ return <div className="app-shell"><aside className={'sidebar '+(mobile?'mobile-o
     reviewBusy={reviewBusy} reviewPendingBooking={reviewPendingBooking}
     setRefreshTick={setRefreshTick} accountUuid={accountUuid} setAccountUuid={setAccountUuid}
     accountRole={accountRole} setAccountRole={setAccountRole} accountBusy={accountBusy}
-    grantTestRole={grantTestRole} apiWarning={apiWarning} apiAvailability={apiAvailability}/>}
+    grantTestRole={grantTestRole} apiWarning={apiWarning} apiAvailability={apiAvailability}
+    auditRows={auditRows} auditTotal={auditTotal} auditOffset={auditOffset} setAuditOffset={setAuditOffset}
+    auditRoom={auditRoom} setAuditRoom={setAuditRoom} auditAction={auditAction} setAuditAction={setAuditAction}
+    auditLoading={auditLoading} auditError={auditError}/>}
 </main></div>{mobile&&<div className="mobile-backdrop" onClick={()=>setMobile(false)}/>}
-{showBooking&&<div className="modal-overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setShowBooking(false)}}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="ig-booking-title"><div className="modal-head"><div><div className="eyebrow">CAMPUS RESERVATION</div><h2 id="ig-booking-title">Reserve a classroom</h2></div><button onClick={()=>setShowBooking(false)}><X size={20}/></button></div><p className="muted">Bookings are validated against existing room reservations before confirmation.</p><div className="booking-summary"><div><small>ROOM</small><b>{selected||'No room selected'}</b></div><div><small>DATE</small><b>{date}</b></div><div><small>TIME</small><b>{hour.padStart(2,'0')}:00 · {duration}h</b></div></div><label className="field-label">Session title<input value={bookingTitle} onChange={e=>setBookingTitle(e.target.value)}/></label><label className="field-label">Booking type<select value={bookingKind} onChange={e=>setBookingKind(e.target.value)}><option value="lecture">Extra lecture</option><option value="exam">Examination</option><option value="practical">Practical session</option><option value="event">Academic event</option></select></label><div className="modal-actions"><button className="button-outline compact" onClick={()=>setShowBooking(false)}>Cancel</button><button className="button-primary compact" disabled={loading||!current||!canBook||!isAvailable(current)||current.capacity<capacity} onClick={doBook}>{loading?'Saving…':'Confirm reservation'} <ArrowRight size={16}/></button></div><p className="tiny">Exam and event requests may be queued for administrator approval in connected mode.</p></section></div>}
+{showBooking&&<div className="modal-overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setShowBooking(false)}}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="ig-booking-title"><div className="modal-head"><div><div className="eyebrow">CAMPUS RESERVATION</div><h2 id="ig-booking-title">Reserve a classroom</h2></div><button onClick={()=>setShowBooking(false)}><X size={20}/></button></div><p className="muted">Bookings are checked against occupancy, capacity, room type and any requested equipment. Exam/event and restricted rooms require approval.</p><div className="booking-summary"><div><small>ROOM</small><b>{selected||'No room selected'}</b></div><div><small>DATE</small><b>{date}</b></div><div><small>TIME</small><b>{hour.padStart(2,'0')}:00 · {duration}h</b></div></div><label className="field-label">Session title<input value={bookingTitle} onChange={e=>setBookingTitle(e.target.value)}/></label><label className="field-label">Booking type<select value={bookingKind} onChange={e=>setBookingKind(e.target.value)}><option value="lecture">Extra lecture</option><option value="exam">Examination</option><option value="practical">Practical session</option><option value="event">Academic event</option></select></label><p className="ig-note"><Info size={14}/> {current?.verified?'Room capacity is recorded as verified.':'Capacity is provisional; confirm with the university.'} {requiredEquipment?'Requested equipment must be explicitly recorded and verified.':'Equipment is not assumed to be present.'}</p>
+<div className="modal-actions"><button className="button-outline compact" onClick={()=>setShowBooking(false)}>Cancel</button><button className="button-primary compact" disabled={loading||!current||!canBook||!isAvailable(current)||current.capacity<capacity} onClick={doBook}>{loading?'Saving…':(bookingKind==='exam'||bookingKind==='event'||current?.restricted)?'Request approval':'Confirm reservation'} <ArrowRight size={16}/></button></div><p className="tiny">Exam and event requests may be queued for administrator approval in connected mode.</p></section></div>}
 {report&&<div className="modal-overlay"><section className="modal" role="dialog" aria-modal="true" aria-labelledby="ig-report-title"><div className="modal-head"><h2 id="ig-report-title">Report an issue</h2><button onClick={()=>setReport(false)}><X/></button></div><p className="muted">Flag incorrect or outdated schedule information. This will not modify official bookings.</p><button className="button-primary" onClick={submitReport}>Submit schedule report</button></section></div>}
 {toast&&<div className="toast"><Info size={17}/>{toast}<button onClick={()=>setToast('')}><X size={15}/></button></div>}</div>
 }
