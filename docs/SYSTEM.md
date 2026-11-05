@@ -1,16 +1,43 @@
-# IET Grid — SYSTEM.md
+# IET Grid — System Specification
 
-## Architecture
-React + Vite UI, Supabase Auth, PostgreSQL with RLS and server-validated booking RPC, Vercel static hosting.
+> Compact engineering reference. For detailed rationale see [ARCHITECTURE.md](ARCHITECTURE.md), for product scope see [PRD.md](PRD.md), and for current limitations see [MVP.md](MVP.md).
 
-## Security
-Default new accounts to unverified student. Admin verification must happen in a privileged administrative process. Only verified faculty/coordinators/admins can book. Confirmed reservations protected from time overlap by PostgreSQL GiST exclusion constraint. Sensitive mutation RPCs check role inside database. Do not expose service-role keys.
+## Core responsibility
 
-## Booking engine
-Availability searches by room, date, time and capacity. Deterministic ranking penalizes excess capacity and cross-building travel. Database is the final authority. Exams and events are pending approval.
+An institution-specific scheduling system that identifies suitable IET/Deeksha rooms, prevents confirmed collisions at the database layer, lets authorized faculty submit bookings and gives students academic schedule and notice access.
 
-## Data caveats
-Official student dataset is not yet imported. Capacities marked unverified are estimates. Blueprint shows LH13/LH14 and IET23, despite discrepancies in textual inventory. Floor UI is currently schematic, not yet an architecturally accurate SVG trace. Demo-mode data is nonpersistent.
+## Running implementation
 
-## Deferred
-Automatic semester scheduling, full timetable import, granular scope delegation, verified student section mapping, and full issue management.
+- Frontend: React 19 + Vite 6, hosted on Vercel.
+- Backend: dedicated Supabase Auth + PostgreSQL; six RLS-enabled public tables.
+- Database APIs: role-verified RPCs for booking creation, booking review and notice publication; secure triggers for profile creation and booking history.
+- UI: overview, schematic floor explorer, calendar, booking list, announcements, minimal report and administrator overview.
+- Room inventory: 30 seeded entries derived from organizer blueprint identifiers. Some capacities and lab classifications are unverified.
+- Demo mode: explicit sample data; local-only reservations are not persisted.
+
+## Core invariants
+
+1. Two **confirmed** bookings cannot overlap for the same room over half-open time intervals.
+2. No browser-side check substitutes for database conflict validation.
+3. Role elevation never relies on user-editable metadata.
+4. Student or unverified user cannot create a privileged booking or official notice.
+5. Pending requests are not represented as confirmed.
+6. Demo data and unverified room attributes are labeled.
+7. Approved public timetables must eventually be versioned separately from editable drafts.
+
+## Authorization target
+
+University admin → coordinator with delegated building/department scope → verified faculty → student. The coarse roles exist; fine-grained delegated scopes and fully personalized cohort visibility are future work and must be implemented before institutional rollout.
+
+## Major known gaps
+
+No imported student/batch/section data, incomplete recurring official timetable model, schematic (not exact) architectural maps, incomplete approval UI and unverified real user end-to-end booking test. Full semester timetable optimization is intentionally deferred after the hackathon.
+
+## Data migrations
+
+- [Initial schema](../supabase/migrations/001_iet_grid.sql)
+- [Security hardening](../supabase/migrations/002_security_hardening.sql)
+
+## Related
+
+[Design system](DESIGN.md) · [Decision log](DECISIONS.md) · [Test plan](TEST_PLAN.md) · [Implementation plan](IMPLEMENTATION_PLAN.md)
