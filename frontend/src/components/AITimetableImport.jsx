@@ -39,8 +39,8 @@ export default function AITimetableImport({apiFetch, onDone}) {
     setBusy(true);setError('');setMessage('');
     try{
       const result=await apiFetch('/api/v1/admin/ai/timetable/confirm',{method:'POST',
-        body:JSON.stringify({rows:ready.map(x=>({row_index:x.row_index,room_id:x.room_id,starts_at:x.start,ends_at:x.end,
-          cohort_id:x.cohort_id,required_capacity:x.expected_size||1,required_equipment:[]}))})});
+        body:JSON.stringify({rows:ready.map(x=>({row_index:x.row_index,title:(x.course_title||x.course_code||'Timetable session').slice(0,180),room_id:x.room_id,starts_at:x.start,ends_at:x.end,
+          cohort_id:x.cohort_id,required_capacity:x.expected_size||1,required_equipment:[],kind:x.kind||'lecture'}))})});
       setMessage('Confirmed '+result.confirmed_count+' reservations. '+result.failed_count+' failed.');
       if(result.confirmed_count)onDone?.();
     }catch(e){setError(e.message||'Reservation confirmation failed.');}finally{setBusy(false);}
