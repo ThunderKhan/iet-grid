@@ -27,7 +27,7 @@ function Empty({icon:Icon=BookOpen,title,body,action}) {
   return <div className="ig-empty"><div className="ig-empty-icon"><Icon size={24}/></div><h3>{title}</h3><p>{body}</p>{action}</div>;
 }
 function MiniRoom({room,isAvailable,onClick,selected}) {
-  const good=isAvailable?.(room);
+  const good=!!isAvailable?.(room);
   const status=good?'available':'unknown';
   return <button className={'ig-mini-room '+(good?'is-free':'is-unverified')+(selected?' is-selected':'')}
     key={room.id} onClick={()=>onClick(room)} type="button">
@@ -58,8 +58,8 @@ export function OverviewPage({rooms,bookings,notices,matching,buildings,selected
       </div>
       <div className="ig-hero-visual" aria-hidden="true"><div className="ig-hero-orbit orbit-a"/><div className="ig-hero-orbit orbit-b"/><div className="ig-hero-orbit orbit-c"/>
         <div className="ig-hero-ui"><div className="ig-hero-ui-top"><Layers size={15}/> CAMPUS GRID <span>01 / 02</span></div>
-          <div className="ig-hero-ui-rooms"><span>IET22</span><span>IET16</span><i>MAIN CORRIDOR</i><span className="green">IET19</span><span>IET18</span></div>
-          <div className="ig-hero-ui-bottom"><CheckCircle2 size={13}/> SOURCE-BACKED AVAILABILITY</div>
+          <div className="ig-hero-ui-rooms"><span>IET22</span><span>IET16</span><i>MAIN CORRIDOR</i><span className="accent">IET19</span><span>IET18</span></div>
+          <div className="ig-hero-ui-bottom"><CheckCircle2 size={13}/> ILLUSTRATIVE FLOOR PREVIEW</div>
         </div>
       </div>
     </section>
@@ -104,7 +104,8 @@ export function ExplorePage({buildings,rooms,building,setBuilding,floor,setFloor
   const getStatus=(r)=>{
     if(!demo&&!apiAvailability)return 'unknown';
     const record=apiAvailability?.find(a=>a.id===r.id);
-    if(!demo && record?.reason==='ineligible')return 'restricted';
+    if(!demo&&!record)return 'unknown';
+    if(!demo && record.reason==='ineligible')return 'restricted';
     if(r.capacity<capacity)return 'restricted';
     return isAvailable(r)?'available':'occupied';
   };
@@ -186,7 +187,7 @@ export function CalendarPage({date,setDate,initialDate,calendarBookings,rooms,on
           type="button" onClick={()=>onOpenRoom(b.room_id,b.starts_at)}>
           <small><Clock3 size={12}/>{strTime(b.starts_at)} – {strTime(b.ends_at)}</small>
           <strong>{b.title}</strong><span>{b.room_id}</span><StatePill status={b.status}/></button>)}
-          {!byDay(day).length&&<div className="ig-cal-empty-day"><span>No events</span><small>Available schedule window</small></div>}
+          {!byDay(day).length&&<div className="ig-cal-empty-day"><span>No events</span><small>No availability claim</small></div>}
         </div></div>)}
     </div>}
     <p className="ig-note"><Info size={14}/> Select a scheduled event to locate its room on the floor board. The backend remains authoritative for overlaps and approval status.</p>
@@ -233,7 +234,7 @@ export function AnnouncementsPage({notices,demo,markNoticeRead,noticeReadBusy,se
       <button className="ig-btn ig-btn-outline" type="button" onClick={()=>setReport(true)}>Report an issue <ArrowUpRight size={16}/></button></div>
   </section></div>;
 }
-export function AdminPage({canAdmin,demo,userRole,rooms,bookings,notices,noticeTitle,setNoticeTitle,noticeBody,setNoticeBody,noticePriority,setNoticePriority,noticeBusy,addNotice,pendingQueue,pendingLoading,pendingError,reviewBusy,reviewPendingBooking,setRefreshTick,accountUuid,setAccountUuid,accountRole,setAccountRole,accountBusy,grantTestRole,apiWarning}) {
+export function AdminPage({canAdmin,demo,userRole,rooms,bookings,notices,noticeTitle,setNoticeTitle,noticeBody,setNoticeBody,noticePriority,setNoticePriority,noticeBusy,addNotice,pendingQueue,pendingLoading,pendingError,reviewBusy,reviewPendingBooking,setRefreshTick,accountUuid,setAccountUuid,accountRole,setAccountRole,accountBusy,grantTestRole,apiWarning,apiAvailability}) {
   return <div className="ig-page-stack">
     <section className="ig-admin-intro"><div><span className="ig-overline">OPERATIONS CENTER</span><h2>Campus administration</h2><p>Review allocations, publish academic updates, and manage permitted access.</p></div><StatePill status={canAdmin?'available':'restricted'}>{canAdmin?(demo?'Demo view':'Verified operator'):'Restricted access'}</StatePill></section>
     {!canAdmin?<section className="ig-card"><Empty icon={LockKeyhole} title="Administrator access required" body="These controls are limited to verified university administrators and coordinators."/></section>:<>
@@ -278,7 +279,7 @@ export function AdminPage({canAdmin,demo,userRole,rooms,bookings,notices,noticeT
           <PanelHead eyebrow="SERVICE READINESS" title="Integration status" icon={CheckCircle2} description="No simulated uptime or fabricated service-health metrics"/>
           <div className="ig-health-lines"><div><span>Application</span><b>Authenticated workspace</b></div>
             <div><span>Data mode</span><StatePill status={demo?'pending':'available'}>{demo?'Demo data':'Connected session'}</StatePill></div>
-            <div><span>Live availability</span><StatePill status={apiWarning?'unknown':'available'}>{demo?'Demo only':apiWarning?'Not verified':'API response required'}</StatePill></div>
+            <div><span>Live availability</span><StatePill status={demo||!apiAvailability||apiWarning?'unknown':'available'}>{demo?'Demo only':apiWarning||!apiAvailability?'Not verified':'API response received'}</StatePill></div>
             <div><span>Floor geometry</span><StatePill status="unknown">Schematic / unverified</StatePill></div>
           </div>
         </section>

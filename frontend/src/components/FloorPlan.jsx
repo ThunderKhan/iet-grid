@@ -66,8 +66,7 @@ function PlanCanvas({group,rows,selected,onSelect,getStatus,building,floor}) {
         </>}
       </React.Fragment>;
     })}
-    <rect x="740" y={height-65} width="92" height="31" rx="6" fill="#E2EAF3" stroke="#B9C9DC"/>
-    <text x="786" y={height-45} textAnchor="middle" className="ig-plan-corridor">STAIRS*</text>
+    <text x="440" y={height-41} textAnchor="middle" className="ig-plan-corridor">SCHEMATIC · GEOMETRY UNVERIFIED</text>
   </svg>;
 }
 export default function FloorPlan({rooms,building,floor,selected,onSelect,getStatus}) {
