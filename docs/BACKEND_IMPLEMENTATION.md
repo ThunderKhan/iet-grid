@@ -99,7 +99,8 @@ Supabase/PostgREST may cap individual responses. The availability service pages 
 - SQL transaction exercise: overlapping room reservation rejected, same cohort double booking rejected, adjacent reservation allowed, conflicting pending approval rejected; the scenario was **rolled back**.
 - FastAPI production /health and /api/openapi.json returned HTTP 200.
 - Initial offline pytest and mocked authorization/API contract suites passed.
-- Regression tests covering calendar input validation and paginated allocation reads were added; workflow configuration updated to install pytest-asyncio. Check the latest workflow run before marking them green.
+- **34 pytest tests passed** in [GitHub Actions Backend checks](https://github.com/ThunderKhan/iet-grid/actions/runs/42005322777), including a migration-manifest guard, paginated availability, timezone validation, mock student/faculty authorization and scheduling algorithms.
+- The repository's rollback-only [SQL authenticated workflow test](../backend/tests/integration/sql_authenticated_workflows.sql) passed using temporary Auth users and SQL-simulated identities: default student signup, verified faculty booking, idempotency, overlap denial, student RLS denial, cancellation, recurring academic series, cohort notice, and pending-to-confirmed approval. All test records were rolled back.
 
 **Not yet verified:**
 - Full authenticated production path with student, faculty and admin accounts.
@@ -118,7 +119,7 @@ Only public Supabase publishable keys are used. Never commit private university 
 
 ## 9. Immediately remaining work
 
-1. Obtain a real verified administrator/faculty/student test identity set; record success/failure evidence.
+1. Establish the first real administrator using [the trusted bootstrap guide](../backend/BOOTSTRAP_AND_ACCEPTANCE.md), then create verified faculty and student test identities; record evidence.
 2. Test one actual persisted faculty booking, then an overlapping second booking; test administrator approval.
 3. Import official student, cohort, faculty and timetable data when the organizers supply it; no fabricated student records.
 4. Complete blueprint spatial fidelity and administrator/student UI as separate frontend work.

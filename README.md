@@ -7,6 +7,7 @@
 | Live frontend | https://iet-grid.vercel.app |
 | Live backend | https://iet-grid-api.vercel.app |
 | Backend health | https://iet-grid-api.vercel.app/health |
+| Trusted admin bootstrap and acceptance | [backend/BOOTSTRAP_AND_ACCEPTANCE.md](backend/BOOTSTRAP_AND_ACCEPTANCE.md) |
 | Interactive API reference | https://iet-grid-api.vercel.app/api/docs |
 | Documentation hub | [docs/README.md](docs/README.md) |
 | Backend implementation record | [docs/BACKEND_IMPLEMENTATION.md](docs/BACKEND_IMPLEMENTATION.md) |

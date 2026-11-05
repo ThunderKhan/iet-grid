@@ -24,6 +24,7 @@ Institute of Engineering & Technology (IET), Deen Dayal Upadhyaya Gorakhpur Univ
 
 - [Frontend application](../frontend/README.md): React/Vite code, public Supabase client, room explorer and calendar.
 - [Backend implementation](../backend/README.md): independently deployed FastAPI modular monolith plus Supabase Auth, RLS-enforced PostgreSQL and transactional booking functions.
+- [Trusted admin bootstrap and acceptance](../backend/BOOTSTRAP_AND_ACCEPTANCE.md): verified account provisioning and required real-user tests.
 - Two Vercel projects: frontend root `frontend/` at https://iet-grid.vercel.app, and FastAPI root `backend/` at https://iet-grid-api.vercel.app. Supabase PostgreSQL remains the transaction authority.
 - Migration scripts were relocated with no live database schema changes. Changes to `backend/` do **not** run automatically on Git push.
 
@@ -42,7 +43,8 @@ IET Grid lets authorized university staff discover, schedule and reserve suitabl
 
 - **Already in repository:** React/Vite pages and demo mode; independently hosted FastAPI API with booking, availability, calendar, notices and admin routes; eight SQL migrations for 20 RLS-enabled tables; offline test suites.
 - **Already provisioned:** dedicated Supabase project, 30 seeded room records, and two Vercel production projects. API health/OpenAPI endpoints have returned HTTP 200.
-- **Not yet proven end-to-end:** real faculty account verification, authenticated production booking/approval, actual student cohort filtering from official records, and administrative UI workflows.
+- **Verified by automated/SQL tests:** 34 passing pytest cases and rollback-only simulated faculty/student/admin database workflow tests; API health/OpenAPI HTTP 200.
+- **Not yet proven end-to-end:** real faculty account verification, authenticated production browser booking/approval, official student cohort import, and administrative UI workflows.
 - **Still missing mandatory input:** organizer-provided student, branch, year, batch and section data, plus authoritative room capacity/laboratory mapping.
 - **Not production ready:** floor-plan geometry is schematic, not an accurately digitized tracing of the supplied blueprint.
 

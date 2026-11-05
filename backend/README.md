@@ -4,6 +4,8 @@
 **API documentation:** https://iet-grid-api.vercel.app/api/docs  
 **Health:** https://iet-grid-api.vercel.app/health
 
+**Administrator bootstrap:** [BOOTSTRAP_AND_ACCEPTANCE.md](BOOTSTRAP_AND_ACCEPTANCE.md). First admin role must be assigned by independently verified, privileged SQL approval, never by public signup metadata.
+
 ## Design
 
 A separately deployed FastAPI modular monolith, backed by the dedicated Supabase PostgreSQL/Auth project. The frontend is a separate React/Vite app. The API validates Supabase access tokens with its Auth service and forwards them to PostgREST so RLS continues to apply. Only SQL RPCs mutate privileged campus records.
@@ -116,6 +118,8 @@ python -m pytest tests -q
 
 - GitHub Actions tests: passed for initial, mocked Auth/RPC and algorithm suites.
 - Database rollback integration: passed room, cohort, adjacency and approval-collision tests; records rolled back.
+- Rollback-only simulated authenticated SQL integration: default student provisioning, faculty booking/idempotency, RLS denial, cancellation, recurring academic series, targeted notices and admin approvals passed. All temporary test users and records rolled back.
+- **34 pytest tests passed** in GitHub Actions run https://github.com/ThunderKhan/iet-grid/actions/runs/42005322777.
 - Live Vercel API: /health and /api/openapi.json returned HTTP 200.
 - Missing: signed-in verified faculty and student end-to-end production test; 100-request concurrency benchmark; actual student datasets; final institutional acceptance tests.
 

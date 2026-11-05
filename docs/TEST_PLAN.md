@@ -7,10 +7,11 @@
 | Test category | Evidence | Result |
 | --- | --- | --- |
 | SQL room overlap, cohort conflict, adjacent booking and pending-approval conflict | Supabase rollback transaction, with zero lasting test rows | **PASS** |
+| Simulated authenticated database workflows | [Rollback SQL script](../backend/tests/integration/sql_authenticated_workflows.sql): faculty/student RLS, idempotency, cancellation, recurrence, notices, approvals | **PASS** (SQL simulation only; not a live HTTP session) |
 | Live API deployment health | Vercel-served /health response HTTP 200 | **PASS** |
 | OpenAPI generated contract | Live /api/openapi.json response HTTP 200 | **PASS** |
 | Offline unit and mocked authorization tests | GitHub Actions Backend checks, including anonymous denial and faculty RPC forwarding | **PASS** |
-| Pagination and calendar-invalid-date regression tests | Automated tests plus pytest-asyncio-enabled workflow | **PASS** if latest green workflow confirmed |
+| Pagination, calendar validation, migration manifest and mock API regression tests | [GitHub Actions run 42005322777](https://github.com/ThunderKhan/iet-grid/actions/runs/42005322777): 34 pytest cases | **PASS** |
 | Full production JWT→faculty booking→student read→admin approval | No verified test profiles at baseline | **NOT TESTED** |
 | Official student dataset/recurring timetable import | Required source files unavailable | **BLOCKED** |
 | High-load concurrent booking benchmark | No production benchmark run | **NOT TESTED** |

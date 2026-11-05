@@ -30,7 +30,7 @@ Versioned SQL migrations **001–008** are located under backend/supabase/migrat
 
 ## Verification status
 
-Live API health/OpenAPI endpoints returned HTTP 200. Automated unit and mocked API suites have passed; PostgreSQL rolled-back collision tests passed after a trigger fix. New calendar and pagination regressions are included in CI. Real administrator/faculty/student accounts and authenticated end-to-end booking tests are still required.
+Live API health/OpenAPI endpoints returned HTTP 200. A total of 34 automated pytest cases pass in CI, including pagination/timezone and migration-manifest regressions. Rolled-back SQL tests verified collisions, simulated faculty/student authorization, idempotency, cancellation, recurrence and approval; they do not substitute for real HTTP account testing. Real administrator/faculty/student accounts and authenticated end-to-end booking tests are still required.
 
 ## Product roadmap beyond hackathon
 

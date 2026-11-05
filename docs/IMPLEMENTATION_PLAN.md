@@ -18,7 +18,7 @@
 | Phase 1: database redesign | **Implemented and migrated**: 20 RLS tables; room/faculty/cohort allocations; idempotent booking, cancellation, approvals; migrations 001–008 restored | Authenticated user-level transaction tests and security review |
 | Phase 2: API authorization + academic import | **Implemented**: FastAPI with Supabase Auth verification; secured RPC forwarding; CSV dry-run and atomic import; recurring academic scheduling APIs | Trusted test account provisioning and real organizer dataset |
 | Phase 3: scheduling/recommendations | **Implemented**: hard eligibility, capacity/type/equipment, interval/ranking, alternate slots, paginated allocations | Real student/timetable data and live user acceptance |
-| Phase 4: tests + integration | **Partially verified**: GitHub Actions unit/mock tests; SQL rollback conflicts; frontend and API deployed independently; live API health/OpenAPI HTTP 200 | Real faculty/admin/student sessions, 100-request load test, screenshots |
+| Phase 4: tests + integration | **Partially verified**: 34 passing pytest cases, rollback-only authenticated SQL integration, two live Vercel projects and API health/OpenAPI HTTP 200 | Real faculty/admin/student browser sessions, 100-request load test and screenshots |
 
 **Important:** The database is usable but has no real registered campus profiles or imported academic timetables at the recorded baseline. The MVP is **not fully verified** until these live account/data dependencies are exercised.
 
