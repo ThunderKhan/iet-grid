@@ -203,7 +203,7 @@ export default function ProfilePage({supabase,session,profile,role='student',
 
   return <div className="igp-page">
     <div className="igp-intro">
-      <span className="igp-eyebrow">ACCOUNT SETTINGS</span>
+      
       <h1>My profile</h1>
       <p>Manage how your name and photo appear in IET Grid, and review your academic information.</p>
     </div>

@@ -1,7 +1,7 @@
 /* Architectural Minimalism: navy/cobalt from root DESIGN.md. Status is indicated by small dots and the text legend, never entire room fills. */
 .bp-board{min-width:0;background:#fff;border:1px solid var(--ig-border);border-radius:14px;overflow:visible;box-shadow:0 2px 10px rgba(16,27,44,.04)}
 .bp-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid #EDF1F6}
-.bp-head h2{font-size:17px;color:var(--ig-text);letter-spacing:-.025em;font-weight:700;line-height:1.35;margin:0}
+.bp-head h1{font-size:17px;color:var(--ig-text);letter-spacing:-.025em;font-weight:700;line-height:1.35;margin:0}
 .bp-head p{font-size:12px;color:var(--ig-muted);margin:5px 0 0;line-height:1.5}
 .bp-head-copy{min-width:0}
 .bp-view-toggle{display:flex;align-items:center;flex-shrink:0;gap:3px;background:var(--ig-canvas);border:1px solid var(--ig-border);border-radius:8px;padding:3px}
@@ -61,7 +61,7 @@
 @media(max-width:700px){
  .bp-head{padding:12px 13px;align-items:center;flex-direction:row;gap:8px}
  .bp-head p{font-size:12px;line-height:1.4}
- .bp-head h2{font-size:15px}
+ .bp-head h1{font-size:15px}
  .bp-view-toggle button{padding:7px 9px;font-size:13px}
  .bp-view-toggle button svg{width:14px;height:14px}
  .bp-viewport{padding:8px 0 10px}
@@ -142,7 +142,7 @@
 .bp-board{position:relative;isolation:isolate}
 .bp-head{position:relative;z-index:4;min-height:80px;background:#fff;border-radius:14px 14px 0 0;
   border-bottom:1px solid #E4EAF2;padding:15px 22px}
-.bp-head h2{font-size:18px;font-weight:730;letter-spacing:-.035em}
+.bp-head h1{font-size:18px;font-weight:730;letter-spacing:-.035em}
 .bp-head-actions{gap:10px;flex-shrink:0}
 .bp-building-tabs{background:#F6F8FC;border-color:#E4EAF2;gap:2px}
 .bp-building-tabs button{transition:color .15s ease,background .15s ease,border-color .15s ease}

@@ -202,7 +202,7 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
     <header className="bp-head">
       <div className="bp-head-copy">
         <div className="bp-heading-line">
-          <h2>Classroom layout</h2>
+          <h1>Classroom layout</h1>
           {buildings.length>0&&<div className="bp-building-tabs" role="group" aria-label="Select building">
             {buildings.map(b=><button type="button" key={b.id} aria-pressed={building===b.id}
               aria-label={b.id==='DEEK'?'Select Deeksha Bhawan building':'Select Institute of Engineering & Technology building'}

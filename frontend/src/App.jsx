@@ -389,18 +389,6 @@ return <div className="app-shell">
       <RefreshCcw size={15}/> Retry loading
     </button>
   </div>}
-  {view!=='Explore rooms'&&view!=='My profile'&&(<div className="page-intro"><div><div className="eyebrow">IET GRID / {view.toUpperCase()}</div>
-    <h1>{view==='Overview'?'Campus overview':view}</h1>
-    <p>{view==='Overview'?'Classrooms, bookings, and academic updates in one workspace.':
-      view==='Explore rooms'?'Select a building, check a time slot, and inspect available classrooms.':
-      view==='Calendar'?'A connected view of room allocations and teaching schedules.':
-      view==='My bookings'?'Review reservations, pending approvals, and your visible booking history.':
-      view==='Announcements'?'Official university notices and timetable changes.':
-      'Campus operations and institutional controls.'}</p></div>
-    {view!=='Admin'&&<div className="intro-actions"><button className="button-primary compact" type="button" onClick={()=>setView('Explore rooms')}>
-      <Search size={16}/> Find a room</button></div>}
-  </div>
-  )}
 {view==='My profile'&&<ProfilePage
     supabase={supabase} session={session} profile={profile} role={userRole}
     avatarUrl={avatarUrl} onProfileChanged={setProfile}/>}
