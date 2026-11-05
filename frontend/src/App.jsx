@@ -33,6 +33,8 @@ const [noticeReadBusy,setNoticeReadBusy]=useState('');
 
 const chosenCohort=cohorts.find(c=>c.id===cohortId)||null;
 const [liveDataError,setLiveDataError]=useState('');
+const [inventoryLoading,setInventoryLoading]=useState(true);
+const [inventoryRetry,setInventoryRetry]=useState(0);
 const API_BASE=import.meta.env.VITE_API_BASE_URL||'';
 const [apiAvailability,setApiAvailability]=useState(null);
 const [apiRecommendations,setApiRecommendations]=useState([]);
@@ -86,7 +88,7 @@ useEffect(()=>{
  // A new login must not temporarily display the previous account's profile.
  setProfile(null);
  // Always load records authorized for the active signed-in account.
- setRooms([]);setBookings([]);setNotices([]);setLiveDataError('');
+ setRooms([]);setBookings([]);setNotices([]);setLiveDataError('');setInventoryLoading(true);
  (async()=>{
   try{
    const [p,r,b,n]=await Promise.all([
@@ -99,14 +101,16 @@ useEffect(()=>{
    setProfile(p.data||null);
    setRooms(r.data||[]);setBookings(b.data||[]);setNotices(n.data||[]);
    if([p,r,b,n].some(res=>res.error))
-    setLiveDataError('Some live campus records could not be loaded. Do not rely on incomplete schedules.');
+    setLiveDataError('Some campus records could not be loaded. Check your connection before relying on the schedule.');
   }catch(_error){
    if(!ignore){setRooms([]);setBookings([]);setNotices([]);
-    setLiveDataError('Campus data could not be loaded. Check your backend and database connection.')}
+    setLiveDataError('Campus records could not be loaded from Supabase. Check your connection and try again.');}
+  }finally{
+    if(!ignore)setInventoryLoading(false);
   }
  })();
  return()=>{ignore=true};
-},[session?.user?.id,session?.access_token]);
+},[session?.user?.id,session?.access_token,inventoryRetry]);
 // Avatar files are private. Only the owner can create a short-lived signed URL.
 useEffect(()=>{
   if(!session?.user?.id||!profile?.avatar_path){setAvatarUrl('');return;}
@@ -373,7 +377,13 @@ return <div className="app-shell">
   onSignOut={()=>{supabase.auth.signOut();setView('Explore rooms')}}/>
 <div className="workarea">
 <main className="main-content">
-  {liveDataError&&<p role="alert" className="form-error">{liveDataError}</p>}
+  {liveDataError&&<div className="ig-data-alert" role="alert">
+    <AlertTriangle size={19} aria-hidden="true"/>
+    <div><strong>Campus records need attention</strong><p>{liveDataError}</p></div>
+    <button type="button" onClick={()=>{setInventoryRetry(n=>n+1);setRefreshTick(n=>n+1)}}>
+      <RefreshCcw size={15}/> Retry loading
+    </button>
+  </div>}
   {view!=='Explore rooms'&&view!=='My profile'&&(<div className="page-intro"><div><div className="eyebrow">IET GRID / {view.toUpperCase()}</div>
     <h1>{view==='Overview'?'Campus overview':view}</h1>
     <p>{view==='Overview'?'Classrooms, bookings, and academic updates in one workspace.':
@@ -396,7 +406,7 @@ return <div className="app-shell">
     bookingKind={bookingKind} setBookingKind={setBookingKind}
     requiredEquipment={requiredEquipment} setRequiredEquipment={setRequiredEquipment}
     apiAvailability={apiAvailability} apiWarning={apiWarning} isAvailable={isAvailable}
-    matching={matching} current={current} canBook={canBook}
+    matching={matching} current={current} canBook={canBook} inventoryLoading={inventoryLoading}
     setShowBooking={setShowBooking} setView={setView}
     activeSessions={activeSessions} nowScheduleState={nowScheduleState} currentTimeMs={currentTimeMs}/>}
   {view==='Calendar'&&<CalendarPage date={date} setDate={setDate} initialDate={initialDate}
