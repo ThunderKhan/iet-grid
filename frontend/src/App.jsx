@@ -269,7 +269,7 @@ return <div className="app-shell"><aside className={'sidebar '+(mobile?'mobile-o
   {view==='Overview'&&<OverviewPage rooms={rooms} bookings={bookings} notices={notices}
     matching={matching} buildings={buildings} selected={selected} setSelected={setSelected}
     setBuilding={setBuilding} setFloor={setFloor} setView={setView} demo={demo}
-    apiAvailability={apiAvailability} isAvailable={isAvailable} canBook={canBook} date={date} hour={hour} duration={duration}/>}
+    apiAvailability={apiAvailability} isAvailable={isAvailable} canBook={canBook} date={date} hour={hour} duration={duration} capacity={capacity}/>}
   {view==='Explore rooms'&&<ExplorePage buildings={buildings} rooms={rooms} building={building}
     setBuilding={setBuilding} floor={floor} setFloor={setFloor} selected={selected} setSelected={setSelected}
     date={date} setDate={setDate} hour={hour} setHour={setHour} duration={duration}

@@ -35,9 +35,9 @@ function MiniRoom({room,isAvailable,onClick,selected}) {
     <span className="ig-mini-room-id">{room.id}</span><small>{room.capacity}{room.verified?'':'*'} seats</small><span className={'ig-mini-indicator '+status}>{good?'Free':'Check'}</span>
   </button>;
 }
-export function OverviewPage({rooms,bookings,notices,matching,buildings,selected,setSelected,setBuilding,setFloor,setView,demo,apiAvailability,isAvailable,canBook,date,hour,duration}) {
+export function OverviewPage({rooms,bookings,notices,matching,buildings,selected,setSelected,setBuilding,setFloor,setView,demo,apiAvailability,isAvailable,canBook,date,hour,duration,capacity}) {
   const sample=rooms.filter(r=>r.building==='IET'&&r.floor==='First').slice(0,6);
-  const availableCount=demo?rooms.filter(r=>isAvailable(r)).length:
+  const availableCount=demo?rooms.filter(r=>isAvailable(r)&&r.capacity>=capacity).length:
     apiAvailability?rooms.filter(r=>isAvailable(r)).length:null;
   const upcoming=[...bookings].filter(b=>new Date(b.ends_at).getTime()>=Date.now()).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at)).slice(0,4);
   const metrics=[
@@ -74,7 +74,7 @@ export function OverviewPage({rooms,bookings,notices,matching,buildings,selected
           icon={MapPin} action={<button className="ig-link" onClick={()=>setView('Explore rooms')}>Full explorer <ArrowUpRight size={16}/></button>}/>
         <div className="ig-mini-floor">
           <div className="ig-mini-floor-label">IET / FIRST FLOOR</div>
-          <div className="ig-mini-floor-grid">{sample.map(room=><MiniRoom room={room} key={room.id} isAvailable={isAvailable} onClick={openRoom} selected={selected===room.id}/>)}</div>
+          <div className="ig-mini-floor-grid">{sample.map(room=><MiniRoom room={room} key={room.id} isAvailable={r=>isAvailable(r)&&r.capacity>=capacity} onClick={openRoom} selected={selected===room.id}/>)}</div>
           <span className="ig-mini-corridor">— CAMPUS CORRIDOR —</span>
           <div className="ig-mini-floor-foot"><span><i className="ig-dot ig-dot-green"/> Verified available</span><span><i className="ig-dot ig-dot-gray"/> Check status</span></div>
         </div>
@@ -230,7 +230,7 @@ export function CalendarPage({date,setDate,initialDate,calendarBookings,rooms,on
           type="button" onClick={()=>onOpenRoom(b.room_id,b.starts_at)}>
           <small><Clock3 size={12}/>{strTime(b.starts_at)} – {strTime(b.ends_at)}</small>
           <strong>{b.title}</strong><span>{b.room_id}</span><StatePill status={b.status}/></button>)}
-          {!byDay(day).length&&<div className="ig-cal-empty-day"><span>No events</span><small>No availability claim</small></div>}
+          {!byDay(day).length&&<div className="ig-cal-empty-day"><span>No events</span><small>Check live availability in Explore rooms</small></div>}
         </div></div>)}
     </div>}
     <p className="ig-note"><Info size={14}/> Select a scheduled event to locate its room on the floor board. The backend remains authoritative for overlaps and approval status.</p>
