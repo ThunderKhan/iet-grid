@@ -112,7 +112,7 @@ try {
     'ProfilePage.css','ReservationDialog.css','TopNavigation.css','AppErrorBoundary.css'
   ].map(name=>readFileSync('src/components/'+name,'utf8'));
   for(const stylesheet of componentCSS) {
-    assert.doesNotMatch(stylesheet,/(--ig-[\\w-]+)\\s*:\\s*var\\(\\1\\)/,
+    assert.doesNotMatch(stylesheet,/(--ig-[\w-]+)\s*:\s*var\(\1\)/,
       'Stylesheets must not define circular CSS design tokens');
   }
   const foundations=readFileSync('src/styles.css','utf8');
