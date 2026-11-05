@@ -5,7 +5,10 @@ import {configured, supabase} from '../supabase';
 import './AuthScreen.css';
 
 const appleEnabled = import.meta.env.VITE_AUTH_APPLE_ENABLED === 'true';
-const redirectBase = () => (import.meta.env.VITE_SITE_URL?.trim() || window.location.origin).replace(/\/+$/, '') + '/';
+// Development callbacks always return to the origin actually serving Vite.
+// This prevents an old production VITE_SITE_URL from redirecting local logins away.
+const redirectBase = () => (import.meta.env.DEV ? window.location.origin :
+  (import.meta.env.VITE_SITE_URL?.trim() || window.location.origin)).replace(/\/+$/, '') + '/';
 
 function GoogleIcon() {
   return <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
