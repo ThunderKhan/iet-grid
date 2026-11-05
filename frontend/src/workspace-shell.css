@@ -55,3 +55,13 @@
 
 
 /* The global navigation is now the sticky top bar (see TopNavigation.css). */
+
+/* Recoverable, truthful data-load error with a single next action. */
+.app-shell .ig-data-alert{display:flex;align-items:flex-start;gap:12px;border:1px solid #E3C5B3;background:#FFF9F3;color:#714A2C;border-radius:10px;padding:14px 16px;margin-bottom:18px;line-height:1.5}
+.app-shell .ig-data-alert>svg{flex:0 0 auto;margin-top:2px}
+.app-shell .ig-data-alert>div{min-width:0;flex:1}
+.app-shell .ig-data-alert strong{display:block;font-size:14px;color:#674226}
+.app-shell .ig-data-alert p{margin:3px 0 0;font-size:13px;overflow-wrap:anywhere}
+.app-shell .ig-data-alert button{display:inline-flex;align-items:center;gap:8px;justify-content:center;min-height:42px;padding:9px 13px;color:#613E22;background:#fff;border:1px solid #D4B79F;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap}
+.app-shell .ig-data-alert button:hover{background:#FFF1E3}
+@media(max-width:600px){.app-shell .ig-data-alert{flex-wrap:wrap}.app-shell .ig-data-alert button{width:100%}}
