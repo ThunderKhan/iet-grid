@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field, model_validator
 from app.core.auth import Principal, require_user, require_coordinator
 from app.core.gateway import Gateway
+from app.modules.campus import get_allocations
 from app.modules.scheduling import validate_interval
 
 router = APIRouter()
@@ -80,9 +81,9 @@ async def calendar(request: Request, start: datetime, end: datetime,
     }
     if room_id:
         base["room_id"] = "eq." + room_id
-    allocations = await db.select("room_allocations", {
-        **base, "select": "room_id,source_type,source_id,starts_at,ends_at"
-    })
+    allocations = await get_allocations(db, start, end)
+    if room_id:
+        allocations = [a for a in allocations if a["room_id"] == room_id]
     bookings = await db.select("bookings", {
         **base, "select": "id,title,room_id,kind,starts_at,ends_at,status"
     })
