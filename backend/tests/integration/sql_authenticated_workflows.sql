@@ -25,14 +25,14 @@ select set_config('request.jwt.claim.sub','8d72b5fc-ad9b-463b-aa63-bfbb08b91d21'
 
 do $test_faculty$
 declare s timestamptz:=date_trunc('hour',now())+interval '2 days';
- id uuid; retry_id uuid; n integer;
+ v_booking_id uuid; retry_id uuid; n integer;
 begin
- id:=public.request_room_booking('IET18','Valid faculty lecture',s,s+interval '1 hour','lecture',75,
+ v_booking_id:=public.request_room_booking('IET18','Valid faculty lecture',s,s+interval '1 hour','lecture',75,
   '5b9e9b62-66e6-49ec-a06f-0c8eef3b9d18',null);
  retry_id:=public.request_room_booking('IET18','Valid faculty lecture',s,s+interval '1 hour','lecture',75,
   '5b9e9b62-66e6-49ec-a06f-0c8eef3b9d18',null);
- if id<>retry_id then raise exception 'FAIL: idempotency mismatched IDs';end if;
- select count(*) into n from public.room_allocations where source_type='booking' and source_id=id;
+ if v_booking_id<>retry_id then raise exception 'FAIL: idempotency mismatched IDs';end if;
+ select count(*) into n from public.room_allocations where source_type='booking' and source_id=v_booking_id;
  if n<>1 then raise exception 'FAIL: missing canonical room occupancy';end if;
  begin
   perform public.request_room_booking('IET18','Overlapping request',
@@ -45,11 +45,11 @@ begin
    s,s+interval '1 hour','lecture',75,gen_random_uuid(),null);
   raise exception 'FAIL: student booking accepted';
  exception when insufficient_privilege then null;end;
- if exists(select 1 from public.bookings where public.bookings.id=id)
+ if exists(select 1 from public.bookings where public.bookings.id=v_booking_id)
  then raise exception 'FAIL: student saw faculty-only booking';end if;
  perform set_config('request.jwt.claim.sub','8d72b5fc-ad9b-463b-aa63-bfbb08b91d21',true);
- perform public.cancel_room_booking(id,'Transient SQL integration test');
- if exists(select 1 from public.room_allocations where source_id=id)
+ perform public.cancel_room_booking(v_booking_id,'Transient SQL integration test');
+ if exists(select 1 from public.room_allocations where source_id=v_booking_id)
  then raise exception 'FAIL: cancellation did not release occupancy';end if;
  raise notice 'PASS: faculty booking, idempotency, conflict, student denial, cancellation';
 end $test_faculty$;
