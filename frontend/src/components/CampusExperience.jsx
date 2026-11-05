@@ -11,6 +11,20 @@ const monthDay=d=>new Date(d+'T12:00:00Z').toLocaleDateString('en-IN',{day:'nume
 const clock=h=>String(h).padStart(2,'0')+':00';
 const statuses={available:'Available',occupied:'Occupied',restricted:'Not eligible',unknown:'Not verified',pending:'Approval pending'};
 function Badge({value}){const s=statuses[value]?value:'unknown';return <span className={'cx-status cx-status-'+s}><span className="cx-status-dot"/>{statuses[s]}</span>}
+/**
+ * The availability API distinguishes conflict, eligibility and missing data.
+ * Never paint an unrecognized or failed response as an occupied classroom.
+ */
+export function resolveRoomStatus(room,requiredSeats,apiAvailability){
+  if(!room||!Array.isArray(apiAvailability))return 'unknown';
+  const result=apiAvailability.find(entry=>entry.id===room.id);
+  if(!result)return 'unknown';
+  if(Number(room.capacity)<requiredSeats)return 'restricted';
+  if(result.reason==='occupied')return 'occupied';
+  if(result.reason==='ineligible')return 'restricted';
+  if(result.reason==='available'&&result.available===true)return 'available';
+  return 'unknown';
+}
 export default function CampusExperience({
   buildings,rooms,building,setBuilding,floor,setFloor,selected,setSelected,
   date,setDate,hour,setHour,duration,setDuration,capacity,setCapacity,
@@ -30,14 +44,7 @@ export default function CampusExperience({
     return()=>media.removeEventListener?.('change',change);
   },[]);
   useEffect(()=>{if(!mobile)setSheetOpen(false)},[mobile]);
-  const getStatus=room=>{
-    if(room.capacity<capacity)return 'restricted';
-    if(!apiAvailability)return 'unknown';
-    const status=apiAvailability.find(r=>r.id===room.id);
-    if(!status)return 'unknown';
-    if(status.reason==='ineligible')return 'restricted';
-    return isAvailable(room)?'available':'occupied';
-  };
+  const getStatus=room=>resolveRoomStatus(room,capacity,apiAvailability);
   const currentStatus=current?getStatus(current):'unknown';
   const bookable=!!current&&canBook&&currentStatus==='available';
   const runningInSelectedRoom=activeSessions[current?.id];
@@ -89,7 +96,11 @@ export default function CampusExperience({
         <CalendarDays size={15}/> View timetable</button>
     </div>
     {!canBook&&<p className="cx-assist">Only authorized faculty and campus operators can reserve classrooms.</p>}
-    {canBook&&!bookable&&<p className="cx-assist">This room is not confirmed available for the requested capacity and time.</p>}
+    {canBook&&!bookable&&<p className="cx-assist">
+      {currentStatus==='occupied'?'A confirmed allocation conflicts with this time. Try another slot or classroom.':
+       currentStatus==='restricted'?'This space does not meet the selected session requirements. Adjust the session type or minimum seats below.':
+       'Availability could not be verified for this slot. Try refreshing the campus data.'}
+    </p>}
     {!current.verified&&<p className="cx-assist">* Capacity is provisional until verified by the institute.</p>}
   </div>:<div className="cx-no-room"><DoorOpen size={27}/><h3>Choose a classroom</h3>
     <p>Select a room from the floor map to see its status and reserve it for your class.</p></div>;
@@ -116,11 +127,11 @@ export default function CampusExperience({
     <div className="cx-lower-workspace">
       <div className="cx-tools-column">
     <section className="cx-nav" aria-label="Reservation time and requirements">
-      <span className="cx-nav-heading">Reservation time</span>
+      <span className="cx-nav-heading">Session details</span>
       <Popover.Root>
-        <Popover.Trigger asChild><button type="button" className="cx-schedule-trigger" aria-label="Edit selected date, time and room requirements">
+        <Popover.Trigger asChild><button type="button" className="cx-schedule-trigger" aria-label="Edit session type, date, time and room requirements">
           <CalendarDays size={17}/>
-          <span><strong>{monthDay(date)}</strong><small>{clock(hour)} – {clock(Number(hour)+duration)} IST · {capacity} seats</small></span>
+          <span><strong>{monthDay(date)}</strong><small>{clock(hour)}–{clock(Number(hour)+duration)} IST · {capacity} seats · {bookingKind}</small></span>
           <ChevronDown size={16}/></button></Popover.Trigger>
         <Popover.Portal>
           <Popover.Content side="bottom" align="end" sideOffset={8} className="cx-schedule-popover">
@@ -130,6 +141,14 @@ export default function CampusExperience({
               <label>Start · IST <select value={hour} onChange={e=>setHour(e.target.value)}>{TIMES.map(h=><option key={h} value={String(h)}>{clock(h)}</option>)}</select></label>
               <label>Duration <select value={duration} onChange={e=>setDuration(Number(e.target.value))}>{[1,2,3].map(d=><option key={d} value={d}>{d} hour{d>1?'s':''}</option>)}</select></label>
               <label>Minimum seats <select value={capacity} onChange={e=>setCapacity(Number(e.target.value))}>{[30,75,150,200].map(n=><option key={n} value={n}>{n} seats</option>)}</select></label>
+              <label className="cx-popover-type">Session type
+                <select value={bookingKind} onChange={e=>setBookingKind(e.target.value)}>
+                  <option value="lecture">Lecture</option>
+                  <option value="practical">Practical / laboratory</option>
+                  <option value="exam">Exam</option>
+                  <option value="event">Event</option>
+                </select>
+              </label>
             </div>
             <div className="cx-popover-foot"><Info size={13}/> Availability updates for this interval.
               <Popover.Close className="cx-done">Done</Popover.Close></div>
