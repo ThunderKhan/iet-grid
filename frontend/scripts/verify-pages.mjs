@@ -1,7 +1,7 @@
 // Lightweight server-render smoke tests for every authenticated page.
 // Runs without secrets, accounts, or external API calls.
 import assert from 'node:assert/strict';
-import {existsSync} from 'node:fs';
+import {existsSync,readFileSync} from 'node:fs';
 import React from 'react';
 import {renderToString} from 'react-dom/server';
 import {createServer} from 'vite';
@@ -58,6 +58,20 @@ try {
   assert.ok(VELARIS_FRAGMENT_SHADER.includes('snoise(')&&VELARIS_FRAGMENT_SHADER.includes('u_colors[4]'),
     'Velaris must use the supplied simplex-noise blending shader');
   assert.equal(hexToUnitRGB('#315CE5').length,3,'Theme color conversion failed');
+  // Architectural Minimalism must not revert to full-room status coloring.
+  const planCSS=readFileSync('src/components/BlueprintSitePlan.css','utf8');
+  assert.match(planCSS,/\\.bp-room-surface\\{fill:#FFFFFF;/,
+    'Room surfaces should be neutral white');
+  assert.doesNotMatch(planCSS,/\\.bp-room\\.bp-(available|occupied|restricted)\\s+\\.bp-room-surface\\{/,
+    'Room availability must be shown through indicators, not full-tile fills');
+  assert.match(planCSS,/\\.bp-circulation\\{fill:#EEF2F6;/,
+    'Corridors should use neutral gray');
+  assert.match(planCSS,/\\.bp-room\\.is-selected \\.bp-room-border\\{stroke:#315CE5;stroke-width:2\\.75\\}/,
+    'Selected room must retain a precise cobalt outline');
+  assert.match(planCSS,/\\.bp-room\\.bp-available \\.bp-room-indicator\\{fill:#187A55\\}/,
+    'Available status remains legible');
+  assert.match(planCSS,/\\.bp-room\\.bp-occupied \\.bp-room-indicator\\{fill:#B42332\\}/,
+    'Occupied status remains legible');
   const {default: BlueprintSitePlan}=await server.ssrLoadModule('/src/components/BlueprintSitePlan.jsx');
   const {default: ReservationDialog,AcademicGroupFields}=await server.ssrLoadModule('/src/components/ReservationDialog.jsx');
   const {previewCohorts,formatCohort,cohortBranchOptions,cohortYearOptions,cohortSectionOptions,cohortMatches}=await server.ssrLoadModule('/src/academicCohorts.js');
