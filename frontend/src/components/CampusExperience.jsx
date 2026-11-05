@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import * as Dialog from '@radix-ui/react-dialog';
 import {ArrowRight, BookOpenText, Building2, CalendarDays, CheckCircle2, ChevronDown, Clock3, DoorOpen, Info, Layers3, Settings2, SlidersHorizontal, Users, X} from 'lucide-react';
 import BlueprintSitePlan from './BlueprintSitePlan';
+import {sessionTimeIST} from '../currentSessions';
 import './CampusExperience.css';
 
 const TIMES=Array.from({length:11},(_,i)=>8+i);
@@ -15,9 +16,11 @@ export default function CampusExperience({
   date,setDate,hour,setHour,duration,setDuration,capacity,setCapacity,
   bookingKind,setBookingKind,requiredEquipment,setRequiredEquipment,
   apiAvailability,apiWarning,isAvailable,matching,current,canBook,
-  setShowBooking,setView,demo,selectedCohortLabel
+  setShowBooking,setView,demo,selectedCohortLabel,
+  activeSessions={},nowScheduleState='loading',currentTimeMs=Date.now()
 }) {
   const [mode,setMode]=useState('plan');
+  const mapRef=useRef(null);
   const [sheetOpen,setSheetOpen]=useState(false);
   const [mobile,setMobile]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(max-width:720px)').matches);
   useEffect(()=>{
@@ -39,6 +42,15 @@ export default function CampusExperience({
   };
   const currentStatus=current?getStatus(current):'unknown';
   const bookable=!!current&&canBook&&currentStatus==='available';
+  const runningInSelectedRoom=activeSessions[current?.id];
+  const floorRoomIds=new Set(rooms.filter(r=>r.building===building&&r.floor===floor).map(r=>r.id));
+  const floorSessions=Object.values(activeSessions).filter(s=>floorRoomIds.has(s.roomId))
+    .sort((a,b)=>a.roomId.localeCompare(b.roomId,undefined,{numeric:true}));
+  const revealMap=()=>{
+    if(!mapRef.current)return;
+    const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    mapRef.current.scrollIntoView({block:'start',behavior:reduced?'instant':'smooth'});
+  };
   const selectRoom=room=>{
     setSelected(room.id);
     if(mobile)setSheetOpen(true);
@@ -47,15 +59,26 @@ export default function CampusExperience({
     setBuilding(code);
     setFloor(buildings.find(b=>b.id===code)?.floors?.[0]||'Ground');
     setSelected('');setSheetOpen(false);
+    revealMap();
   };
   const selectAlternative=room=>{
     setBuilding(room.building);setFloor(room.floor);
     setSelected(room.id);
     if(mobile)setSheetOpen(true);
+    else revealMap();
   };
   const roomInfo=current?<div className="cx-room-info">
     <div className="cx-room-name"><div><span className="cx-overline">SELECTED CLASSROOM</span><h2>{current.id}</h2>
       <p>{current.floor} floor · {current.type}</p></div><Badge value={currentStatus}/></div>
+    {runningInSelectedRoom&&<section className="cx-running-room" aria-label="Class currently running in selected room">
+      <div className="cx-running-heading"><span className="cx-running-indicator"/> CLASS IN PROGRESS NOW</div>
+      <strong>{runningInSelectedRoom.title}</strong>
+      <small>{sessionTimeIST(runningInSelectedRoom.start)} – {sessionTimeIST(runningInSelectedRoom.end)} IST
+        {!runningInSelectedRoom.detailsVisible?' · Details restricted':''}</small>
+    </section>}
+    {nowScheduleState==='unavailable'&&!demo&&<p className="cx-assist">
+      The current class schedule is unavailable; room activity cannot be confirmed.
+    </p>}
     <div className="cx-room-details">
       <span><Users size={16}/> Capacity <b>{current.capacity}{current.verified?'':'*'} seats</b></span>
       <span><Layers3 size={16}/> Space <b className="cx-caps">{current.type}</b></span>
@@ -82,6 +105,15 @@ export default function CampusExperience({
     setSheetOpen(false);
   };
   return <div className="cx-page">
+    {apiWarning&&<div className="cx-warning" role="alert"><Info size={17}/>{apiWarning}</div>}
+    <section className="cx-map-hero" ref={mapRef} aria-label="Campus floor explorer">
+      <BlueprintSitePlan rooms={rooms} building={building} floor={floor} selected={selected}
+        onSelect={selectRoom} getStatus={getStatus} mode={mode}
+        floorOptions={floorOptions} onNavigateFloor={goToFloor} onModeChange={setMode}
+        activeSessions={activeSessions} nowScheduleState={nowScheduleState}/>
+    </section>
+    <div className="cx-lower-workspace">
+      <div className="cx-tools-column">
     <section className="cx-nav" aria-label="Campus floor and schedule">
       <div className="cx-nav-main">
         <div className="cx-building-tabs" role="group" aria-label="Select building">
@@ -112,13 +144,23 @@ export default function CampusExperience({
         </Popover.Portal>
       </Popover.Root>
     </section>
-    {apiWarning&&<div className="cx-warning" role="alert"><Info size={17}/>{apiWarning}</div>}
-    <div className="cx-content">
-      <div className="cx-floor-column">
-
-        <BlueprintSitePlan rooms={rooms} building={building} floor={floor} selected={selected}
-          onSelect={selectRoom} getStatus={getStatus} mode={mode}
-          floorOptions={floorOptions} onNavigateFloor={goToFloor} onModeChange={setMode}/>
+      <section className="cx-live-roster" aria-label="Current classes on selected floor">
+        <div className="cx-live-roster-head">
+          <div><span className="cx-overline">CAMPUS ACTIVITY</span>
+            <h2>Running right now</h2></div>
+          <span className="cx-live-clock">{sessionTimeIST(new Date(currentTimeMs).toISOString())} IST</span>
+        </div>
+        {nowScheduleState==='loading'?<p className="cx-live-muted">Checking active classroom sessions…</p>:
+         nowScheduleState==='unavailable'?<p className="cx-live-muted">Live schedule unavailable. Current classes cannot be verified.</p>:
+         floorSessions.length===0?<p className="cx-live-muted">No ongoing classes are listed on this floor.</p>:
+         <div className="cx-live-list">{floorSessions.map(s=><button type="button" key={s.roomId}
+           className="cx-live-item" onClick={()=>{const room=rooms.find(r=>r.id===s.roomId);if(room)selectRoom(room);revealMap();}}>
+           <span className="cx-live-room">{s.roomId}</span>
+           <span className="cx-live-item-content"><strong>{s.title}</strong>
+             <small>{sessionTimeIST(s.start)} – {sessionTimeIST(s.end)} IST</small></span>
+           <ArrowRight size={15}/></button>)}</div>}
+        {demo&&<small className="cx-demo-note">Sample timetable — local preview only.</small>}
+      </section>
       </div>
       <aside className="cx-aside">
         <div className="cx-side-head"><span className="cx-overline">BOOKING DETAILS</span><small>Step 1 of 2 · Select room</small></div>
