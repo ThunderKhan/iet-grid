@@ -126,3 +126,11 @@ Only public Supabase publishable keys are used. Never commit private university 
 5. Reconcile acceptance results with [TEST_PLAN.md](TEST_PLAN.md), screenshots and the submitted Word solution.
 
 The automated semester-wide optimizer (OR-Tools CP-SAT) remains an agreed longer-term capability, not a completed backend feature.
+
+## Hackathon P0 role/approval/notice implementation
+
+Admin pending exam/event Approve/Reject UI, priority notices and read receipts, and confirmed-user faculty/student provisioning have been implemented. Migrations 009–010 are applied. Exam approval and high-priority notice creation are atomic in PostgreSQL.
+
+**44 automated pytest tests passed** and the dedicated database passed a rollback-only multi-role provisioning → pending exam → admin approval → automatic notice → student receipt scenario. The test left no real accounts, bookings or notices.
+
+The [live P0 acceptance checklist](HACKATHON_P0_ACCEPTANCE.md) explains the final browser test with independently registered and confirmed faculty/student test identities. Real multi-account login acceptance is not yet verified. Academic dataset import remains deferred because no official file was provided.

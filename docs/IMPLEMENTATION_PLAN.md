@@ -9,16 +9,16 @@
 - `frontend/`: independently buildable web app, Vercel root `frontend`.
 - `backend/`: independently hosted FastAPI application **plus** versioned Supabase SQL migrations; database remains authoritative.
 - `docs/`: product and architecture artifacts, separate from both runtime folders.
-- The dedicated Supabase project has migrations 001–008 applied. SQL migrations require reviewed deployment, independently of FastAPI/Vercel Git builds.
+- The dedicated Supabase project has migrations 001–010 applied. SQL migrations require reviewed deployment, independently of FastAPI/Vercel Git builds.
 
 ## Four-phase backend sprint — implementation status
 
 | Sprint phase | Result | Remaining acceptance |
 | --- | --- | --- |
-| Phase 1: database redesign | **Implemented and migrated**: 20 RLS tables; room/faculty/cohort allocations; idempotent booking, cancellation, approvals; migrations 001–008 restored | Authenticated user-level transaction tests and security review |
+| Phase 1: database redesign | **Implemented and migrated**: 20 RLS tables; room/faculty/cohort allocations; idempotent booking, cancellation, approvals; migrations 001–010 versioned | Authenticated user-level transaction tests and security review |
 | Phase 2: API authorization + academic import | **Implemented**: FastAPI with Supabase Auth verification; secured RPC forwarding; CSV dry-run and atomic import; recurring academic scheduling APIs | Trusted test account provisioning and real organizer dataset |
 | Phase 3: scheduling/recommendations | **Implemented**: hard eligibility, capacity/type/equipment, interval/ranking, alternate slots, paginated allocations | Real student/timetable data and live user acceptance |
-| Phase 4: tests + integration | **Partially verified**: 34 passing pytest cases, rollback-only authenticated SQL integration, two live Vercel projects and API health/OpenAPI HTTP 200 | Real faculty/admin/student browser sessions, 100-request load test and screenshots |
+| Phase 4: tests + integration | **Partially verified**: 44 passing pytest cases, rollback-only authenticated SQL integration, two live Vercel projects and API health/OpenAPI HTTP 200 | Real faculty/admin/student browser sessions, 100-request load test and screenshots |
 
 **Important:** The database is usable but has no real registered campus profiles or imported academic timetables at the recorded baseline. The MVP is **not fully verified** until these live account/data dependencies are exercised.
 
@@ -62,8 +62,8 @@ Status meanings: **DONE** = repository/infrastructure confirmed; **PARTIAL** = s
 | MAP-01 | P0 | Integrate supplied **original** IET + Deeksha blueprints visibly/accurately | PARTIAL | Blueprint source on both buildings |
 | CAL-01 | P0 | Include regular timetable commitments in availability | TODO | No false free room during recurring class |
 | STUD-01 | P0 | Show student schedule, in-app notices, minimal report | PARTIAL | Student role test |
-| ADMIN-01 | P0 | Approve/reject pending exam/event booking through UI | TODO | Coordinator-controlled, audited |
-| NOTICE-01 | P0 | Post an exam update with admin and read as student | PARTIAL | Persisted notice after reload |
+| ADMIN-01 | P0 | Approve/reject pending exam/event booking through UI | IMPLEMENTED / SQL TESTED | Live pending queue, protected review and automatic exam notice; browser test pending |
+| NOTICE-01 | P0 | Post an exam update with admin and read as student | IMPLEMENTED / SQL TESTED | Priority publisher and read receipts; real student browser test pending |
 | QA-01 | P0 | Incognito deployment, mobile and role tests | TODO | Signed evidence/checklist |
 | SUB-01 | P0 | Update written solution with true results, screenshots and URLs | PARTIAL | Final .docx consistent with app |
 | SUB-02 | P0 | Submit URLs, source and Word solution before 21:00 IST | TODO | Submission confirmation |

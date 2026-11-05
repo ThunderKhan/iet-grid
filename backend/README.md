@@ -43,7 +43,7 @@ React/Vite (frontend/)
 - app/modules/notices.py — notices, read receipts and schedule issue reporting
 - app/main.py — application, routes and lifespan
 - main.py — Vercel-recognized entrypoint
-- supabase/migrations/001–008 — additive schema and security migrations
+- supabase/migrations/001–010 — schema, security and hackathon P0 approvals/roles
 - tests/ — pure unit tests, mocked API/authorization tests, rollback SQL checks
 
 ## Run locally
@@ -105,7 +105,7 @@ Send as Content-Type: text/csv with an authenticated university admin token. Dry
 
 ## Database guarantees
 
-The schema currently includes 20 RLS-protected public tables. Migrations 001–008 have been applied on the dedicated project. Do not rerun the initial create-table migration on the same database.
+The schema currently includes 20 RLS-protected public tables. Migrations 001–010 have been applied on the dedicated project. Do not rerun the initial create-table migration on the same database.
 
 The canonical room_allocations table holds active reservations from confirmed bookings, academic lectures and maintenance blocks. Separate faculty_allocations and cohort_allocations prohibit the same teacher or cohort being committed to overlapping sessions. Half-open time intervals permit adjacent classes. Atomic triggers, transaction rollback, and a PostgreSQL exclusion constraint prevent partial allocations. Pending approvals are revalidated; they do not hold inventory. Idempotency keys protect retries, and cancellations release reservations automatically.
 
@@ -128,3 +128,11 @@ python -m pytest tests -q
 Vercel project: iet-grid-api. Root Directory: backend. Framework: FastAPI. Function region: Mumbai. The public Vercel deployment uses SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY and CORS_ORIGINS. Frontend Vercel project uses VITE_API_BASE_URL to call this API.
 
 We have not built payments, a BookMyShow Redis hold system, Kafka or a trained ML model. The booking architecture is inspired by transactional reservation patterns, not cloned from BookMyShow.
+
+## Hackathon P0 completion — 5 November 2026
+
+Admin pending exam/event Approve/Reject UI, priority notices and read receipts, and confirmed-user faculty/student provisioning have been implemented. Migrations 009–010 are applied. Exam approval and high-priority notice creation are atomic in PostgreSQL.
+
+**44 automated pytest tests passed** and the dedicated database passed a rollback-only multi-role provisioning → pending exam → admin approval → automatic notice → student receipt scenario. The test left no real accounts, bookings or notices.
+
+The [live P0 acceptance checklist](../docs/HACKATHON_P0_ACCEPTANCE.md) explains the final browser test with independently registered and confirmed faculty/student test identities. Real multi-account login acceptance is not yet verified. Academic dataset import remains deferred because no official file was provided.

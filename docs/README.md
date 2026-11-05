@@ -17,6 +17,7 @@ Institute of Engineering & Technology (IET), Deen Dayal Upadhyaya Gorakhpur Univ
 | [BACKEND_IMPLEMENTATION.md](BACKEND_IMPLEMENTATION.md) | Current deployed FastAPI + Supabase modules, migration map, verification and remaining gaps | Engineering |
 | [REQUIREMENTS_TRACEABILITY.md](REQUIREMENTS_TRACEABILITY.md) | Every official problem-statement requirement mapped to implementation status | Team + judges |
 | [TEST_PLAN.md](TEST_PLAN.md) | Test scenarios, verification evidence required and release criteria | Engineering + QA |
+| [HACKATHON_P0_ACCEPTANCE.md](HACKATHON_P0_ACCEPTANCE.md) | Real faculty/student signup, exam approval and student notice test | Hackathon team |
 | [SYSTEM.md](SYSTEM.md) | Concise system reference, operational invariants and known gaps | Engineering |
 | [DESIGN.md](DESIGN.md) | Brand, UX structure, visual rules and spatial/calendar interaction | Design + frontend |
 

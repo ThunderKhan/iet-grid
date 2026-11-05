@@ -71,3 +71,11 @@ For each test record: tester, date/time IST, commit SHA, deployment URL, user ro
 ## 5. Verification discipline
 
 Never change a test status to PASS solely because source code appears correct. Record real execution. A failure should be triaged as code, data, authorization, environment or deployment.
+
+## Hackathon P0 role and notice verification
+
+Admin pending exam/event Approve/Reject UI, priority notices and read receipts, and confirmed-user faculty/student provisioning have been implemented. Migrations 009–010 are applied. Exam approval and high-priority notice creation are atomic in PostgreSQL.
+
+**44 automated pytest tests passed** and the dedicated database passed a rollback-only multi-role provisioning → pending exam → admin approval → automatic notice → student receipt scenario. The test left no real accounts, bookings or notices.
+
+The [live P0 acceptance checklist](HACKATHON_P0_ACCEPTANCE.md) explains the final browser test with independently registered and confirmed faculty/student test identities. Real multi-account login acceptance is not yet verified. Academic dataset import remains deferred because no official file was provided.
