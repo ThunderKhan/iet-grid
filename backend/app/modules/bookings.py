@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from pydantic import BaseModel, Field, model_validator
 from app.core.auth import Principal, require_user, require_staff, require_coordinator
 from app.core.gateway import Gateway
-from app.modules.scheduling import validate_interval
+from app.modules.scheduling import validate_interval, normalize_required_equipment
 
 router = APIRouter()
 
@@ -18,12 +18,14 @@ class BookingCreate(BaseModel):
     kind: str = Field(default="lecture", pattern="^(lecture|practical|exam|event)$")
     required_capacity: int = Field(default=1, ge=1, le=2000)
     cohort_id: UUID | None = None
+    required_equipment: list[str] = Field(default_factory=list, max_length=8)
     idempotency_key: UUID = Field(default_factory=uuid4)
 
     @model_validator(mode="after")
     def check_time(self):
         try:
             validate_interval(self.starts_at, self.ends_at)
+            normalize_required_equipment(self.required_equipment)
         except ValueError as exc:
             raise ValueError(str(exc))
         return self
@@ -41,7 +43,7 @@ class ApprovalRequest(BaseModel):
 async def create_booking(body: BookingCreate, request: Request,
                          me: Principal = Depends(require_staff)):
     db = Gateway(request, me.token)
-    booking_id = await db.rpc("request_room_booking", {
+    booking_id = await db.rpc("request_room_booking_with_equipment", {
         "p_room_id": body.room_id,
         "p_title": body.title,
         "p_starts_at": body.starts_at.isoformat(),
@@ -50,9 +52,10 @@ async def create_booking(body: BookingCreate, request: Request,
         "p_required_capacity": body.required_capacity,
         "p_idempotency_key": str(body.idempotency_key),
         "p_cohort_id": str(body.cohort_id) if body.cohort_id else None,
+        "p_required_equipment": sorted(normalize_required_equipment(body.required_equipment)),
     })
     rows = await db.select("bookings", {
-        "select": "id,room_id,title,kind,status,starts_at,ends_at,cohort_id,created_by",
+        "select": "id,room_id,title,kind,status,starts_at,ends_at,cohort_id,created_by,required_equipment",
         "id": "eq." + str(booking_id), "limit": "1",
     })
     return {"id": booking_id, "status": rows[0]["status"] if rows else "unknown",
@@ -63,7 +66,7 @@ async def create_booking(body: BookingCreate, request: Request,
 async def my_bookings(request: Request, me: Principal = Depends(require_user)):
     db = Gateway(request, me.token)
     rows = await db.select("bookings", {
-        "select": "id,title,kind,room_id,starts_at,ends_at,status,created_at,cohort_id",
+        "select": "id,title,kind,room_id,starts_at,ends_at,status,created_at,cohort_id,required_equipment",
         "created_by": "eq." + str(me.user_id), "order": "starts_at.desc",
         "limit": "200",
     })

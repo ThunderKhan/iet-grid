@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.core.gateway import BackendError
-from app.modules import campus, bookings, academics, notices, administration
+from app.modules import campus, bookings, academics, notices, administration, audit
 
 
 @asynccontextmanager
@@ -56,3 +56,5 @@ app.include_router(bookings.router, prefix="/api/v1", tags=["bookings"])
 app.include_router(academics.router, prefix="/api/v1", tags=["academics"])
 app.include_router(notices.router, prefix="/api/v1", tags=["announcements"])
 app.include_router(administration.router, prefix="/api/v1", tags=["administration"])
+
+app.include_router(audit.router, prefix="/api/v1", tags=["audit"])

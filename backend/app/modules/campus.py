@@ -5,7 +5,7 @@ from app.core.auth import Principal, require_user
 from app.core.gateway import Gateway
 from app.modules.scheduling import (
     validate_interval, find_available, find_alternative_slots, overlaps, parse_instant,
-    room_is_eligible,
+    room_is_eligible, room_ineligibility_reasons, normalize_required_equipment, room_metadata,
 )
 
 router = APIRouter()
@@ -44,6 +44,13 @@ async def get_allocations(gateway: Gateway, start: datetime, end: datetime) -> l
     raise HTTPException(503, "Availability is too large to verify safely")
 
 
+def parsed_equipment(raw: str) -> set[str]:
+    try:
+        return normalize_required_equipment([x for x in raw.split(",") if x.strip()])
+    except ValueError as exc:
+        raise HTTPException(422, str(exc))
+
+
 def checked_interval(start: datetime, end: datetime) -> None:
     try:
         validate_interval(start, end)
@@ -72,7 +79,10 @@ async def floors(request: Request, building: str | None = None,
 async def rooms(request: Request, building: str | None = None, floor: str | None = None,
                 me: Principal = Depends(require_user)):
     db = Gateway(request, me.token)
-    return {"rooms": await get_rooms(db, building, floor)}
+    inventory = await get_rooms(db, building, floor)
+    return {"rooms": [{**r, **room_metadata(r, "lecture")} for r in inventory],
+            "verified_room_count": sum(r.get("verified") is True for r in inventory),
+            "provisional_room_count": sum(r.get("verified") is not True for r in inventory)}
 
 
 @router.get("/availability")
@@ -91,12 +101,15 @@ async def availability(
         a["room_id"] for a in allocations
         if overlaps(start, end, parse_instant(a["starts_at"]), parse_instant(a["ends_at"]))
     }
-    required = {e.strip() for e in equipment.split(",") if e.strip()}
+    required = parsed_equipment(equipment)
     output = []
     for room in room_rows:
-        eligible = room_is_eligible(room, capacity, kind, required)
+        disqualifications = room_ineligibility_reasons(room, capacity, kind, required)
         conflicts = room["id"] in unavailable_ids
-        output.append({**room, "available": eligible and not conflicts,
+        eligible = not disqualifications
+        output.append({**room, **room_metadata(room, kind),
+                       "available": eligible and not conflicts,
+                       "ineligibility_reasons": disqualifications,
                        "reason": ("occupied" if conflicts else
                                   "ineligible" if not eligible else "available")})
     return {"start": start, "end": end, "required_capacity": capacity,
@@ -117,7 +130,7 @@ async def recommendations(
     all_rooms = await get_rooms(db)
     allocations = await get_allocations(db, start - timedelta(hours=2),
                                          end + timedelta(hours=2))
-    required = {e.strip() for e in equipment.split(",") if e.strip()}
+    required = parsed_equipment(equipment)
     ranked = find_available(all_rooms, allocations, start, end, capacity, kind,
                             building, required)
     nearby = [] if ranked else find_alternative_slots(
@@ -126,4 +139,4 @@ async def recommendations(
     return {"start": start, "end": end, "requested_capacity": capacity,
             "recommendations": ranked[:limit], "alternative_slots": nearby,
             "algorithm": "hard-constraint-filter + deterministic-capacity-location-ranking",
-            "warning": "Availability is advisory; each booking is revalidated atomically by PostgreSQL."}
+            "warning": "Relative fit scores are not probabilities. Provisional capacity and equipment require institutional verification. Booking constraints are revalidated by PostgreSQL."}

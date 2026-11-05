@@ -26,16 +26,65 @@ def validate_interval(start: datetime, end: datetime) -> None:
         raise ValueError("Intervals must be positive and at most eight hours")
 
 
+def normalize_required_equipment(items) -> set[str]:
+    """Canonical, bounded hard constraints; do not treat unknown inventory as verified."""
+    result = set()
+    for value in items:
+        if not isinstance(value, str) or not 1 <= len(value.strip()) <= 60:
+            raise ValueError("Equipment labels must be 1–60 characters")
+        result.add(value.strip().lower())
+    if len(result) > 8:
+        raise ValueError("At most eight required equipment features")
+    return result
+
+
+def room_ineligibility_reasons(
+    room: dict[str, Any], min_capacity: int, kind: str,
+    equipment: set[str] | None = None,
+) -> list[str]:
+    reasons = []
+    if not room.get("active", True):
+        reasons.append("inactive")
+    if room.get("type") == "library":
+        reasons.append("non_bookable_space")
+    if int(room.get("capacity", 0)) < min_capacity:
+        reasons.append("insufficient_capacity")
+    if room.get("type") == "lab" and kind != "practical":
+        reasons.append("lab_requires_practical")
+    required = normalize_required_equipment(equipment or set())
+    if required and not room.get("verified", False):
+        reasons.append("equipment_unverified")
+    recorded = normalize_required_equipment(room.get("equipment") or [])
+    if not required.issubset(recorded):
+        reasons.append("equipment_not_recorded")
+    return reasons
+
+
 def room_is_eligible(room: dict[str, Any], min_capacity: int, kind: str = "lecture",
                      equipment: set[str] | None = None) -> bool:
-    if not room.get("active", True) or room.get("type") == "library":
-        return False
-    if int(room.get("capacity", 0)) < min_capacity:
-        return False
-    if room.get("type") == "lab" and kind != "practical":
-        return False
-    required = equipment or set()
-    return required.issubset(set(room.get("equipment") or []))
+    return not room_ineligibility_reasons(room, min_capacity, kind, equipment)
+
+
+def room_metadata(room: dict[str, Any], kind: str) -> dict:
+    """Explicit metadata confidence and approval outcome without invented facts."""
+    verified = room.get("verified") is True
+    approval = kind in ("exam", "event") or bool(room.get("restricted"))
+    warnings = []
+    if not verified:
+        warnings.append("Capacity and room details are provisional; confirm with university")
+    if room.get("accessible") is None:
+        warnings.append("Accessibility has not been documented")
+    if not room.get("equipment"):
+        warnings.append("No equipment is recorded; this does not prove none exists")
+    return {
+        "metadata_status": "verified" if verified else "provisional",
+        "capacity_status": "verified" if verified else "estimated",
+        "metadata_warnings": warnings,
+        "requires_approval": approval,
+        "booking_outcome": "pending_approval" if approval else "instant_if_available",
+        "approval_reason": ("Exam/event requires review" if kind in ("exam", "event")
+                            else "Restricted room requires review" if approval else None),
+    }
 
 
 def explain_room(room: dict, min_capacity: int, preferred_building: str | None,
@@ -55,7 +104,9 @@ def explain_room(room: dict, min_capacity: int, preferred_building: str | None,
         reasons.append("Capacity requires university confirmation")
     if equipment:
         reasons.append("Required equipment present")
-    return {"score": score, "reasons": reasons}
+    if room.get("restricted"):
+        reasons.append("Restricted room; approval required")
+    return {"score": score, "reasons": reasons, **room_metadata(room, "lecture")}
 
 
 def find_available(
@@ -77,7 +128,8 @@ def find_available(
         if room["id"] in occupied or not room_is_eligible(room, min_capacity, kind, equipment):
             continue
         fit = explain_room(room, min_capacity, preferred_building, equipment)
-        candidates.append({**room, **fit, "available": True})
+        # Approval policy depends on requested session type, not just the room.
+        candidates.append({**room, **fit, **room_metadata(room, kind), "available": True})
     return sorted(candidates, key=lambda r: (-r["score"], r["id"]))
 
 
