@@ -1,33 +1,126 @@
-# IET Grid Backend
+# IET Grid Backend — FastAPI + Supabase
 
-The application's backend is **Supabase Auth + PostgreSQL**, not a standalone Node or Python HTTP server. This folder owns database schema migrations, authorization, server-side booking RPCs, and database constraints. The frontend must not be trusted to decide privileges or finalize room availability.
+**Public API:** https://iet-grid-api.vercel.app  
+**API documentation:** https://iet-grid-api.vercel.app/api/docs  
+**Health:** https://iet-grid-api.vercel.app/health
 
-## Layout
+## Design
 
-- `supabase/migrations/001_iet_grid.sql` — initial six-table schema, room seed, Row Level Security, booking and announcement functions.
-- `supabase/migrations/002_security_hardening.sql` — public extension and trigger-function permission hardening.
+A separately deployed FastAPI modular monolith, backed by the dedicated Supabase PostgreSQL/Auth project. The frontend is a separate React/Vite app. The API validates Supabase access tokens with its Auth service and forwards them to PostgREST so RLS continues to apply. Only SQL RPCs mutate privileged campus records.
 
-## Setup
+~~~text
+React/Vite (frontend/)
+  ├── Supabase Auth → user JWT
+  └── FastAPI (backend/)
+       ├── identity + verified institutional role
+       ├── campus and availability
+       ├── idempotent bookings + scoped approvals
+       ├── recurring academic timetables
+       ├── deterministic recommendations
+       ├── cohort import + student enrollment
+       └── announcements and minimal issue reports
+              └── Supabase PostgreSQL
+                    ├── row-level security
+                    ├── canonical room/faculty/cohort allocations
+                    ├── GiST overlap exclusion constraints
+                    ├── authorization-checked RPCs
+                    └── audit records
+~~~
 
-1. Create or select the **dedicated IET Grid** Supabase project; never apply these SQL files to unrelated projects.
-2. On a **fresh database only**, run migrations in filename order using the Supabase SQL Editor. The original migration files are **not designed for repeated application**.
-3. Use the project's **URL and publishable key** in the frontend environment (see `../frontend/.env.example`).
-4. Verify the room inventory, Row Level Security, privileges and booking conflict checks.
-5. Create real test users via Auth and provision faculty/admin permissions only via trusted administrative operations. Never use browser-editable metadata for roles.
+**Do not create a second booking write path.** PostgreSQL is the final collision and role authority.
 
-## What runs on the backend
+## Modules
 
-- `profiles`, `rooms`, `bookings`, `announcements`, `schedule_reports`, `booking_history`
-- Supabase authentication and Postgres Row Level Security
-- `create_room_booking`, `review_room_booking` and `publish_campus_notice` RPCs
-- PostgreSQL exclusion constraint for overlapping **confirmed** bookings
-- Booking history trigger
+- app/core/auth.py — Supabase bearer validation and verified roles
+- app/core/gateway.py — RLS-preserving PostgREST access and normalized errors
+- app/modules/campus.py — room discovery, occupancy, alternatives
+- app/modules/bookings.py — booking create/list/cancel/review
+- app/modules/academics.py — calendar, official sessions, recurring series, room blocks
+- app/modules/scheduling.py — pure interval, capacity, equipment and ranking algorithms
+- app/modules/administration.py — privileged provisioning and atomic CSV import
+- app/modules/notices.py — notices, read receipts and schedule issue reporting
+- app/main.py — application, routes and lifespan
+- main.py — Vercel-recognized entrypoint
+- supabase/migrations/001–008 — additive schema and security migrations
+- tests/ — pure unit tests, mocked API/authorization tests, rollback SQL checks
 
-## Important limits
+## Run locally
 
-- Current UI derives recommendation rankings in the frontend. The **backend revalidates** each booking before storing it.
-- No separate FastAPI/Express deployment exists at present; do not claim one.
-- Regular university timetable imports, official student/branch/batch records, exact floor-plan geometry and coordinator scopes are not yet complete.
-- Exam and event requests can be stored pending; a complete approval screen remains pending.
+~~~bash
+cd backend
+python -m venv .venv
+# Activate the environment (PowerShell: .venv\Scripts\Activate.ps1)
+python -m pip install -r requirements.txt
+# Set environment variables in your shell or IDE:
+# SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+# SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_PUBLISHABLE_KEY
+# CORS_ORIGINS=https://iet-grid.vercel.app,http://localhost:5173
+uvicorn main:app --reload --port 8000
+~~~
 
-See `../docs/ARCHITECTURE.md`, `../docs/SYSTEM.md` and `../docs/IMPLEMENTATION_PLAN.md`.
+The app reads environment variables directly; copying .env.example does **not** automatically load them. Never use service-role credentials in a public browser.
+
+## Endpoints
+
+All /api/v1 endpoints require Authorization: Bearer followed by a Supabase user access token.
+
+| Endpoint | Method | Use |
+| --- | --- | --- |
+| /health | GET | Public configuration health |
+| /api/v1/me | GET | Verified identity and memberships |
+| /api/v1/buildings, /floors, /rooms | GET | Campus infrastructure |
+| /api/v1/availability | GET | Real room occupancy by date/capacity |
+| /api/v1/recommendations | GET | Ranked eligible rooms and alternative slots |
+| /api/v1/calendar | GET | Canonical room allocations |
+| /api/v1/bookings | POST | Idempotent reservation; instant/pending approval |
+| /api/v1/bookings/me, /pending | GET | Personal and scoped pending reservations |
+| /api/v1/bookings/{id}/cancel | POST | Owner/authorized cancellation |
+| /api/v1/admin/bookings/{id}/review | POST | Scope-checked approval/rejection |
+| /api/v1/cohorts | GET | Cohort metadata |
+| /api/v1/admin/cohorts/import | POST | Validated, transaction-atomic CSV upsert |
+| /api/v1/admin/enrollments | POST | Verified student-to-cohort mapping |
+| /api/v1/admin/users/{id}/role | POST | Admin-only trusted role grant |
+| /api/v1/admin/coordinator-scopes | POST | Delegated building permission |
+| /api/v1/admin/courses | POST | Official course metadata |
+| /api/v1/admin/teaching-assignments | POST | Staff-to-cohort/course assignment |
+| /api/v1/admin/sessions | POST | Official lecture and timetable occupancy |
+| /api/v1/admin/series, /series/{id}/publish | POST | Draft and atomic recurring publication |
+| /api/v1/admin/room-blocks | POST | Maintenance/reserved interval |
+| /api/v1/announcements | GET | Cohort-aware in-app notice feed |
+| /api/v1/admin/announcements | POST | Scoped notices |
+| /api/v1/announcements/{id}/read | POST | Guarded read receipt |
+| /api/v1/reports, /reports/me | POST/GET | Minimal schedule issue reporting |
+
+## Dataset import
+
+Expected cohort CSV columns:
+
+~~~csv
+code,branch,academic_year,section,batch_start,expected_size
+~~~
+
+Send as Content-Type: text/csv with an authenticated university admin token. Dry run is the default. Pass dry_run=false only after reviewing validation output; the SQL RPC processes all rows atomically. The organizer-provided student-level dataset is **not yet available/imported**. The existing database must not be populated with made-up student identities. A university-verified identity mapping is needed before enrolling actual users.
+
+## Database guarantees
+
+The schema currently includes 20 RLS-protected public tables. Migrations 001–008 have been applied on the dedicated project. Do not rerun the initial create-table migration on the same database.
+
+The canonical room_allocations table holds active reservations from confirmed bookings, academic lectures and maintenance blocks. Separate faculty_allocations and cohort_allocations prohibit the same teacher or cohort being committed to overlapping sessions. Half-open time intervals permit adjacent classes. Atomic triggers, transaction rollback, and a PostgreSQL exclusion constraint prevent partial allocations. Pending approvals are revalidated; they do not hold inventory. Idempotency keys protect retries, and cancellations release reservations automatically.
+
+## Verification
+
+~~~bash
+python -m pip install 'pytest>=8,<10'
+python -m pytest tests -q
+~~~
+
+- GitHub Actions tests: passed for initial, mocked Auth/RPC and algorithm suites.
+- Database rollback integration: passed room, cohort, adjacency and approval-collision tests; records rolled back.
+- Live Vercel API: /health and /api/openapi.json returned HTTP 200.
+- Missing: signed-in verified faculty and student end-to-end production test; 100-request concurrency benchmark; actual student datasets; final institutional acceptance tests.
+
+## Deployment
+
+Vercel project: iet-grid-api. Root Directory: backend. Framework: FastAPI. Function region: Mumbai. The public Vercel deployment uses SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY and CORS_ORIGINS. Frontend Vercel project uses VITE_API_BASE_URL to call this API.
+
+We have not built payments, a BookMyShow Redis hold system, Kafka or a trained ML model. The booking architecture is inspired by transactional reservation patterns, not cloned from BookMyShow.

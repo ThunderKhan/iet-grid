@@ -1,28 +1,18 @@
-# IET Grid Frontend
+# IET Grid Frontend — React + Vite
 
-React 19 + Vite 6 application deployed to Vercel from this directory.
+Deployed independently at https://iet-grid.vercel.app from frontend/.
 
-## Run locally
+## Development
 
-```bash
+~~~bash
 cd frontend
 npm install
 cp .env.example .env.local
 npm run dev
-```
+~~~
 
-Fill `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` using the **IET Grid** project's URL and public publishable key (never a service-role key).
+Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY for Supabase Auth, and VITE_API_BASE_URL for the separate FastAPI service (http://localhost:8000 locally or https://iet-grid-api.vercel.app in production).
 
-```bash
-npm run build
-npm run preview
-```
+Live room availability, recommendation ranking, booking creation, admin notices and schedule reports use the REST API with the user's bearer token. The calendar gets room occupancy from the same backend. PostgreSQL continues to enforce final booking consistency.
 
-## Integration
-
-- The frontend uses the public Supabase client in `src/supabase.js`.
-- The persisted backend logic and migrations live in `../backend/supabase/migrations/`.
-- If Supabase is unconfigured, the app offers an **explicitly labeled demonstration**, with nonpersistent sample data.
-- The map is currently schematic; the university-provided original blueprint and official student records need fuller integration.
-
-Vercel project settings must use **Root Directory: `frontend`**, framework **Vite**, build `npm run build`, and output `dist`.
+Guests can view an explicitly labeled local demonstration with nonpersistent sample reservations. The map is schematic; exact blueprint geometry, official student data and full scheduling imports are pending. See ../backend/README.md and ../docs/README.md.
