@@ -55,3 +55,16 @@ The six views now use independent React page components in `src/components/Works
 **Data integrity:** The new room geometry is explicitly SCHEMATIC, NOT TO SCALE. The repository does not currently contain verified IET or Deeksha architectural SVG/PDF assets. Room IDs are source-preserved, but room placement, corridor geometry and capacities remain provisional; do not advertise a traced architectural map until official plan assets are available and room polygons are validated. Live availability is never inferred from an empty API response.
 
 **Validation:** from `frontend/`, run `npm install`, `npm run build` and `node scripts/verify-pages.mjs`. The GitHub Actions workflow `.github/workflows/frontend-build.yml` repeats build and server-render smoke tests on UI changes. Successful builds do **not** replace browser-based mobile testing or real-user integration tests.
+
+### Local visual preview (development only)
+
+When Vercel deployments are temporarily unavailable, use the Vite dev server to inspect the redesigned pages with sample records:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open **http://localhost:5173/?preview=1**. This route is intentionally guarded by `import.meta.env.DEV` and is compiled out of production builds. It does not grant any real institutional role, does not persist records, and displays the global **DEMO DATA** badge. Do not use this for production acceptance or real API tests. The ordinary URL without `preview=1` still uses Supabase authentication.
+
