@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {GrainGradient} from '@paper-design/shaders-react';
-import {ArrowRight, ArrowUpRight, Building2, CalendarDays, CheckCircle2, Eye, EyeOff, Layers3, LockKeyhole, MapPinned, ShieldAlert} from 'lucide-react';
+import {ArrowRight, CheckCircle2, Eye, EyeOff, Layers3, LockKeyhole, ShieldAlert} from 'lucide-react';
 import {configured, supabase} from '../supabase';
 import './AuthScreen.css';
 
@@ -30,7 +30,7 @@ function Field({id,label,type='text',value,onChange,placeholder,autoComplete,min
     </span>
   </label>;
 }
-export default function AuthScreen({onGuest, recovery=false, onRecoveryComplete, onRecoveryCancel}) {
+export default function AuthScreen({recovery=false, onRecoveryComplete, onRecoveryCancel}) {
   const [mode,setMode] = useState(recovery ? 'reset' : 'signin');
   const [first,setFirst] = useState('');
   const [last,setLast] = useState('');
@@ -132,7 +132,7 @@ export default function AuthScreen({onGuest, recovery=false, onRecoveryComplete,
                 aria-label={showPassword?'Hide password':'Show password'}>{showPassword?<EyeOff size={18}/>:<Eye size={18}/>}</button>}/>}
             {signin && <div className="ig-auth-forgot"><button type="button" onClick={() => switchMode('forgot')}>Forgot password?</button></div>}
             {!configured && <div className="ig-auth-feedback warning" role="status">
-              <ShieldAlert size={17}/> Live authentication is not configured here. Explore the demo instead.
+              <ShieldAlert size={17}/> Live authentication is not configured here. Contact your campus administrator.
             </div>}
             {feedback && <div role={feedback.kind === 'error'?'alert':'status'} className={'ig-auth-feedback '+feedback.kind}>
               {feedback.kind === 'success'?<CheckCircle2 size={17}/>:<ShieldAlert size={17}/>}
@@ -156,24 +156,9 @@ export default function AuthScreen({onGuest, recovery=false, onRecoveryComplete,
           colors={['#315CE5','#10213B','#6C8FF7','#CFDDFC']} colorBack="#07162C"/>
         <div className="ig-auth-art-veil"/>
         <div className="ig-auth-art-content">
-          <div className="ig-auth-art-top"><span className="ig-auth-art-badge"><Building2 size={16}/> CAMPUS OPERATIONS</span>
-            <span className="ig-auth-art-location">IET · DEEKSHA BHAWAN</span></div>
           <div className="ig-auth-art-center">
-            <div className="ig-auth-mini-map" aria-hidden="true">
-              <div className="ig-auth-mini-caption"><MapPinned size={14}/> IET · FIRST FLOOR</div>
-              <div className="ig-auth-mini-rooms">
-                <span>IET22</span><span>IET16</span>
-                <i>CORRIDOR</i>
-                <span className="is-free">IET19 <small>FREE</small></span><span>IET18</span>
-              </div>
-              <div className="ig-auth-mini-bottom"><CalendarDays size={14}/> ONE CONNECTED SCHEDULE</div>
-            </div>
             <h2>Every room.<br/>Every schedule.<br/><em>One intelligent grid.</em></h2>
             <p>Discover free spaces, coordinate classes, and stay in sync across campus.</p>
-          </div>
-          <div className="ig-auth-art-footer">
-            <button type="button" className="ig-auth-preview" onClick={onGuest}><span><Layers3 size={19}/> Explore campus demo</span><ArrowUpRight size={18}/></button>
-            <p>Demo mode uses sample data. Reservations are not saved to university records.</p>
           </div>
         </div>
       </aside>
