@@ -67,3 +67,11 @@ npm run dev
 
 Open **http://localhost:5173/?preview=1**. This route is intentionally guarded by `import.meta.env.DEV` and is compiled out of production builds. It does not grant any real institutional role, does not persist records, and displays the global **DEMO DATA** badge. Do not use this for production acceptance or real API tests. The ordinary URL without `preview=1` still uses Supabase authentication.
 
+
+## Campus experience redesign (local-first)
+
+The Campus map is now implemented by `CampusExperience.jsx` using the existing `BlueprintSitePlan.jsx` vector layout. The simplified SVG retains the room adjacency/relative layout of the source PDF but intentionally omits doors, washrooms, drinking-water spaces and stairs. It is **not a surveyed, scale-accurate architectural plan**. The main surface follows `DESIGN.md`, reuses the authenticated login's cobalt/navy Paper Design `GrainGradient` only in the small header, and uses Radix Popover for the schedule control and Radix Dialog for mobile room details. Room map/list selection and API-backed booking checks remain connected.
+
+The booking dialog now supports **academic groups** via `GET /api/v1/cohorts` (registered cohort UUID is passed as `cohort_id` to `POST /api/v1/bookings`). Lectures, practicals and exams require a selected cohort. Local preview uses clearly labeled sample cohorts, including AI/ML · Year 2 · Section A; these demo IDs are **never** submitted to the backend. Event bookings can omit a cohort. Titles are prefixed with the chosen branch for readable schedules, and the structured cohort ID is stored separately.
+
+Run `npm install`, `npm run build`, and `node scripts/verify-pages.mjs` locally. No Vercel deployment is required for this workflow.

@@ -9,24 +9,23 @@ import {createServer} from 'vite';
 const server=await createServer({server:{middlewareMode:true},appType:'custom',logLevel:'error'});
 try {
   const pages=await server.ssrLoadModule('/src/components/WorkspacePages.jsx');
-  const {default: BlueprintBoard}=await server.ssrLoadModule('/src/components/BlueprintBoard.jsx');
+  const {default: CampusExperience}=await server.ssrLoadModule('/src/components/CampusExperience.jsx');
+  const {default: BlueprintSitePlan}=await server.ssrLoadModule('/src/components/BlueprintSitePlan.jsx');
+  const {default: ReservationDialog}=await server.ssrLoadModule('/src/components/ReservationDialog.jsx');
+  const {previewCohorts,formatCohort}=await server.ssrLoadModule('/src/academicCohorts.js');
   const {sampleRooms: allRooms}=await server.ssrLoadModule('/src/data.js');
-  for (const [building,floor,asset,roomId] of [
-    ['IET','Ground','iet-ground.png','LIBRARY'],
-    ['IET','First','iet-first.png','IET19'],
-    ['IET','Second','iet-second.png','IET32'],
-    ['DEEK','Ground','deeksha-ground.png','LH04'],
-    ['DEEK','First','deeksha-first.png','LH14'],
-  ]) {
-    assert.ok(existsSync('public/floorplans/'+asset),'Missing actual blueprint asset '+asset);
-    const html=renderToString(React.createElement(BlueprintBoard,{
-      rooms:allRooms,building,floor,selected:roomId,
-      onSelect:()=>{},getStatus:()=> 'unknown',
+  for(const [building,floor,roomId] of [
+    ['IET','Ground','LIBRARY'],['IET','First','IET19'],
+    ['IET','Second','IET32'],['DEEK','Ground','LH04'],['DEEK','First','LH14']
+  ]){
+    const html=renderToString(React.createElement(BlueprintSitePlan,{
+      rooms:allRooms,building,floor,selected:roomId,onSelect:()=>{},getStatus:()=> 'unknown'
     }));
-    assert.ok(html.includes('floorplans/'+asset),'Blueprint source missing from '+building+' '+floor);
-    assert.ok(html.includes('Select '+roomId),'Room interaction hotspot missing '+roomId);
-    console.log('PASS source-backed blueprint',building,floor,asset,roomId);
+    assert.ok(html.includes(roomId), 'Room missing from modern SVG: '+roomId);
+    assert.ok(!html.includes('WASHROOM')&&!html.includes('DRINKING WATER')&&!html.includes('STAIRS'), 'Non-bookable facilities leaked into SVG');
+    console.log('PASS modern plan',building,floor,roomId);
   }
+  assert.ok(previewCohorts.some(c=>formatCohort(c).includes('AI/ML')&&c.academic_year===2&&c.section==='A'),'Missing example academic cohort');
   const sampleRooms=[
     {id:'IET19',building:'IET',floor:'First',capacity:75,type:'classroom',verified:false,active:true},
     {id:'IET22',building:'IET',floor:'First',capacity:75,type:'lab',verified:false,active:true}
@@ -48,12 +47,19 @@ try {
     reviewBusy:'',reviewPendingBooking:noop,setRefreshTick:noop,accountUuid:'',setAccountUuid:noop,
     accountRole:'faculty',setAccountRole:noop,accountBusy:false,grantTestRole:noop};
   const views=[
-    ['Explore rooms',pages.ExplorePage,'Campus map'],
+    ['Campus map',CampusExperience,'Find space for the next class.'],
     ['Calendar',pages.CalendarPage,'Campus timetable'],
     ['My bookings',pages.BookingsPage,'Classroom reservations'],
     ['Announcements',pages.AnnouncementsPage,'Campus announcements'],
     ['Admin',pages.AdminPage,'Campus administration']
   ];
+  const reservationHtml=renderToString(React.createElement(ReservationDialog,{
+    open:true,onOpenChange:()=>{},room:{id:'IET18',capacity:75},date:'2026-11-06',hour:'11',duration:1,
+    bookingTitle:'Machine Learning',setBookingTitle:()=>{},bookingKind:'lecture',setBookingKind:()=>{},
+    cohorts:previewCohorts,cohortId:previewCohorts.find(c=>c.branch==='AI ML'&&c.academic_year===2&&c.section==='A').id,
+    setCohortId:()=>{},loading:false,canBook:true,available:true,onConfirm:()=>{},demo:true
+  }));
+  assert.ok(reservationHtml.includes('AI/ML'),'Booking dialog must display selected academic cohort');
   for(const [name,Component,needle] of views){
     const html=renderToString(React.createElement(Component,shared));
     assert.ok(html.length>300,name+' rendered too little UI');

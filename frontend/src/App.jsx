@@ -3,7 +3,10 @@ import React,{useState,useEffect,useMemo} from 'react';
 import {LayoutDashboard,CalendarDays,Map as MapIcon,BookOpen,GraduationCap,Shield,Settings,Search,Bell,ChevronDown,ChevronLeft,ChevronRight,Plus,ArrowUpRight,Clock,Users,CheckCircle2,AlertTriangle,LogOut,Lock,Building2,Layers,PanelLeftClose,Command,Filter,MapPin,Sparkles,ArrowRight,DoorOpen,Check,Menu,X,Info,Send,BookMarked,RefreshCcw} from 'lucide-react';
 import {supabase,configured} from './supabase';
 import AuthScreen from './components/AuthScreen';
-import {ExplorePage,CalendarPage,BookingsPage,AnnouncementsPage,AdminPage} from './components/WorkspacePages';
+import {CalendarPage,BookingsPage,AnnouncementsPage,AdminPage} from './components/WorkspacePages';
+import CampusExperience from './components/CampusExperience';
+import ReservationDialog from './components/ReservationDialog';
+import {previewCohorts,formatCohort,branchLabel} from './academicCohorts';
 import {buildings,sampleRooms,demoBookings,demoNotices,localDate,occupancy,recommend,dateTimes} from './data';
 const initialDate=localDate();
 const menu=[['Explore rooms',MapIcon],['Calendar',CalendarDays],['My bookings',BookOpen],['Announcements',Bell],['Admin',Shield]];
@@ -11,6 +14,9 @@ const fmt=(v,opts)=>new Date(v).toLocaleString('en-IN',opts||{hour:'numeric',min
 function IconTag({children}){return <span className="tag">{children}</span>}
 export default function App(){
 const [session,setSession]=useState(null);const [recovering,setRecovering]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='reset');const [guest,setGuest]=useState(()=>import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview')==='1');const [profile,setProfile]=useState(null);const [rooms,setRooms]=useState(configured?[]:sampleRooms);const [bookings,setBookings]=useState(configured?[]:demoBookings);const [notices,setNotices]=useState(configured?[]:demoNotices);const [view,setView]=useState('Explore rooms');const [building,setBuilding]=useState('IET');const [floor,setFloor]=useState('First');const [date,setDate]=useState(initialDate);const [hour,setHour]=useState('11');const [duration,setDuration]=useState(1);const [capacity,setCapacity]=useState(75);const [requiredEquipment,setRequiredEquipment]=useState('');const [selected,setSelected]=useState('IET19');const [toast,setToast]=useState('');const [loading,setLoading]=useState(false);const [mobile,setMobile]=useState(false);const [showBooking,setShowBooking]=useState(false);const [bookingTitle,setBookingTitle]=useState('Extra lecture');const [bookingKind,setBookingKind]=useState('lecture');const [report,setReport]=useState(false);const [noticeTitle,setNoticeTitle]=useState('');const [noticeBody,setNoticeBody]=useState('');
+const [cohorts,setCohorts]=useState([]);
+const [cohortId,setCohortId]=useState('');
+const [cohortError,setCohortError]=useState('');
 const [noticePriority,setNoticePriority]=useState('normal');
 const [noticeBusy,setNoticeBusy]=useState(false);
 const [pendingQueue,setPendingQueue]=useState([]);
@@ -23,6 +29,8 @@ const [accountBusy,setAccountBusy]=useState(false);
 const [noticeReadBusy,setNoticeReadBusy]=useState('');
 
 const demo=!configured||guest;
+const availableCohorts=demo?previewCohorts:cohorts;
+const chosenCohort=availableCohorts.find(c=>c.id===cohortId)||null;
 const [liveDataError,setLiveDataError]=useState('');
 const API_BASE=import.meta.env.VITE_API_BASE_URL||'';
 const [apiAvailability,setApiAvailability]=useState(null);
@@ -45,6 +53,20 @@ async function apiFetch(route,opts={}){
  if(!response.ok)throw new Error(data?.error?.message||data?.detail||'Backend request failed');
  return data;
 }
+useEffect(()=>{
+  if(demo||!session?.access_token){setCohorts([]);setCohortError('');return;}
+  let cancelled=false;
+  setCohortError('');
+  apiFetch('/api/v1/cohorts').then(data=>{
+    if(cancelled)return;
+    const listed=(data.cohorts||[]).filter(c=>c.active!==false&&c.id);
+    setCohorts(listed);
+    setCohortId(id=>listed.some(c=>c.id===id)?id:'');
+  }).catch(error=>{
+    if(!cancelled){setCohorts([]);setCohortError('Academic groups unavailable: '+error.message)}
+  });
+  return ()=>{cancelled=true};
+},[demo,session?.access_token]);
 useEffect(()=>{if(!configured)return;supabase.auth.getSession().then(({data})=>setSession(data.session));const {data:{subscription}}=supabase.auth.onAuthStateChange((_,s)=>setSession(s));return()=>subscription.unsubscribe()},[]);
 useEffect(()=>{
  if(!session||demo)return;
@@ -205,16 +227,23 @@ async function doBook(){
  if(!isAvailable(current))return alert('This room is not verified as available at that time.');
  if(current.capacity<capacity)return alert('Requested capacity exceeds room size.');
  setLoading(true);let success=false;
- const title=bookingTitle.trim()||'Extra lecture';
+ const selectedGroup=chosenCohort;
+ if(bookingKind!=='event'&&!selectedGroup)return alert('Choose a registered academic group before submitting.');
+ const rawTitle=bookingTitle.trim();
+ if(rawTitle.length<3)return alert('Enter a session title of at least three characters.');
+ const groupPrefix=selectedGroup?branchLabel(selectedGroup.branch)+' · ':'';
+ const title=(groupPrefix+rawTitle).slice(0,180);
  try{
   if(demo){
    setBookings(prev=>[...prev,{id:'local-'+Date.now(),room_id:current.id,title,
-    starts_at:start,ends_at:end,status:['exam','event'].includes(bookingKind)?'pending':'confirmed',kind:bookingKind}]);
+    starts_at:start,ends_at:end,status:['exam','event'].includes(bookingKind)?'pending':'confirmed',
+    kind:bookingKind,cohort_id:selectedGroup?.id||null,cohort_label:formatCohort(selectedGroup)}]);
    alert(['exam','event'].includes(bookingKind)?'Demo request pending approval (local only). Not saved to university records.':'Demo reservation added locally. Not saved to university records.');
   }else{
    const result=await apiFetch('/api/v1/bookings',{method:'POST',body:JSON.stringify({
      room_id:current.id,title,starts_at:start,ends_at:end,kind:bookingKind,required_capacity:capacity,
-     idempotency_key:crypto.randomUUID(),required_equipment:requiredEquipment?[requiredEquipment]:[]})});
+     idempotency_key:crypto.randomUUID(),cohort_id:selectedGroup?.id||null,
+     required_equipment:requiredEquipment?[requiredEquipment]:[]})});
    const b=await supabase.from('bookings').select('*').order('starts_at');
    if(b.data)setBookings(b.data);
    setRefreshTick(v=>v+1);
@@ -294,7 +323,7 @@ return <div className="app-shell"><aside className={'sidebar '+(mobile?'mobile-o
       <Search size={16}/> Find a room</button></div>}
   </div>
   )}
-{view==='Explore rooms'&&<ExplorePage buildings={buildings} rooms={rooms} building={building}
+{view==='Explore rooms'&&<CampusExperience buildings={buildings} rooms={rooms} building={building}
     setBuilding={setBuilding} floor={floor} setFloor={setFloor} selected={selected} setSelected={setSelected}
     date={date} setDate={setDate} hour={hour} setHour={setHour} duration={duration}
     setDuration={setDuration} capacity={capacity} setCapacity={setCapacity}
@@ -323,8 +352,14 @@ return <div className="app-shell"><aside className={'sidebar '+(mobile?'mobile-o
     auditRoom={auditRoom} setAuditRoom={setAuditRoom} auditAction={auditAction} setAuditAction={setAuditAction}
     auditLoading={auditLoading} auditError={auditError}/>}
 </main></div>{mobile&&<div className="mobile-backdrop" onClick={()=>setMobile(false)}/>}
-{showBooking&&<div className="modal-overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setShowBooking(false)}}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="ig-booking-title"><div className="modal-head"><div><div className="eyebrow">CAMPUS RESERVATION</div><h2 id="ig-booking-title">Reserve a classroom</h2></div><button onClick={()=>setShowBooking(false)}><X size={20}/></button></div><p className="muted">Bookings are checked against occupancy, capacity, room type and any requested equipment. Exam/event and restricted rooms require approval.</p><div className="booking-summary"><div><small>ROOM</small><b>{selected||'No room selected'}</b></div><div><small>DATE</small><b>{date}</b></div><div><small>TIME</small><b>{hour.padStart(2,'0')}:00 · {duration}h</b></div></div><label className="field-label">Session title<input value={bookingTitle} onChange={e=>setBookingTitle(e.target.value)}/></label><label className="field-label">Booking type<select value={bookingKind} onChange={e=>setBookingKind(e.target.value)}><option value="lecture">Extra lecture</option><option value="exam">Examination</option><option value="practical">Practical session</option><option value="event">Academic event</option></select></label><p className="ig-note"><Info size={14}/> {current?.verified?'Room capacity is recorded as verified.':'Capacity is provisional; confirm with the university.'} {requiredEquipment?'Requested equipment must be explicitly recorded and verified.':'Equipment is not assumed to be present.'}</p>
-<div className="modal-actions"><button className="button-outline compact" onClick={()=>setShowBooking(false)}>Cancel</button><button className="button-primary compact" disabled={loading||!current||!canBook||!isAvailable(current)||current.capacity<capacity} onClick={doBook}>{loading?'Saving…':(bookingKind==='exam'||bookingKind==='event'||current?.restricted)?'Request approval':'Confirm reservation'} <ArrowRight size={16}/></button></div><p className="tiny">Exam and event requests may be queued for administrator approval in connected mode.</p></section></div>}
+<ReservationDialog open={showBooking} onOpenChange={setShowBooking}
+  room={current} date={date} hour={hour} duration={duration}
+  bookingTitle={bookingTitle} setBookingTitle={setBookingTitle}
+  bookingKind={bookingKind} setBookingKind={setBookingKind}
+  cohorts={availableCohorts} cohortId={cohortId} setCohortId={setCohortId}
+  cohortError={cohortError} loading={loading} canBook={canBook}
+  available={!!current&&isAvailable(current)&&current.capacity>=capacity}
+  onConfirm={doBook} demo={demo}/>
 {report&&<div className="modal-overlay"><section className="modal" role="dialog" aria-modal="true" aria-labelledby="ig-report-title"><div className="modal-head"><h2 id="ig-report-title">Report an issue</h2><button onClick={()=>setReport(false)}><X/></button></div><p className="muted">Flag incorrect or outdated schedule information. This will not modify official bookings.</p><button className="button-primary" onClick={submitReport}>Submit schedule report</button></section></div>}
 {toast&&<div className="toast"><Info size={17}/>{toast}<button onClick={()=>setToast('')}><X size={15}/></button></div>}</div>
 }
