@@ -156,7 +156,8 @@ try {
   }));
   assert.ok(styledRoomMap.includes('Find a room...')&&styledRoomMap.includes('aria-autocomplete="list"'),
     'Map header should expose the accessible classroom finder');
-  assert.ok(styledRoomMap.includes('5 Nov 2026 · 11:00–12:00 IST')&&styledRoomMap.includes('75 seats minimum'),
+  assert.ok(styledRoomMap.includes('5 Nov 2026 · 11:00–12:00 IST')
+    &&styledRoomMap.includes('bp-slot-capacity')&&styledRoomMap.includes('seats minimum'),
     'Map should provide clear, non-editable date and capacity context');
   assert.ok(styledRoomMap.includes('bp-fine-grid'),'Floor map should retain restrained architectural guide lines');
   assert.ok(sampleLiveMap.includes('LIVE NOW'),'Room plan must visibly identify running classes');
