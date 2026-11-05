@@ -33,7 +33,7 @@ export default function VelarisGradient({
   className = '',
   colors = DEFAULT_COLORS,
   background = '#07162C',
-  speed = 0.42,
+  speed = 2.4,
   grain = 0.16,
 }) {
   const canvasRef = useRef(null);

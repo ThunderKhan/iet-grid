@@ -79,7 +79,7 @@ export default function CampusExperience({
   return <div className="cx-page">
     <header className="cx-hero">
       <VelarisGradient className="cx-gradient" colors={HERO_COLORS}
-        background="#07162C" speed={0.42} grain={0.16}/>
+        background="#07162C" speed={2.4} grain={0.16}/>
       <div className="cx-gradient-overlay" aria-hidden="true"/>
       <div className="cx-hero-copy">
         <span className="cx-hero-overline">IET GRID · CAMPUS BOOKING</span>
