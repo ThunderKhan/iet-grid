@@ -121,7 +121,6 @@ function RoomQuickFind({rooms,onFindRoom}){
     </div>
     {open&&query.trim()&&<div className="bp-search-results" id={listId} role="listbox"
       aria-label="Matching campus rooms">
-      <span className="bp-search-caption">JUMP TO CLASSROOM</span>
       {results.length?results.map((room,index)=><button type="button" key={room.id}
         id={listId+'-room-'+index} role="option" aria-selected={index===highlight}
         className={'bp-search-result'+(index===highlight?' is-highlighted':'')}
@@ -130,7 +129,7 @@ function RoomQuickFind({rooms,onFindRoom}){
         <span className="bp-search-result-meta">
           {room.building==='DEEK'?'Deeksha':'IET'} · {room.floor} floor
         </span>
-        <span className="bp-search-result-arrow" aria-hidden="true">↗</span>
+        <ChevronRight size={15} className="bp-search-result-arrow" aria-hidden="true"/>
       </button>):
       <p className="bp-search-empty">No matching room is loaded.</p>}
       {results.length>0&&<small className="bp-search-hint">↑ ↓ to navigate · Enter to open</small>}
@@ -245,20 +244,10 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
         </span>
       </button>)}{!sorted.length&&<p className="bp-list-empty">No rooms loaded for this floor.</p>}</div>
     </div>:<div className="bp-viewport">
-      <svg viewBox={isDeek?'0 0 940 568':'0 0 940 470'} className="bp-svg" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Interactive floor plan. Use Tab then Enter to select rooms.">
-        <defs>
-          <pattern id="bp-fine-grid" width="28" height="28" patternUnits="userSpaceOnUse">
-            <path d="M28 0H0V28" className="bp-grid-line"/>
-          </pattern>
-        </defs>
-        <rect x="8" y="8" width="924" height={isDeek?551:453} rx="12" className="bp-page-outline"/>
-        <rect x="12" y="12" width="916" height={isDeek?543:445} rx="10" fill="url(#bp-fine-grid)" aria-hidden="true"/>
-        <text x="40" y="50" className="bp-drawing-title">INTERACTIVE FLOOR PLAN</text>
-        <text x="900" y="50" textAnchor="end" className="bp-drawing-index">IET GRID · PLAN VIEW</text>
+      <svg viewBox={isDeek?'0 70 940 455':'0 80 940 335'} className="bp-svg" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Interactive classroom floor plan. Use Tab and Enter to select a room.">
         <Shell building={building} floor={floor}/>
         {layout.map(item=><Room key={item.id} item={item} room={byId.get(item.id)} availability={stateOf(byId.get(item.id))}
           selected={selected} onSelect={onSelect} activeSession={activeSessions[item.id]}/>)}
-        <text x="472" y={isDeek?548:447} textAnchor="middle" className="bp-disclaimer">ROOM ARRANGEMENT BASED ON SUPPLIED PLAN · SIMPLIFIED NOT TO SCALE</text>
       </svg><div className="bp-mobile-cue">← Scroll sideways for the full floor plan →</div>
     </div>}
       <button type="button" className="bp-floor-arrow bp-floor-next"
@@ -274,8 +263,9 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
       <span className="bp-floor-position-count">{floorIndex+1} of {availableFloors.length}</span>
     </div>
     <footer className="bp-footer"><div className="bp-legend">
-      {Object.entries(statuses).filter(([s])=>s!=='pending').map(([s,label])=><span key={s}><i className={'bp-dot bp-dot-'+s}/>{label} for selected time</span>)}
-      <span><i className="bp-dot bp-dot-live"/>Running now (separate from selected time)</span>
-    </div>{missing.length>0&&<p>{missing.length} imported room(s) not located in the supplied drawing. Choose them in List view.</p>}</footer>
+      {Object.entries(statuses).filter(([s])=>s!=='pending').map(([s,label])=><span key={s}><i className={'bp-dot bp-dot-'+s}/>{label}</span>)}
+      <span><i className="bp-dot bp-dot-live"/>Running now</span>
+    </div><p className="bp-footnote">Availability: selected slot · Live classes: current time · Floor layout schematic, not to scale</p>
+      {missing.length>0&&<p>{missing.length} room(s) are not on this drawing. Find them in List view.</p>}</footer>
   </section>;
 }
