@@ -1,42 +1,38 @@
-/* Modern room-first vector board, based on the approved IET Grid DESIGN.md.
-   Shared bp-* classes intentionally scoped under .bp-board or .bp-svg. */
-.bp-board{min-width:0;background:#fff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(16,27,44,.035)}
+/* Architectural Minimalism: navy/cobalt from root DESIGN.md. Status is indicated by small dots and the text legend, never entire room fills. */
+.bp-board{min-width:0;background:#fff;border:1px solid #DCE4EF;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(16,27,44,.025)}
 .bp-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid #EDF1F6}
 .bp-head h2{font-size:17px;color:#17243B;letter-spacing:-.025em;font-weight:700;line-height:1.35;margin:0}
 .bp-head p{font-size:12px;color:#687993;margin:5px 0 0;line-height:1.5}
 .bp-head-copy{min-width:0}
-.bp-view-toggle{display:flex;align-items:center;flex-shrink:0;gap:3px;background:#EDF1F7;border:1px solid #DDE5F0;border-radius:8px;padding:3px}
+.bp-view-toggle{display:flex;align-items:center;flex-shrink:0;gap:3px;background:#F6F8FB;border:1px solid #DCE4EF;border-radius:8px;padding:3px}
 .bp-view-toggle button{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:6px;background:transparent;color:#657791;font-size:12px;font-weight:680;min-height:34px}
-.bp-view-toggle button.active{background:#fff;color:#315CE5;box-shadow:0 1px 4px #1D31571A}
+.bp-view-toggle button.active{background:#fff;color:#244DC5;box-shadow:0 0 0 1px #E7ECF2}
 .bp-view-toggle button:hover:not(.active){color:#315CE5;background:#F8FAFF}
-.bp-viewport{position:relative;width:100%;min-width:0;padding:15px 12px 18px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#BFCDE2 #F4F7FC;background:#F8FAFE}
+.bp-viewport{position:relative;width:100%;min-width:0;padding:15px 12px 18px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#CBD5E1 #F6F8FB;background:#FFFFFF}
 .bp-svg{display:block;width:100%;height:auto;max-width:1100px;margin:0 auto;shape-rendering:geometricPrecision;font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif}
-.bp-page-outline{fill:#F8FAFE;stroke:#E7EDF5;stroke-width:1}
-.bp-drawing-title{fill:#526885;font-size:13px;font-weight:760;letter-spacing:.06em}
-.bp-floor-foundation{fill:#EAF0F9;stroke:#A9B9D1;stroke-width:2.5}
-.bp-circulation{fill:#D9E4F2;stroke:#CAD6E8;stroke-width:1}
-.bp-circulation-vertical{fill:#E4ECF7;stroke:#D4DDED;stroke-width:1}
-.bp-corridor-label{fill:#8B9FB5;letter-spacing:2px;font-size:9px;font-weight:780}
+.bp-page-outline{fill:#FCFDFE;stroke:#E7ECF2;stroke-width:1}
+.bp-drawing-title{fill:#52637B;font-size:12px;font-weight:710;letter-spacing:.06em}
+.bp-floor-foundation{fill:#F3F5F8;stroke:#B9C7DA;stroke-width:1.6}
+.bp-circulation{fill:#EEF2F6;stroke:#DCE4EF;stroke-width:.8}
+.bp-circulation-vertical{fill:#EEF2F6;stroke:#DCE4EF;stroke-width:.8}
+.bp-corridor-label{fill:#7F8DA0;letter-spacing:1.6px;font-size:9px;font-weight:680}
 .bp-room{cursor:pointer;outline:none;isolation:isolate}
 .bp-room[role=img]{cursor:default}
-.bp-room-surface{fill:#FFF;transition:fill .15s ease,stroke .15s ease}
-.bp-room-border{stroke:#B8C7D8;stroke-width:2;fill:none;transition:stroke .15s ease}
-.bp-room:not(.is-selected):hover .bp-room-surface{fill:#EFF4FE}
-.bp-room:not(.is-selected):hover .bp-room-border{stroke:#718FC0;stroke-width:3}
-.bp-room:focus-visible .bp-room-border{stroke:#315CE5;stroke-width:4}
-.bp-room.bp-available .bp-room-surface{fill:#F0FAF5}
-.bp-room.bp-occupied .bp-room-surface{fill:#FFF5F6}
-.bp-room.bp-restricted .bp-room-surface{fill:#F9F7FD}
-.bp-room.is-selected .bp-room-surface{fill:#E9EFFF}
-.bp-room.is-selected .bp-room-border{stroke:#315CE5;stroke-width:4.5}
-.bp-room-title{fill:#213B59;font-size:21px;font-weight:730;pointer-events:none;letter-spacing:-.035em}
-.bp-room-subtitle{fill:#6A7E95;font-size:10px;font-weight:650;pointer-events:none;letter-spacing:.045em}
-.bp-room-indicator{fill:#8290A5;stroke:#FFF;stroke-width:2.2;pointer-events:none}
+.bp-room-surface{fill:#FFFFFF;transition:fill .15s ease}
+.bp-room-border{stroke:#CBD5E1;stroke-width:1.25;fill:none;transition:stroke .15s ease,stroke-width .15s ease}
+.bp-room:not(.is-selected):hover .bp-room-surface{fill:#F8FAFD}
+.bp-room:not(.is-selected):hover .bp-room-border{stroke:#91A3B9;stroke-width:1.8}
+.bp-room:focus-visible .bp-room-border{stroke:#315CE5;stroke-width:2.6}
+.bp-room.is-selected .bp-room-surface{fill:#F4F7FF}
+.bp-room.is-selected .bp-room-border{stroke:#315CE5;stroke-width:2.75}
+.bp-room-title{fill:#17243B;font-size:19px;font-weight:690;pointer-events:none;letter-spacing:-.025em}
+.bp-room-subtitle{fill:#62748A;font-size:9.5px;font-weight:590;pointer-events:none;letter-spacing:.035em}
+.bp-room-indicator{fill:#8290A5;stroke:#FFFFFF;stroke-width:1.3;pointer-events:none}
 .bp-room.bp-available .bp-room-indicator{fill:#187A55}
 .bp-room.bp-occupied .bp-room-indicator{fill:#B42332}
 .bp-room.bp-restricted .bp-room-indicator{fill:#6941C6}
 .bp-room.bp-pending .bp-room-indicator{fill:#8D5B12}
-.bp-room-selected-check{fill:none;stroke:#315CE5;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.bp-room-selected-check{fill:none;stroke:#315CE5;stroke-width:2.35;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .bp-disclaimer{fill:#8A9BB2;font-size:9.5px;font-weight:650;letter-spacing:.045em}
 .bp-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-top:1px solid #E9EFF6;padding:15px 24px;background:#fff}
 .bp-footer>p{margin:0;font-size:11px;line-height:1.5;color:#8D5B12}
@@ -50,8 +46,9 @@
 .bp-list-top select{height:37px;min-width:125px;padding:0 10px;border:1px solid #C9D5E5;border-radius:8px;background:#fff;color:#253A56;font-size:12px}
 .bp-list-rooms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .bp-list-row{display:flex;align-items:center;gap:10px;min-width:0;padding:14px 12px;border:1px solid #E1E9F2;background:#fff;border-radius:9px;text-align:left;color:#17243B}
-.bp-list-row:hover,.bp-list-row.is-selected{background:#F3F6FF;border-color:#90ABF0}
-.bp-list-icon{width:35px;height:35px;border-radius:8px;display:grid;place-items:center;background:#EDF2FA;color:#5B7392;flex-shrink:0}
+.bp-list-row:hover{background:#F8FAFD;border-color:#B9C7DA}
+.bp-list-row.is-selected{background:#F4F7FF;border-color:#315CE5}
+.bp-list-icon{width:35px;height:35px;border-radius:8px;display:grid;place-items:center;background:#F1F4F9;color:#52637B;flex-shrink:0}
 .bp-list-id{flex:1;min-width:0}
 .bp-list-id strong,.bp-list-id small{display:block}
 .bp-list-id strong{font-size:13px}
@@ -76,20 +73,20 @@
 /* Arrow navigation occupies dedicated gutters beside the floor plan; the
    current floor sits centered below the drawing, above the room-status legend. */
 .bp-navigation-stage{display:grid;grid-template-columns:52px minmax(0,1fr) 52px;align-items:center;
-  background:#F8FAFE;min-width:0;gap:0;padding:13px 8px 0}
+  background:#FFFFFF;min-width:0;gap:0;padding:13px 8px 0}
 .bp-navigation-stage>.bp-viewport,.bp-navigation-stage>.bp-list{grid-column:2;grid-row:1;min-width:0}
 .bp-navigation-stage>.bp-floor-previous{grid-column:1;grid-row:1;justify-self:center}
 .bp-navigation-stage>.bp-floor-next{grid-column:3;grid-row:1;justify-self:center}
 .bp-navigation-stage .bp-viewport{padding:12px 0 17px}
 .bp-navigation-stage .bp-list{width:100%}
 .bp-floor-arrow{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;
-  background:#fff;border:1px solid #C4D3E9;color:#315CE5;cursor:pointer;
+  background:#fff;border:1px solid #DCE4EF;color:#315CE5;cursor:pointer;
   transition:background .15s,border-color .15s,box-shadow .15s}
-.bp-floor-arrow:hover:not(:disabled){background:#EDF2FF;border-color:#7E9FE7;box-shadow:0 3px 10px #315CE514}
+.bp-floor-arrow:hover:not(:disabled){background:#F4F7FF;border-color:#B3C4E8}
 .bp-floor-arrow:focus-visible{outline:3px solid #A5BBFF;outline-offset:2px}
 .bp-floor-arrow:disabled{opacity:.35;color:#70839B;cursor:not-allowed;background:#F4F7FB}
 .bp-floor-position{display:flex;align-items:center;justify-content:center;gap:9px;padding:13px 16px 17px;
-  background:#F8FAFE;border-bottom:1px solid #E5EBF4;color:#244DC5}
+  background:#FFFFFF;border-bottom:1px solid #E7ECF2;color:#244DC5}
 .bp-floor-position strong{font-size:12px;font-weight:760}
 .bp-floor-position-dot{width:8px;height:8px;border-radius:50%;background:#315CE5}
 .bp-floor-position-count{font-size:11px;color:#637FA7;font-weight:650}
@@ -124,9 +121,9 @@
 
 /* Campus selection belongs to the floor-plan header, beside its title. */
 .bp-heading-line{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.bp-building-tabs{display:flex;align-items:center;gap:4px;padding:2px;background:#F4F7FB;border:1px solid #E0E7F0;border-radius:9px}
+.bp-building-tabs{display:flex;align-items:center;gap:4px;padding:2px;background:#F6F8FB;border:1px solid #DCE4EF;border-radius:9px}
 .bp-building-tabs button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:7px 11px;min-height:36px;border:1px solid transparent;border-radius:7px;background:transparent;color:#61728A;font-size:12px;font-weight:690;white-space:nowrap;cursor:pointer}
-.bp-building-tabs button.active{background:#EDF2FF;color:#315CE5;border-color:#C8D5FF}
+.bp-building-tabs button.active{background:#fff;color:#244DC5;border-color:#B9C7DA}
 .bp-building-tabs button:hover:not(.active){background:#fff;color:#253C5B}
 .bp-building-tabs button:focus-visible{outline:3px solid #A5BBFF;outline-offset:2px}
 @media(max-width:960px){
