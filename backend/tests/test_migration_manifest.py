@@ -13,6 +13,8 @@ EXPECTED = {
     "008_scoped_reads_and_notice_publication.sql",
     "009_exam_approval_notices.sql",
     "010_confirmed_identity_provisioning.sql",
+    "011_room_eligibility_and_scoped_audit.sql",
+    "012_persist_equipment_booking_requirements.sql",
 }
 
 

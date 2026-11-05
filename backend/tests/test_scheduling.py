@@ -96,3 +96,29 @@ def test_nearby_slots_are_generated_without_fake_inventory():
     for x in result:
         assert x["best_room"]["available"] is True
         assert x["start"] != instant(10).isoformat()
+
+def test_metadata_clearly_marks_unverified_capacity_and_unknown_equipment():
+    from app.modules.scheduling import room_metadata
+    r = dict(ROOMS[2], accessible=None)
+    info = room_metadata(r,"lecture")
+    assert info["capacity_status"] == "estimated"
+    assert info["metadata_status"] == "provisional"
+    assert any("Accessibility" in msg for msg in info["metadata_warnings"])
+    assert any("equipment" in msg.lower() for msg in info["metadata_warnings"])
+
+
+def test_approval_outcome_depends_on_booking_kind_and_restriction():
+    from app.modules.scheduling import room_metadata
+    assert not room_metadata(ROOMS[0], "lecture")["requires_approval"]
+    assert room_metadata(ROOMS[0], "exam")["requires_approval"]
+    assert room_metadata({**ROOMS[0], "restricted": True}, "lecture")["requires_approval"]
+    assert room_metadata(ROOMS[0], "exam")["booking_outcome"] == "pending_approval"
+
+
+def test_equipment_requires_verified_metadata_and_normalized_names():
+    from app.modules.scheduling import normalize_required_equipment
+    assert normalize_required_equipment(["PROJECTOR", " projector "]) == {"projector"}
+    unverified = {**ROOMS[2], "equipment": ["projector"]}
+    assert not room_is_eligible(unverified, 30, "lecture", {"projector"})
+    assert room_is_eligible(ROOMS[1], 50, "lecture", {"PROJECTOR"})
+    assert not room_is_eligible(ROOMS[1], 50, "lecture", {"computer"})

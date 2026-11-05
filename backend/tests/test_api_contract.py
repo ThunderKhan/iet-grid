@@ -62,3 +62,8 @@ def test_cors_is_restricted_to_frontend_origin():
         })
     assert allowed.headers.get("access-control-allow-origin") == "https://iet-grid.vercel.app"
     assert blocked.headers.get("access-control-allow-origin") is None
+
+def test_admin_audit_endpoint_present_in_openapi():
+    with TestClient(app) as client:
+        data = client.get("/api/openapi.json").json()
+    assert "/api/v1/admin/audit" in data["paths"]

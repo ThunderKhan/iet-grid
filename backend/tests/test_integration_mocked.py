@@ -39,7 +39,7 @@ def fake_backend(role: str, verified: bool, captured: list):
                  "starts_at": "2026-11-06T10:00:00+00:00",
                  "ends_at": "2026-11-06T11:00:00+00:00"}
             ])
-        if request.url.path.endswith("/rest/v1/rpc/request_room_booking"):
+        if request.url.path.endswith("/rest/v1/rpc/request_room_booking_with_equipment"):
             return httpx.Response(200, json=BOOKING)
         if request.url.path.endswith("/rest/v1/bookings"):
             return httpx.Response(200, json=[{"id": BOOKING, "status": "confirmed",
@@ -91,7 +91,7 @@ def test_student_is_denied_privileged_booking(client_for):
         "required_capacity": 75,
     })
     assert response.status_code == 403
-    assert not any("/rpc/request_room_booking" in path for _, path, _ in captured)
+    assert not any("/rpc/request_room_booking_with_equipment" in path for _, path, _ in captured)
 
 
 def test_verified_faculty_booking_goes_to_server_rpc(client_for):
@@ -104,7 +104,7 @@ def test_verified_faculty_booking_goes_to_server_rpc(client_for):
     })
     assert response.status_code == 201, response.text
     assert response.json()["status"] == "confirmed"
-    assert any(method == "POST" and path.endswith("/rpc/request_room_booking") for method, path, _ in captured)
+    assert any(method == "POST" and path.endswith("/rpc/request_room_booking_with_equipment") for method, path, _ in captured)
     assert all(auth == "Bearer teacher-token" for _, _, auth in captured)
 
 
