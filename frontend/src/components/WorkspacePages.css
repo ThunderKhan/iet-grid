@@ -16,7 +16,7 @@
 .ig-muted{font-size:13px;color:#65758D;line-height:1.6}
 .ig-alert{display:flex;align-items:flex-start;gap:10px;border:1px solid #EDC5CD;border-radius:10px;background:#FFF1F2;color:#9E2E3A;padding:13px 15px;font-size:13px;line-height:1.5}.ig-alert svg{flex-shrink:0}
 .ig-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:43px 20px;gap:9px;color:var(--ig-muted)}.ig-empty-icon{width:50px;height:50px;border-radius:13px;background:#EFF3FC;color:#5873A3;display:grid;place-items:center;margin-bottom:4px}
-.ig-empty h3{font-size:15px;line-height:1.3;margin:0;color:#263B56;letter-spacing:-.015em}.ig-empty p{margin:0;max-width:310px;font-size:12px;line-height:1.65}.ig-empty .ig-btn{margin-top:12px}.ig-dot{display:inline-block;width:7px;height:7px;border-radius:50%}.ig-dot-green{background:var(--ig-available)}.ig-dot-gray{background:#8E9BAE}select):focus-visible{outline:3px solid #9BB5FA;outline-offset:1px}
+.ig-empty h3{font-size:15px;line-height:1.3;margin:0;color:#263B56;letter-spacing:-.015em}.ig-empty p{margin:0;max-width:310px;font-size:12px;line-height:1.65}.ig-empty .ig-btn{margin-top:12px}.ig-dot{display:inline-block;width:7px;height:7px;border-radius:50%}.ig-dot-green{background:var(--ig-available)}.ig-dot-gray{background:#8E9BAE}
 .ig-calendar-page{padding:23px}.ig-calendar-top{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;flex-wrap:wrap}
 .ig-calendar-top h1{display:flex;align-items:center;gap:10px;font-size:24px;line-height:1.25;color:#1E3553;margin:0 0 6px}.ig-calendar-top h1 svg{color:var(--ig-primary)}.ig-calendar-top p{font-size:14px;line-height:1.6;color:#52637B;margin:0;max-width:65ch}
 .ig-calendar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ig-calendar-actions input{height:44px;max-width:175px;border:1px solid #CCD8E5;border-radius:9px;padding:0 9px;color:#263D59;background:#fff;font-size:13px}
@@ -52,7 +52,7 @@
 .ig-approval h3{font-size:14px;margin:13px 0 8px;color:#243C5A}.ig-approval p{font-size:12px;line-height:1.55;color:var(--ig-muted)}.ig-approval-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
 .ig-health-lines{display:grid}.ig-health-lines>div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 0;border-bottom:1px solid #EAF0F6}.ig-health-lines>div:last-child{border:0}
 .ig-health-lines span{font-size:12px;color:var(--ig-muted)}.ig-health-lines b{font-size:12px;color:#334C67;text-align:right}
-
+@media(max-width:1200px){}
 @media(max-width:1020px){.ig-admin-grid{grid-template-columns:1fr}.ig-cal-columns{overflow-x:auto}.ig-cal-day-column{min-width:120px}}
 @media(max-width:720px){.ig-page-stack{gap:14px}.ig-card{padding:17px}.ig-card-head{flex-wrap:wrap}.ig-cal-columns{overflow-x:auto;display:flex}.ig-cal-day-column{flex:1 0 156px}.ig-cal-columns.is-day .ig-cal-day-column{flex-basis:100%}.ig-calendar-top{flex-direction:column}.ig-booking-item{flex-wrap:wrap;gap:9px}.ig-booking-main{flex-basis:calc(100% - 62px)}.ig-booking-when{padding-left:57px;flex:1}.ig-booking-arrow{display:none}.ig-admin-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.ig-report-callout{align-items:flex-start;flex-direction:column}}
 @media(max-width:460px){.ig-card-head :is(h1,h2){font-size:16px}.ig-card-head-action{width:100%}.ig-card-head-action button{max-width:100%}.ig-tabs{width:100%}.ig-tabs button{flex:1;padding:9px 7px;font-size:13px}.ig-admin-metrics{grid-template-columns:1fr 1fr}.ig-agenda-event{gap:9px;flex-wrap:wrap}.ig-agenda-date{width:100%}.ig-agenda-event>div:nth-child(2){flex-basis:70%}.ig-notice-entry{gap:9px}.ig-notice-emblem{width:35px;height:35px}.ig-notice-heading h3{font-size:13px}}
@@ -60,9 +60,9 @@
 
 /* shadcn-style room details sheet{position:fixed;inset:0;z-index:100;background:#0B1B32AA;animation:ig-fade .16s ease-out}
 @keyframes ig-fade{from{opacity:0}to{opacity:1}}
-
-
-
+@media(max-width:720px){}
+@media(min-width:721px){}
+@media(prefers-reduced-motion:reduce){}
 .ig-audit-card{display:grid;gap:16px}
 .ig-audit-filters{display:flex;gap:14px;align-items:end;flex-wrap:wrap}
 .ig-audit-filters label{display:grid;gap:7px;color:#59718e;font-size:12px;font-weight:650;min-width:150px}
