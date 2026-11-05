@@ -222,7 +222,9 @@ try {
     noticeBody:'Campus update',setNoticeBody:noop,noticePriority:'normal',setNoticePriority:noop,
     noticeBusy:false,addNotice:noop,pendingQueue:[],pendingLoading:false,pendingError:'',
     reviewBusy:'',reviewPendingBooking:noop,setRefreshTick:noop,accountUuid:'',setAccountUuid:noop,
-    accountRole:'faculty',setAccountRole:noop,accountBusy:false,grantTestRole:noop};
+    accountRole:'faculty',setAccountRole:noop,accountBusy:false,grantTestRole:noop,
+    auditRows:[],auditTotal:0,auditOffset:0,setAuditOffset:noop,auditRoom:'',setAuditRoom:noop,
+    auditAction:'',setAuditAction:noop,auditLoading:false,auditError:''};
   const views=[
     ['Campus map',CampusExperience,'Classroom layout'],
     ['Calendar',pages.CalendarPage,'Campus timetable'],
