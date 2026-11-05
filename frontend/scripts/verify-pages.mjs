@@ -1,6 +1,7 @@
 // Lightweight server-render smoke tests for every authenticated page.
 // Runs without secrets, accounts, or external API calls.
 import assert from 'node:assert/strict';
+import {existsSync} from 'node:fs';
 import React from 'react';
 import {renderToString} from 'react-dom/server';
 import {createServer} from 'vite';
@@ -8,6 +9,24 @@ import {createServer} from 'vite';
 const server=await createServer({server:{middlewareMode:true},appType:'custom',logLevel:'error'});
 try {
   const pages=await server.ssrLoadModule('/src/components/WorkspacePages.jsx');
+  const {default: BlueprintBoard}=await server.ssrLoadModule('/src/components/BlueprintBoard.jsx');
+  const {sampleRooms: allRooms}=await server.ssrLoadModule('/src/data.js');
+  for (const [building,floor,asset,roomId] of [
+    ['IET','Ground','iet-ground.png','LIBRARY'],
+    ['IET','First','iet-first.png','IET19'],
+    ['IET','Second','iet-second.png','IET32'],
+    ['DEEK','Ground','deeksha-ground.png','LH04'],
+    ['DEEK','First','deeksha-first.png','LH14'],
+  ]) {
+    assert.ok(existsSync('public/floorplans/'+asset),'Missing actual blueprint asset '+asset);
+    const html=renderToString(React.createElement(BlueprintBoard,{
+      rooms:allRooms,building,floor,selected:roomId,
+      onSelect:()=>{},getStatus:()=> 'unknown',
+    }));
+    assert.ok(html.includes('floorplans/'+asset),'Blueprint source missing from '+building+' '+floor);
+    assert.ok(html.includes('Select '+roomId),'Room interaction hotspot missing '+roomId);
+    console.log('PASS source-backed blueprint',building,floor,asset,roomId);
+  }
   const sampleRooms=[
     {id:'IET19',building:'IET',floor:'First',capacity:75,type:'classroom',verified:false,active:true},
     {id:'IET22',building:'IET',floor:'First',capacity:75,type:'lab',verified:false,active:true}
