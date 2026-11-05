@@ -145,12 +145,14 @@ useEffect(()=>{
  return()=>{disposed=true};
 },[session?.access_token,start,end,capacity,building,bookingKind,requiredEquipment,refreshTick]);
 const [liveCalendar,setLiveCalendar]=useState([]);
+const [calendarLoading,setCalendarLoading]=useState(false);
+const [calendarError,setCalendarError]=useState('');
 const [currentTimeMs,setCurrentTimeMs]=useState(()=>Date.now());
 const [runningAllocations,setRunningAllocations]=useState([]);
 const [runningScheduleStatus,setRunningScheduleStatus]=useState('loading');
 useEffect(()=>{
  if(!session?.access_token)return;
- let disposed=false;setLiveCalendar([]);
+ let disposed=false;setLiveCalendar([]);setCalendarLoading(true);setCalendarError('');
  const first=new Date(date+'T00:00:00');
  const last=new Date(first.getTime()+7*86400000);
  apiFetch('/api/v1/calendar?start='+encodeURIComponent(first.toISOString())+
@@ -159,7 +161,10 @@ useEffect(()=>{
    id:e.id,room_id:e.room_id,title:e.title,kind:e.source_type,
    starts_at:e.start,ends_at:e.end,status:'confirmed'
  })))})
- .catch(()=>{if(!disposed)setLiveCalendar([])});
+ .catch(error=>{
+   if(!disposed){setLiveCalendar([]);
+     setCalendarError('The campus timetable could not be loaded: '+(error?.message||'network error'));}
+ }).finally(()=>{if(!disposed)setCalendarLoading(false)});
  return()=>{disposed=true};
 },[session?.access_token,date,refreshTick]);
 // Running sessions are independent of the reservation time being browsed.
@@ -410,7 +415,8 @@ return <div className="app-shell">
     setShowBooking={setShowBooking} setView={setView}
     activeSessions={activeSessions} nowScheduleState={nowScheduleState} currentTimeMs={currentTimeMs}/>}
   {view==='Calendar'&&<CalendarPage date={date} setDate={setDate} initialDate={initialDate}
-    calendarBookings={calendarBookings} rooms={rooms} onOpenRoom={openRoomAt}/>}
+    calendarBookings={calendarBookings} rooms={rooms} onOpenRoom={openRoomAt}
+    loading={calendarLoading} error={calendarError} onRetry={()=>setRefreshTick(n=>n+1)}/>}
   {view==='My bookings'&&<BookingsPage bookings={bookings} rooms={rooms}
     setView={setView} onOpenRoom={openRoomAt}/>}
   {view==='Announcements'&&<AnnouncementsPage notices={notices}
