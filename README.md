@@ -23,7 +23,7 @@ iet-grid/
 ├── backend/        Separately deployed FastAPI + Supabase/Postgres server logic
 │   ├── app/core/   Auth, security and Supabase gateway
 │   ├── app/modules/ Campus, academics, bookings, recommendations and notices
-│   ├── supabase/migrations/ 001–008 (all restored and versioned)
+│   ├── supabase/migrations/ 001–013 (all restored and versioned)
 │   ├── tests/      Pytest + SQL rollback test
 │   ├── main.py
 │   └── requirements.txt
@@ -36,11 +36,10 @@ iet-grid/
 ~~~bash
 cd frontend
 npm install
-cp .env.example .env.local
 npm run dev
 ~~~
 
-Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY for Supabase Auth; VITE_API_BASE_URL should point to http://localhost:8000 locally or https://iet-grid-api.vercel.app in production. Frontend environment variables are public—**never put secret/service-role keys in them**.
+Open **http://localhost:5123/**. Development uses the dedicated project's public Supabase credentials in `frontend/.env.development`, and the local API at `http://localhost:8000`. If `frontend/.env.local` exists, it overrides these values and must be updated. **Never put secret/service-role keys in Vite variables.** The main application requires actual Supabase login; there is no guest/demo data mode. For detailed PowerShell commands and Auth redirect setup, see [frontend/README.md](frontend/README.md).
 
 ## Run the backend
 
@@ -59,7 +58,7 @@ Backend configuration is read from environment variables. Copying .env.example a
 
 Twenty RLS-protected public tables model buildings, floors, rooms, students/cohorts, regular sessions, bookings, notices and auditing. Room, faculty and cohort allocation constraints prohibit overlapping confirmed commitments. FastAPI provides authenticated endpoints for availability, alternative-room rankings, idempotent bookings, approvals, recurring sessions, validated cohort CSV imports, and in-app notifications.
 
-**Current limitations:** Official student-level datasets and timetable records have not been imported; floor maps are schematic, not precise architectural drawings. Human end-to-end production Auth/role/booking tests remain outstanding. Guest demonstration data is nonpersistent. Full automatic semester timetable generation is a future milestone.
+**Current limitations:** Official student-level datasets and timetable records have not been imported; floor maps are simplified representations of the supplied architecture and do not certify room capacity. Human end-to-end Auth/role/booking tests remain outstanding. The application does not invent bookings or occupants when the live database is empty. Full automatic semester timetable generation is a future milestone.
 
 ## Documentation
 

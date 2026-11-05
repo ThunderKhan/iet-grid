@@ -76,9 +76,8 @@
 .igp-official-body>small{font-size:11px;line-height:1.6;color:#7D8CA1}
 .igp-account-security{padding-bottom:20px}
 .igp-account-security .igp-outline-button{margin:18px 20px 0}
-.igp-demo,.igp-feedback{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border:1px solid #E1E7EF;border-radius:9px;font-size:12px;line-height:1.55}
-.igp-demo{color:#8D5B12;background:#FFF8E9;border-color:#F5E3BE}
-.igp-demo svg,.igp-feedback svg{flex-shrink:0;margin-top:2px}
+.igp-feedback{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border:1px solid #E1E7EF;border-radius:9px;font-size:12px;line-height:1.55}
+.igp-feedback svg{flex-shrink:0;margin-top:2px}
 .igp-feedback.is-error{color:#B42332;background:#FFF5F6;border-color:#F5D3D8}
 .igp-feedback.is-success{color:#187A55;background:#F0F8F3;border-color:#BBDCC9}
 @media(max-width:1080px){

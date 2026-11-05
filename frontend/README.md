@@ -1,77 +1,61 @@
-# IET Grid Frontend — React + Vite
+# IET Grid frontend — real campus platform
 
-Deployed independently at https://iet-grid.vercel.app from frontend/.
+The main application is React 19 + Vite 6, with Supabase Auth/Postgres and a separate FastAPI backend. It follows the repository-root `DESIGN.md`.
 
-## Development
+## Local development (Windows PowerShell)
 
-~~~bash
-cd frontend
-npm install
-cp .env.example .env.local
-npm run dev
-~~~
+The Vite server runs on the **exact port 5123**. No preview URL, guest mode, or simulated campus records are available in the application.
 
-Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY for Supabase Auth, and VITE_API_BASE_URL for the separate FastAPI service (http://localhost:8000 locally or https://iet-grid-api.vercel.app in production).
-
-Live room availability, recommendation ranking, booking creation, admin notices and schedule reports use the REST API with the user's bearer token. The calendar gets room occupancy from the same backend. PostgreSQL continues to enforce final booking consistency.
-
-Guests can view an explicitly labeled local demonstration with nonpersistent sample reservations. The map is schematic; exact blueprint geometry, official student data and full scheduling imports are pending. See ../backend/README.md and ../docs/README.md.
-
-## Email confirmation redirects
-
-The signup flow explicitly passes `options.emailRedirectTo` to Supabase, defaulting to `https://iet-grid.vercel.app/`. Override via `VITE_SITE_URL` if the public domain changes; this variable is embedded at **build time**.
-
-In the dedicated Supabase project, set **Authentication → URL Configuration → Site URL** to `https://iet-grid.vercel.app` and include `https://iet-grid.vercel.app/**` in **Redirect URLs**. For local testing, add `http://localhost:5173/**` as a *development-only additional redirect*, not as the production Site URL. These dashboard Auth settings are separate from Vercel environment variables and cannot be changed by updating this code alone.
-
-After configuring, register a new disposable test account (using an authorized address) and verify that the generated email confirmation redirects directly to production without manual URL edits. Check template settings if a custom email template hardcodes localhost.
-
-## Authentication redesign
-
-The split-panel sign-in/sign-up experience lives in `src/components/AuthScreen.jsx` and is styled in `AuthScreen.css` using the root `DESIGN.md` tokens. It adapts the user-provided 21st.dev composition, including Paper Design's GrainGradient shader. The shader package is pinned to `0.0.82` (Apache-2.0); motion is reduced for users who request it.
-
-- Email/password sign-in and first/last name signup use Supabase Auth. Names are **profile metadata only**, never authorization claims; verified faculty and admin roles require trusted provisioning.
-- Forgot password sends a recovery email to `VITE_SITE_URL/?auth=reset`; the reset screen uses `supabase.auth.updateUser` after the valid recovery session is established.
-- **Continue with Google** is always visible on sign-in and sign-up. Clicking checks the public Auth-provider settings (when available); if Google is disabled it shows an actionable error instead of navigating to a broken OAuth flow. When the provider is enabled it calls `supabase.auth.signInWithOAuth({provider:'google'})` with a return URL. This UI does **not** configure Google OAuth.
-- To activate Google: create a Web Application OAuth client in **Google Cloud → Google Auth Platform**, add `https://iet-grid.vercel.app` as an authorized JavaScript origin and `https://cdzvtfahwbvlfnfmbilt.supabase.co/auth/v1/callback` as an authorized redirect URI. Add the Google Client ID and Client Secret to **IET Grid Supabase → Authentication → Providers → Google** and enable Google. **Never** put the client secret in Vite environment variables, GitHub, or frontend code.
-- Apple is optional and remains hidden until configured using `VITE_AUTH_APPLE_ENABLED=true` with its provider credentials in Supabase.
-- Add production `https://iet-grid.vercel.app/**` and any intended development or preview URLs to **Supabase Authentication → URL Configuration → Redirect URLs**. Recovery and signup redirects require these allowed URLs. Apple web OAuth also requires Apple Developer service configuration.
-- Sign-in does not expose elevated institutional privileges; the server/database authorize role-dependent capabilities.
-- The auth gateway intentionally has **no guest-demo button**; the former decorative campus floor-map and demo CTA were removed.
-
-**Validation still required:** a real, confirmed email signup, password reset and optional OAuth journey in the deployment. Do not claim these flows pass production acceptance solely because the components build.
-
-## Authenticated workspace redesign (DESIGN.md)
-
-The five authenticated views use independent React page components in `src/components/WorkspacePages.jsx`, with shared styles in `WorkspacePages.css`. The global navigation, responsive shell and booking dialogs use `src/workspace-shell.css`. Design values and status rules follow the repository-root `DESIGN.md`.
-
-- **Campus map (landing view):** `BlueprintBoard.jsx` uses five original black-and-white floor drawing assets extracted losslessly from the event's supplied PDF, with accessible transparent hotspots aligned to source room positions. A plan/list switch and building/floor/date/time filters connect to the existing booking API and suggestions. The former `FloorPlan.jsx` zoom-card implementation and Overview dashboard were removed.
-- **Room inspector:** restrained side panel on desktop; on mobile, the existing `@radix-ui/react-dialog@1.3.1` (MIT) primitive provides an accessible bottom sheet. Reuses the established shadcn-style component conventions without introducing another UI framework.
-- **Calendar:** day/week/agenda view with IST timestamps and event navigation back to the selected room.
-- **Bookings:** filterable reservation records with separate confirmed, pending and past statuses.
-- **Announcements:** importance/unread filters, server-backed read receipts and reporting action.
-- **Admin:** existing server-backed review, announcement and authorized user-provisioning workflows in a cohesive workspace.
-
-**Data integrity:** The five **drawing images** come from the original event-supplied blueprint on page 1 of the problem statement, included in `public/floorplans`. Their walls/corridors/stairs are source-backed; the clickable room hotspot rectangles are manually aligned interaction bounds and must be reviewed for accuracy. Capacity data and per-room scheduling eligibility are separate and must be verified through institutional records. No visual status implies an API verification was successful. Live availability is never inferred from an empty API response.
-
-**Validation:** from `frontend/`, run `npm install`, `npm run build` and `node scripts/verify-pages.mjs`. The GitHub Actions workflow `.github/workflows/frontend-build.yml` repeats build and server-render smoke tests on UI changes. Successful builds do **not** replace browser-based mobile testing or real-user integration tests.
-
-### Local visual preview (development only)
-
-When Vercel deployments are temporarily unavailable, use the Vite dev server to inspect the redesigned pages with sample records:
-
-```bash
+```powershell
+git pull origin main
 cd frontend
 npm install
 npm run dev
 ```
 
-Open **http://localhost:5173/?preview=1**. This route is intentionally guarded by `import.meta.env.DEV` and is compiled out of production builds. It does not grant any real institutional role, does not persist records, and displays the global **DEMO DATA** badge. Do not use this for production acceptance or real API tests. The ordinary URL without `preview=1` still uses Supabase authentication.
+Open **http://localhost:5123/**. Sign in with an actual Supabase account. After successful authentication the main landing page is the Campus map (no Overview page).
 
+`frontend/.env.development` contains the dedicated project's *public* Supabase URL and publishable key, the local API address (`http://localhost:8000`), and the local Auth redirect. Never commit any service-role / secret keys. A previously created `frontend/.env.local` has priority over `.env.development`: ensure it uses the same project, port 5123, and backend address, or rename/remove the stale override before restarting Vite.
 
-## Campus experience redesign (local-first)
+## Run the local API
 
-The Campus map is now implemented by `CampusExperience.jsx` using the existing `BlueprintSitePlan.jsx` vector layout. The simplified SVG retains the room adjacency/relative layout of the source PDF but intentionally omits doors, washrooms, drinking-water spaces and stairs. It is **not a surveyed, scale-accurate architectural plan**. The main surface follows `DESIGN.md`, reuses the authenticated login's cobalt/navy Paper Design `GrainGradient` only in the small header, and uses Radix Popover for the schedule control and Radix Dialog for mobile room details. Room map/list selection and API-backed booking checks remain connected.
+From a **second** PowerShell window at the repository root:
 
-The booking dialog now supports **academic groups** via `GET /api/v1/cohorts` (registered cohort UUID is passed as `cohort_id` to `POST /api/v1/bookings`). Lectures, practicals and exams require a selected cohort. Local preview uses clearly labeled sample cohorts, including AI/ML · Year 2 · Section A; these demo IDs are **never** submitted to the backend. Event bookings can omit a cohort. Titles are prefixed with the chosen branch for readable schedules, and the structured cohort ID is stored separately.
+```powershell
+cd backend
+python -m pip install -r requirements.txt
+$env:SUPABASE_URL = "https://cdzvtfahwbvlfnfmbilt.supabase.co"
+$env:SUPABASE_PUBLISHABLE_KEY = "sb_publishable_nUrt2zIq7TP7tDcCNwd6vA_bZBejiF3"
+$env:CORS_ORIGINS = "http://localhost:5123,http://127.0.0.1:5123"
+python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
 
-Run `npm install`, `npm run build`, and `node scripts/verify-pages.mjs` locally. No Vercel deployment is required for this workflow.
+Verify `http://localhost:8000/health` returns `status: ready`. The browser will use `http://localhost:8000/api/v1/*` for availability, timetables, reservations, approvals and notices. Supabase PostgreSQL and Auth remain online; only frontend and API run locally.
+
+## Authentication redirects
+
+The sign-in / sign-up screen comes from `src/components/AuthScreen.jsx`. In development, confirmation, Google OAuth and password reset callback URLs use the **actual local origin**, `http://localhost:5123/`. In Supabase Dashboard → Authentication → URL Configuration, add `http://localhost:5123/**` to **Redirect URLs**. Keep the production domain separately if it remains in use. Do not change a production Site URL solely to test localhost.
+
+Google login needs the OAuth provider enabled in the IET Grid Supabase project; this code alone cannot configure its Google Cloud client or secret. Password/email confirmation must also be tested with a real authorized account.
+
+## Features and data rules
+
+- **Campus map:** Original two-building classroom arrangement, floor arrows, availability from the authenticated API, live running-class titles only when authorized.
+- **Calendar, My bookings, Announcements:** Server-backed user-scoped records, never fabricated bookings or messages.
+- **Reservation dialog:** Real registered academic cohorts from `GET /api/v1/cohorts`; only verified faculty/coordinators/admins can request permitted bookings.
+- **Admin:** Verified role-based booking approval, notices, provisioning, and audit actions. Server and database permissions remain authoritative.
+- **My profile:** Edit your full name, contact information, personal academic preferences, and private photo; institutional role, verification and official enrollment are read-only. Photos use the private `iet-profile-avatars` bucket.
+
+A missing backend, missing Auth session, or failed data request **must not fall back to sample records**. Availability remains unverified when the API cannot confirm it. Official student-level datasets and full institutional timetables have not yet been imported; a blank schedule does not imply the university has no classes.
+
+## Verification
+
+```powershell
+cd frontend
+npm run build
+node scripts/verify-pages.mjs
+```
+
+The `scripts/test-fixtures.js` file exists exclusively for automated UI tests. It is never imported into `src/` or displayed by the application.
+
+No Vercel deployment is required or triggered by the local development commands.

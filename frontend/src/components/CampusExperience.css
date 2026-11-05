@@ -118,7 +118,6 @@
 .cx-live-item-content{display:grid;gap:4px;min-width:0;flex:1}
 .cx-live-item-content strong{font-size:12px;line-height:1.3;color:#24405E;overflow-wrap:anywhere}
 .cx-live-item-content small{font-size:10px;color:#788AA1}
-.cx-demo-note{display:block;font-size:10px;color:#8D5B12;margin-top:12px}
 @media(max-width:720px){
   .cx-map-hero .bp-navigation-stage{grid-template-columns:43px minmax(0,1fr) 43px;padding:7px 3px 0}
   .cx-map-hero .bp-viewport{display:block;min-height:0;padding:7px 0 10px}

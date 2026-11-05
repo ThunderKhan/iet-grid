@@ -60,11 +60,6 @@
 .app-shell .ig-topnav-actions{
   flex:0 0 auto;display:flex;align-items:center;gap:9px;
 }
-.app-shell .ig-topnav-demo{
-  padding:7px 9px;border-radius:7px;
-  background:#654E2A;color:#FFE3AD;
-  border:1px solid #8D713E;font-size:10px;letter-spacing:.09em;font-weight:800;
-}
 .app-shell .ig-topnav-icon{
   position:relative;display:grid;place-items:center;
   height:40px;width:40px;border-radius:9px;
@@ -152,14 +147,12 @@
   .app-shell .ig-topnav-inner{padding:0 13px;gap:10px}
   .app-shell .ig-topnav-logo{width:36px;height:36px;border-radius:10px}
   .app-shell .ig-topnav-brand-copy strong{font-size:15px}
-  .app-shell .ig-topnav-demo{font-size:9px;padding:6px 7px}
-  .app-shell .ig-topnav-actions{gap:4px}
+    .app-shell .ig-topnav-actions{gap:4px}
   .app-shell .ig-topnav-icon{width:37px;height:40px}
 }
 @media(max-width:350px){
   .app-shell .ig-topnav-brand-copy strong{font-size:14px}
-  .app-shell .ig-topnav-demo{padding:6px 5px}
-}
+  }
 @media(prefers-reduced-motion:reduce){
   .app-shell .ig-slide-cursor{transition:none;will-change:auto}
   .app-shell .ig-slide-tab,.app-shell .ig-topnav-logo{transition:none}

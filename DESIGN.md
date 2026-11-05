@@ -160,7 +160,7 @@ The UI is a real scheduling tool for faculty, students, coordinators, and admini
 
 ### Product principles, in priority order
 
-1. **Truth before visual polish.** Never present demo, stale, pending, unverified, or failed data as a live confirmed reservation.
+1. **Truth before visual polish.** Never present stale, pending, unverified, or failed data as a live confirmed reservation.
 2. **Task before decoration.** A faculty member should find a suitable room and understand its availability without interpreting a dashboard full of vanity metrics.
 3. **One mental model.** The same building, room, date, interval, status, and booking ID must mean the same thing in the map, calendar, room details, and reservation list.
 4. **Explain state and consequences.** Make unavailable reasons, pending approval, identity restrictions, and recovery options visible.
@@ -176,14 +176,13 @@ The UI is a real scheduling tool for faculty, students, coordinators, and admini
 | Verified faculty | Discover and book an eligible room for a class | Explore rooms, booking dialog, my bookings | Eligible reservation actions |
 | Coordinator | Monitor assigned rooms and handle delegated approvals | Admin queue, building calendar | Only explicitly authorized scope |
 | Administrator | Oversee campus resources, access review, notices and approvals | Admin dashboard, queues | Only actions verified by backend policy |
-| Guest | Understand the demo without believing it is real | Clearly labeled demonstration | No real persistence |
 
 **Role-based visuals are usability affordances, never authorization.** The backend and database remain authoritative.
 
 ### Source of truth and provenance
 
 - Room, building, floor, availability, approval status, and reservation data must originate from the authoritative API in authenticated mode.
-- The current app also offers demonstration mode. Label it **DEMO DATA** in the global shell and at the final booking result: *"Demo reservation — stored in this browser session only."*
+- The live application requires Supabase authentication and never displays local sample records or simulates a successful save. If the API is unavailable, show an error/unknown state and leave booking actions disabled.
 - If a live availability request fails or is incomplete, show **Availability unavailable / Not verified**; **never** quietly treat that as "Available".
 - A pending reservation is **not a confirmed booking**. Whether pending requests block a particular time slot is a backend business rule, not a color assumption.
 - Capacity values derived from provisional blueprints must be annotated *"Capacity unverified"*; do not invent classroom capacities.
@@ -250,7 +249,7 @@ The UI is a real scheduling tool for faculty, students, coordinators, and admini
 - Dense supporting labels: 13px / 600.
 - Secondary captions: 12px; do not use 9–10px text for essential information.
 - Numeric metric: 28px / 700, with `font-variant-numeric: tabular-nums` for times, counts and capacities.
-- Reserve all-caps micro-labels for a handful of compact nonessential markers (e.g. DEMO DATA), not major navigation or instructions.
+- Reserve all-caps micro-labels for a handful of compact nonessential markers (e.g. ACCOUNT SETTINGS), not major navigation or instructions.
 - Use sentence case: **"Explore rooms"**, **"My bookings"**, **"Approval pending"**.
 - Room IDs are exact identifiers: `IET19`, `IET32`, `LH04`. Never stylistically insert spaces, change casing, or invent labels.
 
@@ -265,7 +264,6 @@ Write like an institutional operations product: informative, concise, action-ori
 | Collision | **IET19 was just booked for this period. Choose another available room or time.** | "Something went wrong" |
 | No match | **No rooms meet the selected capacity and time. Try a smaller capacity or different slot.** | "Zero results!" |
 | Network failure | **Live availability could not be checked. Try again.** | Showing a green room tile |
-| Guest booking | **Demo reservation created locally; it is not stored in university records.** | "Confirmed and saved" |
 
 Use full, descriptive dates where ambiguity matters, e.g. **Thu, 5 Nov · 11:00 AM–12:00 PM IST**. Time input and display must agree with the backend's actual time-zone conversion; do not implicitly reinterpret UTC.
 
@@ -274,9 +272,9 @@ Use full, descriptive dates where ambiguity matters, e.g. **Thu, 5 Nov · 11:00 
 ### Global application shell
 
 - Desktop: sticky **74px top navigation**, no left sidebar. Main content max width **1540px**, responsive horizontal padding up to **38px** on wide screens.
-- Navigation: brand at left, single animated tab group in the center, demo/notification/account utilities at right. The active destination must have a legible cobalt pill and label; hover/focus moves the pill toward the target and restores it on pointer exit.
+- Navigation: brand at left, single animated tab group in the center, notification/account utilities at right. The active destination must have a legible cobalt pill and label; hover/focus moves the pill toward the target and restores it on pointer exit.
 - Navigation destinations: **Overview**, **Explore rooms**, **Calendar**, **My bookings**, **Announcements**, **Admin** (Admin only when role permits).
-- Header: one consolidated top bar; do not render a redundant utility bar or breadcrumb above the campus map. Keep persistent **DEMO** indication for preview data, notices control, and a role-aware account/sign-out menu.
+- Header: one consolidated top bar; do not render a redundant utility bar or breadcrumb above the campus map. Keep the notices control and a role-aware account/sign-out menu; do not render a demo badge.
 - Keep global filters close to the page they affect. Do not repeat giant headers and hero art on every logged-in route.
 - Data cards: 1px border, white background, 14px radius, 20–24px padding, 16–24px gaps.
 - Use a 12-column desktop planning grid, but implement with simple responsive CSS grid as appropriate. Default page rhythm: heading → filters/context → main task content → secondary info.
@@ -335,9 +333,9 @@ Avoid arbitrary absolute widths that break at 320px. On narrow screens, the floo
 - For high-impact actions, use a clear confirmation/review step and show the actual server result.
 - Do not expose all-campus controls to a coordinator whose server scope is narrower.
 
-**Authentication / demo gateway**
+**Authentication gateway**
 - Professional split composition only on wide screens: concise product explanation and clear sign-in/sign-up card.
-- On mobile the sign-in form is primary. Guest demo remains clearly separate from real authentication.
+- On mobile the sign-in form is primary. The main workspace is accessible only after a real Supabase sign-in.
 - Never imply any email domain alone proves university affiliation. Verified faculty/admin privileges come from trusted role provisioning.
 
 ### Spatial/temporal synchronization contract
@@ -380,7 +378,7 @@ Global shared query state (when available): `buildingId`, `floorId`, `roomId`, `
 ### Blueprint-specific contract
 
 - Distinguish verified source geometry from temporary schematic data in the interface.
-- Exact IET and Deeksha labels and floor counts must come from the approved source data. Current demo: IET Ground/First/Second, Deeksha Ground/First.
+- Exact IET and Deeksha labels and floor counts must come from the approved source data. The current building/floor labels are IET Ground/First/Second and Deeksha Ground/First.
 - Preserve the original room IDs (`IET19`, `LH04`, etc.), orientations, doors/corridors/stairs **only where supported by actual traced source**.
 - Proposed target: accessible SVG with viewBox, room groups/polygons, clear focus behavior, semantic IDs, and fallback list/table.
 - Show a north indicator only if orientation is supported; show scale only when validated. A generic orientation icon is not evidence of accuracy.
@@ -436,7 +434,6 @@ Naming is a target **component contract**, not a claim that all these React comp
 | 422 / invalid payload | Field-specific, recoverable error |
 | Successful instant booking | "Reservation confirmed"; reflect persisted server ID |
 | Submitted approval request | "Request sent — approval pending"; no confirmed styling |
-| Guest/demo save | Nonpersistent success explicitly marked "Demo only" |
 | Offline/network unreachable | No false cached availability; clear retry option |
 
 ### Accessibility acceptance contract
@@ -474,8 +471,8 @@ Target **WCAG 2.2 AA** on supported task views:
 - **Tablet**: 1024×768, 768×1024.
 - **Mobile**: 390×844, 375×812, 320×568.
 - **Zoom/keyboard**: 200% zoom; keyboard-only with visible focus; `prefers-reduced-motion`.
-- **Roles**: guest, student, unverified faculty, verified faculty, authorized coordinator, admin.
-- **Data**: demo, empty, loading, API failure, stale response, confirmed booking, pending request, time conflict, unauthorized action.
+- **Roles**: unauthenticated sign-in, student, unverified faculty, verified faculty, authorized coordinator, admin.
+- **Data**: empty, loading, API failure, stale response, confirmed booking, pending request, time conflict, unauthorized action.
 - **Cross-view**: change date/time/capacity → map, list, recommendations and calendar agree; create booking → refresh → persistence and conflict are visible.
 - **Buildings**: IET and Deeksha; each available floor; room label accuracy and explicit schematic warning.
 
@@ -491,7 +488,7 @@ Target **WCAG 2.2 AA** on supported task views:
 | Show source-backed room capacity and geometry | Pretend schematic rectangles are precise blueprints |
 | Display recovery when a booking conflicts | Flash a generic "Error" toast or silently retry as success |
 | Preserve visible, keyboard-operable focus | Depend on hovering small room tiles |
-| Clearly distinguish "demo locally" from "saved live" | Claim guest changes were persisted to Supabase |
+| Require real authorization and verified API saves | Claim a booking was persisted without backend confirmation |
 | Keep UI changes in focused, testable PRs | Replace the existing stack days before submission for appearance alone |
 
 ### Acceptance: the five-second test
@@ -508,7 +505,7 @@ If those answers are not visually obvious, simplify the page before adding embel
 ### Proposed implementation order (without colliding with the active backend work)
 
 1. **P0 — Consistency:** central CSS tokens, shared page heading/filter/input/button/status styles; preserve navigation and existing API behavior.
-2. **P0 — Truth:** consistent confirmed/pending/unknown/demo states; fix misleading availability and booking messages.
+2. **P0 — Truth:** consistent confirmed/pending/unknown states; fix misleading availability and booking messages.
 3. **P0 — Flagship:** refine Explore rooms, inspector, recommendations and map/list switch; protect narrow viewports.
 4. **P0 — Cross-view:** synchronize room and calendar selections, dates and time intervals.
 5. **P1 — Workflow polish:** My bookings, announcements, approval queue, focused accessibility checks.

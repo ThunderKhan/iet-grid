@@ -43,7 +43,7 @@ React/Vite (frontend/)
 - app/modules/notices.py — notices, read receipts and schedule issue reporting
 - app/main.py — application, routes and lifespan
 - main.py — Vercel-recognized entrypoint
-- supabase/migrations/001–010 — schema, security and hackathon P0 approvals/roles
+- supabase/migrations/001–013 — schema, security, role checks and private profile photos
 - tests/ — pure unit tests, mocked API/authorization tests, rollback SQL checks
 
 ## Run locally
@@ -54,9 +54,9 @@ python -m venv .venv
 # Activate the environment (PowerShell: .venv\Scripts\Activate.ps1)
 python -m pip install -r requirements.txt
 # Set environment variables in your shell or IDE:
-# SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-# SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_PUBLISHABLE_KEY
-# CORS_ORIGINS=https://iet-grid.vercel.app,http://localhost:5173
+# SUPABASE_URL=https://cdzvtfahwbvlfnfmbilt.supabase.co
+# SUPABASE_PUBLISHABLE_KEY=sb_publishable_nUrt2zIq7TP7tDcCNwd6vA_bZBejiF3
+# CORS_ORIGINS=http://localhost:5123,http://127.0.0.1:5123
 uvicorn main:app --reload --port 8000
 ~~~
 
