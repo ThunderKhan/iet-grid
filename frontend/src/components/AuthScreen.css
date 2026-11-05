@@ -1,25 +1,25 @@
 /* IET Grid authentication — scoped styles, DESIGN.md palette and accessible controls. */
-.ig-auth-page{--ig-navy:#101B2C;--ig-blue:#315CE5;--ig-canvas:#F6F8FB;--ig-text:#17243B;--ig-muted:#52637B;--ig-line:#DCE4EF;min-height:100dvh;padding:14px;background:var(--ig-canvas);color:var(--ig-text);font-family:Inter,system-ui,sans-serif}
+.ig-auth-page{--ig-navy:var(--ig-navy);--ig-blue:var(--ig-primary);--ig-canvas:var(--ig-canvas);--ig-text:var(--ig-text);--ig-muted:var(--ig-muted);--ig-line:var(--ig-border);min-height:100dvh;padding:14px;background:var(--ig-canvas);color:var(--ig-text);font-family:Inter,system-ui,sans-serif}
 .ig-auth-page *{box-sizing:border-box}
 .ig-auth-layout{display:grid;grid-template-columns:minmax(0,0.96fr) minmax(0,1.04fr);gap:16px;min-height:calc(100dvh - 28px)}
 .ig-auth-form-panel{display:flex;min-width:0;border:1px solid #D4DFEC;border-radius:16px;background:#fff;padding:clamp(28px,5.1vw,76px) clamp(24px,5.7vw,88px);align-items:center}
 .ig-auth-form-content{width:100%;max-width:520px;margin:0 auto}
 .ig-auth-brand{display:flex;gap:12px;align-items:center;margin-bottom:clamp(12px,2.3vh,25px)}
 .ig-auth-brand-mark{display:grid;place-items:center;width:44px;height:44px;flex-shrink:0;background:var(--ig-blue);color:#fff;border-radius:11px;box-shadow:0 8px 18px #315ce527}
-.ig-auth-brand strong{font-size:18px;line-height:1.2;letter-spacing:-.04em;display:block;color:#17243B}
-.ig-auth-brand span{font-size:12px;display:block;margin-top:4px;color:#52637B}
+.ig-auth-brand strong{font-size:18px;line-height:1.2;letter-spacing:-.04em;display:block;color:var(--ig-text)}
+.ig-auth-brand span{font-size:12px;display:block;margin-top:4px;color:var(--ig-muted)}
 .ig-auth-heading{margin-bottom:clamp(12px,2.1vh,20px)}
-.ig-auth-eyebrow{display:block;font-size:10px;letter-spacing:.115em;font-weight:800;color:#315CE5;margin-bottom:10px}
-.ig-auth-heading h1{font-size:clamp(32px,3.1vw,46px);font-weight:650;letter-spacing:-.045em;line-height:1.08;margin:0 0 12px;color:#101B2C}
-.ig-auth-heading p{font-size:clamp(15px,1.4vw,18px);color:#52637B;line-height:1.5;margin:0}
+.ig-auth-eyebrow{display:block;font-size:12px;letter-spacing:.115em;font-weight:800;color:var(--ig-primary);margin-bottom:10px}
+.ig-auth-heading h1{font-size:clamp(32px,3.1vw,46px);font-weight:650;letter-spacing:-.045em;line-height:1.08;margin:0 0 12px;color:var(--ig-navy)}
+.ig-auth-heading p{font-size:clamp(15px,1.4vw,18px);color:var(--ig-muted);line-height:1.5;margin:0}
 .ig-auth-socials{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:0}
 .ig-auth-socials:has(>button:nth-child(2)){grid-template-columns:repeat(2,minmax(0,1fr))}
-.ig-auth-social{min-width:0;min-height:48px;display:flex;gap:10px;align-items:center;justify-content:center;padding:9px 12px;border-radius:10px;border:1px solid #B9C7DA;background:#fff;color:#17243B;font-size:13px;font-weight:600;transition:background .15s,border-color .15s}
-.ig-auth-social:hover:not(:disabled){background:#F6F8FB;border-color:#8DA2BD}
+.ig-auth-social{min-width:0;min-height:48px;display:flex;gap:10px;align-items:center;justify-content:center;padding:9px 12px;border-radius:10px;border:1px solid #B9C7DA;background:#fff;color:var(--ig-text);font-size:13px;font-weight:600;transition:background .15s,border-color .15s}
+.ig-auth-social:hover:not(:disabled){background:var(--ig-canvas);border-color:#8DA2BD}
 .ig-auth-social:disabled{opacity:.58}
 .ig-auth-social span{white-space:normal;text-align:center}
 .ig-auth-divider{display:flex;align-items:center;gap:12px;color:#62748A;font-size:12px;margin:12px 0}
-.ig-auth-divider:before,.ig-auth-divider:after{content:"";height:1px;background:#DCE4EF;flex:1}
+.ig-auth-divider:before,.ig-auth-divider:after{content:"";height:1px;background:var(--ig-border);flex:1}
 .ig-auth-divider span{white-space:nowrap}
 .ig-auth-form{display:grid;gap:12px}
 .ig-auth-name-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
@@ -27,28 +27,28 @@
 .ig-auth-field>label{font-size:13px;font-weight:600;color:#344662}
 .ig-auth-input-wrap{position:relative;display:flex;align-items:center;border:1px solid #B9C7DA;background:#fff;border-radius:10px;min-height:48px;transition:border-color .16s,box-shadow .16s}
 .ig-auth-input-wrap:hover{border-color:#879CB8}
-.ig-auth-input-wrap:focus-within{border-color:#315CE5;box-shadow:0 0 0 3px #315CE526}
-.ig-auth-input-wrap input{width:100%;min-width:0;min-height:46px;border:0;outline:0!important;background:transparent;font-size:15px;line-height:1.35;color:#17243B;padding:12px 15px}
-.ig-auth-input-wrap input::placeholder{color:#8593A6;opacity:1}
+.ig-auth-input-wrap:focus-within{border-color:var(--ig-primary);box-shadow:0 0 0 3px #315CE526}
+.ig-auth-input-wrap input{width:100%;min-width:0;min-height:46px;border:0;outline:0!important;background:transparent;font-size:15px;line-height:1.35;color:var(--ig-text);padding:12px 15px}
+.ig-auth-input-wrap input::placeholder{color:var(--ig-muted);opacity:1}
 .ig-auth-input-wrap input:focus-visible{outline:0!important}
 .ig-auth-show-password{flex-shrink:0;display:grid;place-items:center;background:transparent;color:#536782;width:42px;height:42px;margin-right:4px;border:0;border-radius:7px}
-.ig-auth-show-password:hover{background:#EEF2F8;color:#17243B}
+.ig-auth-show-password:hover{background:#EEF2F8;color:var(--ig-text)}
 .ig-auth-forgot{display:flex;justify-content:flex-end;margin-top:-5px}
-.ig-auth-forgot button,.ig-auth-switch button{background:none;border:0;padding:3px;color:#254ECC;font-size:13px;font-weight:650}
+.ig-auth-forgot button,.ig-auth-switch button{background:none;border:0;padding:3px;color:var(--ig-primary-hover);font-size:13px;font-weight:650}
 .ig-auth-forgot button:hover,.ig-auth-switch button:hover{text-decoration:underline;text-underline-offset:3px}
 .ig-auth-feedback{display:flex;align-items:flex-start;gap:10px;border-radius:10px;padding:12px 13px;line-height:1.5;font-size:13px}
 .ig-auth-feedback svg{flex-shrink:0;margin-top:1px}
 .ig-auth-feedback.success{color:#186546;background:#E8F6EF;border:1px solid #BEDFCD}
 .ig-auth-feedback.error{color:#9C2430;background:#FDECEF;border:1px solid #F2C8D0}
 .ig-auth-feedback.warning{color:#8D5B12;background:#FFF3D8;border:1px solid #EAD6AA}
-.ig-auth-submit{width:100%;min-height:48px;display:flex;justify-content:center;align-items:center;gap:12px;border:1px solid #254ECC;border-radius:10px;background:#315CE5;color:#fff;font-size:15px;font-weight:650;margin-top:3px;transition:background .15s,transform .15s}
-.ig-auth-submit:hover:not(:disabled){background:#254ECC}
+.ig-auth-submit{width:100%;min-height:48px;display:flex;justify-content:center;align-items:center;gap:12px;border:1px solid var(--ig-primary-hover);border-radius:10px;background:var(--ig-primary);color:#fff;font-size:15px;font-weight:650;margin-top:3px;transition:background .15s,transform .15s}
+.ig-auth-submit:hover:not(:disabled){background:var(--ig-primary-hover)}
 .ig-auth-submit:disabled{opacity:.65;cursor:not-allowed}
-.ig-auth-switch{font-size:13px;text-align:center;color:#52637B;margin:15px 0 0;line-height:1.5}
+.ig-auth-switch{font-size:13px;text-align:center;color:var(--ig-muted);margin:15px 0 0;line-height:1.5}
 .ig-auth-page button:focus-visible{outline:3px solid #9FB5FD;outline-offset:3px}
-.ig-auth-page a:focus-visible{outline:3px solid #315CE5;outline-offset:3px}
+.ig-auth-page a:focus-visible{outline:3px solid var(--ig-primary);outline-offset:3px}
 .ig-auth-art-panel{position:relative;isolation:isolate;display:flex;min-width:0;overflow:hidden;border-radius:16px;background:#07162C;color:#fff;min-height:640px}
-.ig-auth-art-fallback{position:absolute;inset:-12%;background:radial-gradient(ellipse at 90% 8%,#6184E8 0%,#315CE5 19%,transparent 54%),radial-gradient(ellipse at 5% 100%,#2349A6 0%,transparent 56%),#07162C;z-index:-2;animation:ig-auth-background-drift 16s ease-in-out infinite alternate;will-change:transform}
+.ig-auth-art-fallback{position:absolute;inset:-12%;background:radial-gradient(ellipse at 90% 8%,#6184E8 0%,var(--ig-primary) 19%,transparent 54%),radial-gradient(ellipse at 5% 100%,#2349A6 0%,transparent 56%),#07162C;z-index:-2;animation:ig-auth-background-drift 16s ease-in-out infinite alternate;will-change:transform}
 .ig-auth-shader{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;opacity:1;z-index:-1;pointer-events:none}
 .ig-auth-art-veil{position:absolute;inset:0;z-index:0;background:linear-gradient(135deg,#07162C44 0%,#07162C30 52%,#07162C52 100%);pointer-events:none}
 .ig-auth-art-content{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;flex:1;min-width:0;gap:28px;padding:clamp(26px,3.5vw,52px)}
@@ -87,7 +87,7 @@
     min-height:100dvh;height:auto;overflow:visible;
     padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right))
       max(18px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));
-    background:linear-gradient(168deg,#101B2C 0px,#223E76 160px,#F6F8FB 160px,#F6F8FB 100%);
+    background:linear-gradient(168deg,var(--ig-navy) 0px,#223E76 160px,var(--ig-canvas) 160px,var(--ig-canvas) 100%);
   }
   .ig-auth-layout{display:block;max-width:590px;width:100%;min-height:0;margin:0 auto}
   .ig-auth-form-panel{
@@ -98,7 +98,7 @@
   }
   .ig-auth-form-panel::before{
     content:"";position:absolute;top:0;left:0;right:0;height:4px;
-    background:linear-gradient(90deg,#315CE5,#80A3FF);
+    background:linear-gradient(90deg,var(--ig-primary),#80A3FF);
   }
   .ig-auth-form-content{width:100%;max-width:500px;min-width:0;margin:auto}
   .ig-auth-art-panel{display:none}
@@ -106,7 +106,7 @@
   .ig-auth-heading{margin-bottom:24px}
   .ig-auth-heading h1{font-size:clamp(31px,5vw,42px)}
   .ig-auth-heading p{font-size:16px;line-height:1.5}
-  .ig-auth-eyebrow{font-size:10px;line-height:1.5;white-space:normal}
+  .ig-auth-eyebrow{font-size:12px;line-height:1.5;white-space:normal}
   .ig-auth-form{gap:15px}
   .ig-auth-field>label{font-size:13px}
   .ig-auth-input-wrap{min-height:52px}
@@ -121,7 +121,7 @@
   .ig-auth-page{
     padding:max(14px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right))
       max(14px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
-    background:linear-gradient(180deg,#101B2C 0px,#25437B 132px,#F6F8FB 132px,#F6F8FB 100%);
+    background:linear-gradient(180deg,var(--ig-navy) 0px,#25437B 132px,var(--ig-canvas) 132px,var(--ig-canvas) 100%);
   }
   .ig-auth-form-panel{
     min-height:calc(100svh - 28px);
@@ -131,8 +131,8 @@
   .ig-auth-brand{margin-bottom:24px;gap:11px}
   .ig-auth-brand-mark{width:42px;height:42px;border-radius:11px}
   .ig-auth-brand strong{font-size:17px}
-  .ig-auth-brand span{font-size:11px}
-  .ig-auth-eyebrow{font-size:9px;line-height:1.55;letter-spacing:.08em;margin-bottom:10px}
+  .ig-auth-brand span{font-size:12px}
+  .ig-auth-eyebrow{font-size:12px;line-height:1.55;letter-spacing:.08em;margin-bottom:10px}
   .ig-auth-heading{margin-bottom:22px}
   .ig-auth-heading h1{font-size:clamp(30px,8vw,36px);line-height:1.1;letter-spacing:-.035em;margin-bottom:10px}
   .ig-auth-heading p{font-size:14px;line-height:1.5}

@@ -1,19 +1,16 @@
 /* Authenticated app shell. Token values match repository-root DESIGN.md.
    Imported after legacy styles while the workspace is migrated to independent pages. */
 .app-shell{
-  --ig-primary:#315CE5;--ig-primary-hover:#254ECC;--ig-navy:#101B2C;
-  --ig-canvas:#F6F8FB;--ig-surface:#FFFFFF;--ig-border:#DCE4EF;
-  --ig-text:#17243B;--ig-muted:#52637B;--ig-available:#187A55;
-  --ig-occupied:#B42332;--ig-pending:#8D5B12;--ig-unknown:#58677D;
-  display:flex;flex-direction:column;min-height:100dvh;background:var(--ig-canvas);color:var(--ig-text);
+  display:flex;flex-direction:column;min-height:100dvh;
+  background:var(--ig-canvas);color:var(--ig-text);
 }
 .app-shell .workarea{min-width:0;flex:1;display:flex;flex-direction:column;width:100%}
 .app-shell .main-content{flex:1;max-width:1540px;width:100%;margin:0 auto;padding:clamp(20px,2.7vw,36px) clamp(17px,2.7vw,38px) 65px}
 .app-shell .page-intro{display:flex;align-items:center;justify-content:space-between;gap:17px;margin-bottom:24px}
-.app-shell .page-intro .eyebrow{font-size:10px;color:#6680A8;letter-spacing:.12em;margin-bottom:7px}
+.app-shell .page-intro .eyebrow{font-size:12px;color:#52637B;letter-spacing:.12em;margin-bottom:7px}
 .app-shell .page-intro h1{font-size:clamp(24px,2.25vw,34px);font-weight:730;color:#182D49;letter-spacing:-.045em;line-height:1.16;margin-bottom:8px}
-.app-shell .page-intro p{font-size:13px;line-height:1.6;color:#667B94;max-width:650px}
-.app-shell .intro-actions .button-primary,.app-shell .intro-actions .button-outline{display:flex;align-items:center;justify-content:center;gap:8px;background:#315CE5;border-color:#315CE5;color:#fff;border-radius:9px;font-size:12px;font-weight:700;padding:12px 17px;min-height:42px}
+.app-shell .page-intro p{font-size:13px;line-height:1.6;color:#52637B;max-width:650px}
+.app-shell .intro-actions .button-primary,.app-shell .intro-actions .button-outline{display:flex;align-items:center;justify-content:center;gap:8px;background:#315CE5;border-color:#315CE5;color:#fff;border-radius:9px;font-size:13px;font-weight:700;padding:12px 17px;min-height:42px}
 .app-shell .intro-actions .button-outline:hover{background:#254ECC;color:#fff}
 .app-shell .intro-actions .button-primary:hover{background:#254ECC}
 .app-shell button:focus-visible,.app-shell a:focus-visible,.app-shell input:focus-visible,.app-shell select:focus-visible,.app-shell textarea:focus-visible{outline:3px solid #A1B9FF;outline-offset:2px}
@@ -23,17 +20,17 @@
 .app-shell .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:16px}
 .app-shell .modal-head h2{font-size:23px;color:#1B3453;margin:4px 0;letter-spacing:-.03em}
 .app-shell .modal-head button{display:grid;place-items:center;width:36px;height:36px;border-radius:8px;background:#F0F4F9;color:#405C7B}
-.app-shell .modal .muted{font-size:13px;color:#667A91;line-height:1.6}
+.app-shell .modal .muted{font-size:13px;color:#52637B;line-height:1.6}
 .app-shell .booking-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:13px 0}
 .app-shell .booking-summary>div{display:flex;flex-direction:column;gap:6px;border:1px solid #DDE6F2;border-radius:9px;padding:12px;background:#F7F9FD;min-width:0}
-.app-shell .booking-summary small{font-size:9px;font-weight:800;color:#6B7C91;letter-spacing:.06em}
+.app-shell .booking-summary small{font-size:12px;font-weight:800;color:#52637B;letter-spacing:.06em}
 .app-shell .booking-summary b{color:#223B58;font-size:12px;overflow-wrap:anywhere}
-.app-shell .field-label{display:grid;gap:7px;font-size:12px;font-weight:700;color:#405671;margin:14px 0}
+.app-shell .field-label{display:grid;gap:7px;font-size:13px;font-weight:700;color:#405671;margin:14px 0}
 .app-shell .field-label input,.app-shell .field-label select,.app-shell .field-label textarea{width:100%;min-height:43px;border:1px solid #C8D6E7;border-radius:9px;padding:10px 11px;background:#fff;color:#203851;font-size:13px}
 .app-shell .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin:20px 0 0}
 .app-shell .modal-actions .button-primary,.app-shell .modal-actions .button-outline{width:auto;min-height:43px;border-radius:9px}
 .app-shell .modal-actions .button-primary{background:#315CE5;color:#fff}.app-shell .modal-actions .button-outline{background:#fff;border:1px solid #C9D7E7;color:#385170}
-.app-shell .tiny{font-size:11px;line-height:1.55;color:#75869B}
+.app-shell .tiny{font-size:12px;line-height:1.55;color:#52637B}
 .app-shell .toast{position:fixed;bottom:22px;right:22px;z-index:150;display:flex;gap:10px;align-items:center;background:#152A47;color:#fff;border:1px solid #31486B;border-radius:12px;box-shadow:0 10px 35px #10213C50;padding:14px 18px;max-width:min(430px,calc(100vw - 26px));font-size:13px;line-height:1.5}
 .app-shell .toast button{margin-left:auto;color:#C9D7EE}
 @media(max-width:900px){

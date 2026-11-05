@@ -1,18 +1,18 @@
 /* Error fallback: same navy / cobalt / canvas palette as DESIGN.md. */
-.ig-app-error{min-height:100dvh;background:#F6F8FB;color:#17243B;
+.ig-app-error{min-height:100dvh;background:var(--ig-canvas);color:var(--ig-text);
   display:flex;align-items:center;justify-content:center;padding:24px;font-family:Inter,system-ui,sans-serif}
 .ig-app-error *{box-sizing:border-box}
-.ig-app-error-card{width:100%;max-width:520px;background:#fff;border:1px solid #DCE4EF;
+.ig-app-error-card{width:100%;max-width:520px;background:#fff;border:1px solid var(--ig-border);
   border-radius:16px;padding:clamp(24px,4vw,42px);box-shadow:0 12px 34px #101B2C0A}
 .ig-app-error-icon{display:grid;place-items:center;width:48px;height:48px;
   border-radius:12px;background:#FFF1F2;color:#A92E3B;margin-bottom:20px}
-.ig-app-error-kicker{font-size:11px;font-weight:800;letter-spacing:.12em;color:#657894}
+.ig-app-error-kicker{font-size:12px;font-weight:800;letter-spacing:.12em;color:#657894}
 .ig-app-error h1{font-size:clamp(23px,3vw,29px);line-height:1.22;
-  letter-spacing:-.035em;color:#101B2C;margin:11px 0 12px}
+  letter-spacing:-.035em;color:var(--ig-navy);margin:11px 0 12px}
 .ig-app-error p{font-size:14px;line-height:1.7;color:#60708A;margin:0 0 23px}
 .ig-app-error button{display:inline-flex;align-items:center;justify-content:center;
   gap:9px;min-height:44px;padding:11px 18px;border:0;border-radius:9px;
-  background:#315CE5;color:#fff;font-size:13px;font-weight:750;cursor:pointer}
+  background:var(--ig-primary);color:#fff;font-size:13px;font-weight:750;cursor:pointer}
 .ig-app-error button:hover{background:#244FCC}
 .ig-app-error button:focus-visible{outline:3px solid #A7BDFF;outline-offset:3px}
 .ig-app-error small{display:block;color:#74839A;line-height:1.6;margin-top:20px}
