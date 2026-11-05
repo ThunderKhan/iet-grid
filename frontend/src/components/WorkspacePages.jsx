@@ -35,7 +35,7 @@ function MiniRoom({room,isAvailable,onClick,selected}) {
     <span className="ig-mini-room-id">{room.id}</span><small>{room.capacity}{room.verified?'':'*'} seats</small><span className={'ig-mini-indicator '+status}>{good?'Free':'Check'}</span>
   </button>;
 }
-export function OverviewPage({rooms,bookings,notices,matching,buildings,selected,setSelected,setBuilding,setFloor,setView,demo,apiAvailability,isAvailable,canBook}) {
+export function OverviewPage({rooms,bookings,notices,matching,buildings,selected,setSelected,setBuilding,setFloor,setView,demo,apiAvailability,isAvailable,canBook,date,hour,duration}) {
   const sample=rooms.filter(r=>r.building==='IET'&&r.floor==='First').slice(0,6);
   const availableCount=demo?rooms.filter(r=>isAvailable(r)).length:
     apiAvailability?rooms.filter(r=>isAvailable(r)).length:null;
@@ -43,7 +43,7 @@ export function OverviewPage({rooms,bookings,notices,matching,buildings,selected
   const metrics=[
     {label:'Campus buildings',value:buildings.length,caption:'IET + Deeksha Bhawan',icon:Building2},
     {label:'Mapped rooms',value:rooms.length,caption:'Across 5 campus floors',icon:DoorOpen},
-    {label:'Availability checked',value:availableCount===null?'—':availableCount,caption:availableCount===null?'Live verification unavailable':'Free for your selected slot',icon:CheckCircle2},
+    {label:'Availability checked',value:availableCount===null?'—':availableCount,caption:availableCount===null?'Live verification unavailable':('For '+date+' · '+String(hour).padStart(2,'0')+':00 IST'),icon:CheckCircle2},
     {label:'Upcoming activity',value:upcoming.length,caption:'Reservations in the visible feed',icon:CalendarDays}
   ];
   const openRoom=(room)=>{setBuilding(room.building);setFloor(room.floor);setSelected(room.id);setView('Explore rooms')};

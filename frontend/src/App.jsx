@@ -182,8 +182,8 @@ async function doBook(){
  try{
   if(demo){
    setBookings(prev=>[...prev,{id:'local-'+Date.now(),room_id:current.id,title,
-    starts_at:start,ends_at:end,status:'confirmed',kind:bookingKind}]);
-   alert('Demo reservation added locally. Not saved to the university database.');
+    starts_at:start,ends_at:end,status:['exam','event'].includes(bookingKind)?'pending':'confirmed',kind:bookingKind}]);
+   alert(['exam','event'].includes(bookingKind)?'Demo request pending approval (local only). Not saved to university records.':'Demo reservation added locally. Not saved to university records.');
   }else{
    const result=await apiFetch('/api/v1/bookings',{method:'POST',body:JSON.stringify({
      room_id:current.id,title,starts_at:start,ends_at:end,kind:bookingKind,required_capacity:capacity,
@@ -269,7 +269,7 @@ return <div className="app-shell"><aside className={'sidebar '+(mobile?'mobile-o
   {view==='Overview'&&<OverviewPage rooms={rooms} bookings={bookings} notices={notices}
     matching={matching} buildings={buildings} selected={selected} setSelected={setSelected}
     setBuilding={setBuilding} setFloor={setFloor} setView={setView} demo={demo}
-    apiAvailability={apiAvailability} isAvailable={isAvailable} canBook={canBook}/>}
+    apiAvailability={apiAvailability} isAvailable={isAvailable} canBook={canBook} date={date} hour={hour} duration={duration}/>}
   {view==='Explore rooms'&&<ExplorePage buildings={buildings} rooms={rooms} building={building}
     setBuilding={setBuilding} floor={floor} setFloor={setFloor} selected={selected} setSelected={setSelected}
     date={date} setDate={setDate} hour={hour} setHour={setHour} duration={duration}
