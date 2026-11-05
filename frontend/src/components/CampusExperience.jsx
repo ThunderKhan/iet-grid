@@ -29,7 +29,7 @@ export default function CampusExperience({
   buildings,rooms,building,setBuilding,floor,setFloor,selected,setSelected,
   date,setDate,hour,setHour,duration,setDuration,capacity,setCapacity,
   bookingKind,setBookingKind,requiredEquipment,setRequiredEquipment,
-  apiAvailability,apiWarning,isAvailable,matching,current,canBook,inventoryLoading=false,onRetry=()=>{},
+  apiAvailability,apiWarning,isAvailable,matching,current,canBook,inventoryLoading=false,onRetryAvailability=()=>{},onRetryRooms=()=>{},
   setShowBooking,setView,selectedCohortLabel,
   activeSessions={},nowScheduleState='loading',currentTimeMs=Date.now()
 }) {
@@ -117,13 +117,13 @@ export default function CampusExperience({
     {apiWarning&&<div className="cx-warning" role="alert">
       <Info size={17} aria-hidden="true"/>
       <span><strong>Availability unavailable</strong>{apiWarning}</span>
-      <button type="button" onClick={onRetry}>Retry check</button>
+      <button type="button" onClick={onRetryAvailability}>Retry check</button>
     </div>}
     {!inventoryLoading&&rooms.length===0&&<div className="cx-no-inventory" role="status">
       <Info size={17} aria-hidden="true"/>
       <span><strong>No campus classrooms are visible.</strong>
         The room inventory may be empty or your account may not have access.</span>
-      <button type="button" onClick={onRetry}>Reload rooms</button>
+      <button type="button" onClick={onRetryRooms}>Reload rooms</button>
     </div>}
     {inventoryLoading&&<div className="cx-loading" role="status">
       <span className="cx-loading-indicator" aria-hidden="true"/> Loading campus classrooms from the university database…

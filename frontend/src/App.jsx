@@ -400,7 +400,8 @@ return <div className="app-shell">
     requiredEquipment={requiredEquipment} setRequiredEquipment={setRequiredEquipment}
     apiAvailability={apiAvailability} apiWarning={apiWarning} isAvailable={isAvailable}
     matching={matching} current={current} canBook={canBook} inventoryLoading={inventoryLoading}
-    onRetry={()=>{setInventoryRetry(n=>n+1);setRefreshTick(n=>n+1)}}
+    onRetryAvailability={()=>setRefreshTick(n=>n+1)}
+    onRetryRooms={()=>setInventoryRetry(n=>n+1)}
     setShowBooking={setShowBooking} setView={setView}
     activeSessions={activeSessions} nowScheduleState={nowScheduleState} currentTimeMs={currentTimeMs}/>}
   {view==='Calendar'&&<CalendarPage date={date} setDate={setDate} initialDate={initialDate}
