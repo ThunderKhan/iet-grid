@@ -1,0 +1,22 @@
+# Node/Vite
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+.vite/
+coverage/
+*.log
+
+# Local credentials (retain examples)
+.env
+.env.*
+!.env.example
+!frontend/.env.example
+.vercel/
+frontend/.vercel/
+
+# OS/editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
