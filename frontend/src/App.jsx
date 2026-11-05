@@ -424,7 +424,7 @@ return <div className="app-shell">
   room={current} date={date} hour={hour} duration={duration}
   bookingTitle={bookingTitle} setBookingTitle={setBookingTitle}
   bookingKind={bookingKind} setBookingKind={setBookingKind}
-  cohorts={availableCohorts} cohortId={cohortId} setCohortId={setCohortId}
+  cohorts={cohorts} cohortId={cohortId} setCohortId={setCohortId}
   cohortError={cohortError} loading={loading} canBook={canBook}
   available={!!current&&isAvailable(current)&&current.capacity>=capacity}
   onConfirm={doBook}/>
