@@ -38,3 +38,7 @@
 ## Submission honesty rule
 
 Do not describe an unimported dataset, untested backend flow, precisely traced blueprint or unimplemented AI timetable optimizer as complete. Judges should be able to distinguish current evidence from roadmap items.
+
+## P1 implementation update
+
+Recommendation results now distinguish verified/provisional capacities, missing equipment, approval-required outcomes and relative fit scores. Booking equipment requirements are revalidated and preserved atomically. Database booking history is exposed through a building-scoped administrator/coordinator API and a read-only dashboard. Tests passed; latest Vercel deploy is blocked by daily deployment limit. Details: [P1_RECOMMENDATIONS_AND_AUDIT.md](P1_RECOMMENDATIONS_AND_AUDIT.md).

@@ -64,3 +64,7 @@ IET Grid lets authorized university staff discover, schedule and reserve suitabl
 - Keep [REQUIREMENTS_TRACEABILITY.md](REQUIREMENTS_TRACEABILITY.md) and [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) current as tasks are validated.
 - Mark any discrepancy between the problem statement, blueprint and supplied CSV explicitly.
 - A feature is called **verified** only after its acceptance test has been executed and recorded.
+
+## Hackathon P1 implementation
+
+[Recommendations, metadata accuracy and administrator audit history](P1_RECOMMENDATIONS_AND_AUDIT.md) documents migrations 011–012, database scope rules, honest metadata labeling, automated verification and the Vercel daily deployment limit.

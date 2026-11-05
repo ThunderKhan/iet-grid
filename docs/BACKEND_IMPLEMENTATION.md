@@ -134,3 +134,7 @@ Admin pending exam/event Approve/Reject UI, priority notices and read receipts, 
 **44 automated pytest tests passed** and the dedicated database passed a rollback-only multi-role provisioning → pending exam → admin approval → automatic notice → student receipt scenario. The test left no real accounts, bookings or notices.
 
 The [live P0 acceptance checklist](HACKATHON_P0_ACCEPTANCE.md) explains the final browser test with independently registered and confirmed faculty/student test identities. Real multi-account login acceptance is not yet verified. Academic dataset import remains deferred because no official file was provided.
+
+## P1 completion (5 Nov 2026)
+
+[Recommendation metadata and audit implementation](P1_RECOMMENDATIONS_AND_AUDIT.md) introduces migrations 011–012 and the administrator audit route. PostgreSQL checks and rollback tests passed; the code and frontend pass CI. The newest commit could not be deployed to Vercel because of the platform's daily Free-tier deployment limit (HTTP 402). Avoid calling these newest UI changes live until a production deployment succeeds.

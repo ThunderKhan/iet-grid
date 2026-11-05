@@ -79,3 +79,11 @@ Admin pending exam/event Approve/Reject UI, priority notices and read receipts, 
 **44 automated pytest tests passed** and the dedicated database passed a rollback-only multi-role provisioning → pending exam → admin approval → automatic notice → student receipt scenario. The test left no real accounts, bookings or notices.
 
 The [live P0 acceptance checklist](HACKATHON_P0_ACCEPTANCE.md) explains the final browser test with independently registered and confirmed faculty/student test identities. Real multi-account login acceptance is not yet verified. Academic dataset import remains deferred because no official file was provided.
+
+## P1 recommendation and audit evidence
+
+- 52 backend tests: **PASS** (GitHub Actions).
+- Vite production build + page-render smoke tests for all six pages: **PASS** (GitHub Actions).
+- Rollback-only SQL test [sql_p1_recommendation_audit.sql](../backend/tests/integration/sql_p1_recommendation_audit.sql): **PASS**, including equipment filtering/idempotency, restricted room approval and building-scoped audit.
+- Human browser acceptance of P1 changes: **NOT VERIFIED**; Vercel deployment quota HTTP 402 prevents release of the newest code at present.
+- See [P1 implementation record](P1_RECOMMENDATIONS_AND_AUDIT.md).

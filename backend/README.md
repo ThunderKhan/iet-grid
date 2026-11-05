@@ -136,3 +136,7 @@ Admin pending exam/event Approve/Reject UI, priority notices and read receipts, 
 **44 automated pytest tests passed** and the dedicated database passed a rollback-only multi-role provisioning → pending exam → admin approval → automatic notice → student receipt scenario. The test left no real accounts, bookings or notices.
 
 The [live P0 acceptance checklist](../docs/HACKATHON_P0_ACCEPTANCE.md) explains the final browser test with independently registered and confirmed faculty/student test identities. Real multi-account login acceptance is not yet verified. Academic dataset import remains deferred because no official file was provided.
+
+## Hackathon P1: verified room eligibility and audit records
+
+[Detailed delivery and evidence](../docs/P1_RECOMMENDATIONS_AND_AUDIT.md). Migrations **011–012** add scoped audit history, transactional equipment matching, and saved booking requirements. API: `GET /api/v1/admin/audit` and `POST /api/v1/bookings` with `required_equipment`. Existing official room records remain unchanged; unverified metadata is labeled provisional. **52 backend tests passed**; P1 SQL rollback integration passed. Vercel currently has a daily deployment-quota error, so newest code has not been verified at the production URL.
