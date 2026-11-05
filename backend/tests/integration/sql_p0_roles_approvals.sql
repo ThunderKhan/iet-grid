@@ -16,10 +16,8 @@ DO $bootstrap$
 BEGIN
  PERFORM public.provision_campus_user('f3de820c-1968-4c81-bd98-a45f21b1a83e','faculty',true);
  PERFORM public.provision_campus_user('9efb03d9-2ca2-485b-9264-9a28090aca01','student',true);
- IF NOT EXISTS(SELECT 1 FROM public.profiles WHERE id='f3de820c-1968-4c81-bd98-a45f21b1a83e' AND role='faculty' AND verified)
- THEN RAISE EXCEPTION 'FAIL faculty provision'; END IF;
- IF NOT EXISTS(SELECT 1 FROM public.profiles WHERE id='9efb03d9-2ca2-485b-9264-9a28090aca01' AND role='student' AND verified)
- THEN RAISE EXCEPTION 'FAIL student provision'; END IF;
+ -- Self-only profiles RLS intentionally hides faculty/student rows from admin.
+ -- Confirm each role under that user's simulated session below.
  BEGIN
    PERFORM public.provision_campus_user('324661e2-2fc6-4aa1-9528-41c22cefe78b','faculty',true);
    RAISE EXCEPTION 'FAIL unconfirmed account promoted';
@@ -33,6 +31,8 @@ DECLARE
   d timestamptz:=date_trunc('hour',now())+interval '3 days';
   v_id uuid;
 BEGIN
+ IF NOT EXISTS(SELECT 1 FROM public.profiles WHERE id=auth.uid() AND role='faculty' AND verified)
+ THEN RAISE EXCEPTION 'FAIL faculty did not receive verified role'; END IF;
  v_id:=public.request_room_booking('IET19','P0 minor examination',d,d+interval '1 hour',
   'exam',75,gen_random_uuid(),null);
  IF (SELECT status FROM public.bookings WHERE id=v_id)<>'pending' THEN
@@ -53,6 +53,8 @@ END $faculty$;
 SELECT set_config('request.jwt.claim.sub','9efb03d9-2ca2-485b-9264-9a28090aca01',true);
 DO $student$
 BEGIN
+ IF NOT EXISTS(SELECT 1 FROM public.profiles WHERE id=auth.uid() AND role='student' AND verified)
+ THEN RAISE EXCEPTION 'FAIL student role'; END IF;
  BEGIN
    PERFORM public.request_room_booking('IET18','Illegal student booking',
      date_trunc('hour',now())+interval '3 days',date_trunc('hour',now())+interval '3 days 1 hour',
