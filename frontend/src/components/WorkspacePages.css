@@ -126,3 +126,27 @@
 @media(max-width:720px){.ig-explore-inspector>.ig-inspector-card{display:none}}
 @media(min-width:721px){.ig-room-sheet-overlay,.ig-room-sheet{display:none}}
 @media(prefers-reduced-motion:reduce){.ig-room-sheet-overlay{animation:none}}
+
+
+/* P1: provenance-aware room recommendations and admin audit evidence */
+.ig-metadata-summary{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:#566e8e;background:#f5f8fc;border:1px solid #dce5f2;border-radius:10px;padding:12px 15px;line-height:1.6}
+.ig-metadata-summary svg{flex-shrink:0;margin-top:2px}
+.ig-metadata-badges{display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 12px}
+.ig-metadata-verified,.ig-metadata-provisional,.ig-metadata-review{font-size:10px;font-weight:700;border-radius:100px;padding:5px 9px}
+.ig-metadata-verified{color:#1b7753;background:#e8f7ef}
+.ig-metadata-provisional{color:#926722;background:#fff4dd}
+.ig-metadata-review{color:#82561e;background:#fff0da}
+.ig-alternative-meta small+small{margin-top:4px;color:#987241}
+.ig-audit-card{display:grid;gap:16px}
+.ig-audit-filters{display:flex;gap:14px;align-items:end;flex-wrap:wrap}
+.ig-audit-filters label{display:grid;gap:7px;color:#59718e;font-size:12px;font-weight:650;min-width:150px}
+.ig-audit-filters input,.ig-audit-filters select{border:1px solid #dae4ef;border-radius:8px;min-height:39px;background:#fff;padding:8px 10px;color:#203855;outline-offset:2px}
+.ig-audit-scroll{overflow:auto;border:1px solid #e1e8f1;border-radius:10px}
+.ig-audit-table{width:100%;min-width:690px;border-collapse:collapse;font-size:12px}
+.ig-audit-table th{text-align:left;background:#f4f7fb;color:#607493;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:13px 11px}
+.ig-audit-table td{padding:13px 11px;vertical-align:middle;border-top:1px solid #e7edf5;color:#344c69;overflow-wrap:anywhere}
+.ig-audit-table td small{display:block;margin-top:5px;color:#7d90a6;font-size:10px}
+.ig-audit-table td b{display:block;color:#234260}
+.ig-audit-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;color:#788ca5;font-size:11px}
+.ig-audit-footer>div{display:flex;gap:8px}
+@media(max-width:720px){.ig-audit-card{padding:15px}.ig-audit-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ig-audit-filters label{min-width:0}.ig-audit-footer>div{width:100%}.ig-audit-footer button{flex:1;justify-content:center}}
