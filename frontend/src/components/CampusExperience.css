@@ -15,8 +15,15 @@
 .cx-schedule-trigger span{display:flex;flex-direction:column;gap:2px;min-width:0}.cx-schedule-trigger strong{font-size:12px;font-weight:750;color:#2E4362}
 .cx-schedule-trigger small{font-size:10px;color:#7A8AA0;white-space:nowrap}
 .cx-overline{color:#7083A2;font-size:10px;line-height:1.5;letter-spacing:.12em;font-weight:780}
-.cx-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,310px);align-items:start;gap:14px}
-.cx-floor-column{min-width:0}
+.cx-map-hero{min-width:0;scroll-margin-top:76px}
+.cx-map-hero .bp-board{border-radius:16px}
+.cx-map-hero .bp-navigation-stage{grid-template-columns:62px minmax(0,1fr) 62px;padding:12px 8px 0}
+.cx-map-hero .bp-viewport{min-height:clamp(420px,64dvh,820px);display:flex;align-items:center;justify-content:center;padding:12px 4px 16px}
+.cx-map-hero .bp-svg{width:100%;max-width:none}
+.cx-map-hero .bp-head{padding:15px 21px}
+.cx-map-hero .bp-footer{padding:13px 22px}
+.cx-lower-workspace{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(310px,.85fr);align-items:start;gap:16px}
+.cx-tools-column{min-width:0;display:grid;gap:14px}
 .cx-aside{margin-top:0;border:1px solid #DFE6F0;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px #101B2C08;min-width:0}
 .cx-side-head{display:flex;flex-direction:column;gap:4px;padding:18px 20px;background:#FAFBFE;border-bottom:1px solid #EDF1F6}
 .cx-side-head small{font-size:11px;color:#8392A5}
@@ -68,12 +75,42 @@
 .cx-mobile-top h2{font-size:21px;color:#203755;margin:0}.cx-mobile-top button{display:grid;place-items:center;width:35px;height:35px;border-radius:8px;background:#F2F5F9}
 .cx-mobile-sheet>p{font-size:12px;line-height:1.5;color:#74869D;margin:6px 0 0}
 .cx-mobile-sheet .cx-room-info{padding:15px 0 3px}
-@media(max-width:1180px){.cx-content{grid-template-columns:minmax(0,1fr) minmax(245px,275px)}.cx-nav-main{gap:6px}.cx-building-tabs button{padding-inline:8px}}
-@media(max-width:1050px){.cx-nav{flex-wrap:wrap}.cx-nav-main{width:100%;justify-content:space-between}.cx-schedule-trigger{margin-left:auto}.cx-content{grid-template-columns:1fr}.cx-aside{margin-top:0}.cx-room-details{grid-template-columns:repeat(3,minmax(0,1fr))}.cx-room-details>span{display:flex;flex-direction:column;gap:6px;align-items:flex-start;border:0!important}.cx-room-details>span+span{padding-left:11px;border-left:1px solid #E9EEF4!important}.cx-cta{grid-template-columns:1fr 1fr}}
+@media(max-width:1180px){.cx-lower-workspace{grid-template-columns:minmax(0,1fr) minmax(285px,.8fr)}.cx-nav-main{gap:6px}.cx-building-tabs button{padding-inline:8px}}
+@media(max-width:1050px){.cx-nav{flex-wrap:wrap}.cx-nav-main{width:100%;justify-content:space-between}.cx-schedule-trigger{margin-left:auto}.cx-lower-workspace{grid-template-columns:1fr}.cx-aside{margin-top:0}.cx-room-details{grid-template-columns:repeat(3,minmax(0,1fr))}.cx-room-details>span{display:flex;flex-direction:column;gap:6px;align-items:flex-start;border:0!important}.cx-room-details>span+span{padding-left:11px;border-left:1px solid #E9EEF4!important}.cx-cta{grid-template-columns:1fr 1fr}}
 @media(max-width:720px){.cx-page{gap:12px}.cx-nav{padding:10px}.cx-nav-main{flex-direction:column;align-items:stretch;gap:8px}
  .cx-building-tabs{width:100%;overflow:auto;scrollbar-width:none} .cx-building-tabs button{flex:1}.cx-nav .cx-schedule-trigger{margin-left:0;width:100%;justify-content:flex-start}
- .cx-content{gap:10px}
+ .cx-lower-workspace{gap:10px}
  .cx-aside{display:none}.cx-status{font-size:11px}
 }
 @media(max-width:380px){.cx-popover-fields{grid-template-columns:1fr}.cx-building-tabs button{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.cx-page *{animation:none!important;transition:none!important}}
+
+
+/* Current session information is separate from availability for a selected
+   future slot. Never imply that the search filter is live current occupancy. */
+.cx-running-room{border:1px solid #BBD4E9;background:#F0F7FD;border-radius:10px;padding:13px 14px;margin:18px 0 2px;display:grid;gap:6px}
+.cx-running-heading{font-size:10px;letter-spacing:.09em;font-weight:800;color:#245D91;display:flex;gap:7px;align-items:center}
+.cx-running-indicator{width:8px;height:8px;border-radius:50%;background:#1976B5;box-shadow:0 0 0 3px #1976B51A}
+.cx-running-room strong{font-size:14px;color:#193B5B;font-weight:750;line-height:1.4;overflow-wrap:anywhere}
+.cx-running-room small{font-size:11px;color:#5F7490}
+.cx-live-roster{background:#fff;border:1px solid #DFE6F0;border-radius:14px;min-width:0;padding:17px 19px}
+.cx-live-roster-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.cx-live-roster-head h2{font-size:15px;font-weight:720;color:#203953;letter-spacing:-.02em;margin:4px 0}
+.cx-live-clock{font-size:11px;font-weight:700;color:#637E9B;background:#F3F6FC;border-radius:7px;padding:7px 9px;white-space:nowrap}
+.cx-live-muted{font-size:12px;line-height:1.5;color:#71859B;margin:10px 0 4px}
+.cx-live-list{display:grid;gap:0;margin-top:9px}
+.cx-live-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border-top:1px solid #EEF2F6;padding:11px 0;color:#6B809D;background:none}
+.cx-live-item:hover .cx-live-room{border-color:#315CE5;background:#EDF2FF;color:#315CE5}
+.cx-live-room{border:1px solid #DFE7F0;color:#2B4A70;font-size:12px;font-weight:760;padding:9px 11px;border-radius:8px;min-width:60px;text-align:center}
+.cx-live-item-content{display:grid;gap:4px;min-width:0;flex:1}
+.cx-live-item-content strong{font-size:12px;line-height:1.3;color:#24405E;overflow-wrap:anywhere}
+.cx-live-item-content small{font-size:10px;color:#788AA1}
+.cx-demo-note{display:block;font-size:10px;color:#8D5B12;margin-top:12px}
+@media(max-width:720px){
+  .cx-map-hero .bp-navigation-stage{grid-template-columns:43px minmax(0,1fr) 43px;padding:7px 3px 0}
+  .cx-map-hero .bp-viewport{display:block;min-height:0;padding:7px 0 10px}
+  .cx-map-hero .bp-svg{width:730px;max-width:none}
+  .cx-map-hero .bp-head{padding:12px 13px}
+  .cx-map-hero .bp-footer{padding:12px 14px}
+  .cx-live-roster{padding:15px}
+}
