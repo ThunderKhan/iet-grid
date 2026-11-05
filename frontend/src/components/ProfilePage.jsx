@@ -82,9 +82,15 @@ export default function ProfilePage({supabase,session,profile,role='student',dem
     return()=>{closed=true;};
   },[demo,role,supabase,user?.id]);
 
+  // Populate once when the institutional profile finishes loading. Do not
+  // overwrite form edits after a successful save or Auth token refresh.
+  const hydratedProfile=useRef(!!profile);
   useEffect(()=>{
-    setForm(profileFormFrom(profile,user,demo));
-  },[user?.id,profile?.full_name,demo]);
+    if(!demo&&profile&&!hydratedProfile.current){
+      setForm(profileFormFrom(profile,user,demo));
+      hydratedProfile.current=true;
+    }
+  },[profile,demo,user]);
 
   useEffect(()=>{
     if(!file){setPreviewUrl('');return;}
