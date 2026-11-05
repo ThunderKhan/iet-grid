@@ -26,7 +26,17 @@ try {
   assert.ok(appSource.includes('if(recovering||!session)return <AuthScreen'),
     'The real application must require Supabase sign-in');
 
-  const {default: CampusExperience}=await server.ssrLoadModule('/src/components/CampusExperience.jsx');
+  const {default: CampusExperience,resolveRoomStatus}=await server.ssrLoadModule('/src/components/CampusExperience.jsx');
+  const availableRoom={id:'IET18',capacity:75};
+  assert.equal(resolveRoomStatus(availableRoom,50,null),'unknown',
+    'Absent availability must never be shown as occupied or free');
+  assert.equal(resolveRoomStatus(availableRoom,50,[{id:'IET18',reason:'unverified',available:false}]),'unknown',
+    'Unrecognized API states must fail closed');
+  assert.equal(resolveRoomStatus(availableRoom,50,[{id:'IET18',reason:'occupied',available:false}]),'occupied');
+  assert.equal(resolveRoomStatus(availableRoom,80,[{id:'IET18',reason:'available',available:true}]),'restricted',
+    'Capacity filtering must never promise an ineligible room');
+  assert.equal(resolveRoomStatus(availableRoom,50,[{id:'IET18',reason:'ineligible',available:false}]),'restricted');
+  assert.equal(resolveRoomStatus(availableRoom,50,[{id:'IET18',reason:'available',available:true}]),'available');
   const {default: ProfilePage,validateProfileImage,profileFormFrom}=await server.ssrLoadModule('/src/components/ProfilePage.jsx');
   const fileOK={type:'image/png',size:120000};
   assert.equal(validateProfileImage(fileOK),'');
@@ -172,7 +182,12 @@ try {
   assert.ok(styledRoomMap.includes('5 Nov 2026 · 11:00–12:00 IST')
     &&styledRoomMap.includes('bp-slot-capacity')&&styledRoomMap.includes('seats minimum'),
     'Map should provide clear, non-editable date and capacity context');
-  assert.ok(styledRoomMap.includes('bp-fine-grid'),'Floor map should retain restrained architectural guide lines');
+  assert.ok(styledRoomMap.includes('0 80 940 335')&&
+    !styledRoomMap.includes('INTERACTIVE FLOOR PLAN')&&
+    !styledRoomMap.includes('IET GRID · PLAN VIEW'),
+    'The floor plan must give rooms more space without duplicate decorative headings');
+  assert.ok(styledRoomMap.includes('Floor layout schematic, not to scale'),
+    'The compact map must retain its provenance caveat');
   assert.ok(sampleLiveMap.includes('LIVE NOW'),'Room plan must visibly identify running classes');
   assert.ok(sampleLiveMap.includes('AI/ML · Computer Vision'),
     'Authorized current class should be visible to the viewer');
@@ -193,7 +208,8 @@ try {
       buildings:[{id:'IET',short:'IET',floors:['Ground','First','Second']},
         {id:'DEEK',short:'Deeksha Bhawan',floors:['Ground','First']}],
       rooms:allRooms,building:whichBuilding,floor:currentFloor,selected:'',
-      date:'2026-11-05',hour:'11',duration:1,capacity:75,apiAvailability:null,
+      date:'2026-11-05',hour:'11',duration:1,capacity:75,bookingKind:'lecture',
+      setBookingKind:()=>{},apiAvailability:null,
       matching:[],canBook:false,isAvailable:()=>false,
       setBuilding:()=>{},setFloor:()=>{},setSelected:()=>{},setDate:()=>{},
       setHour:()=>{},setDuration:()=>{},setCapacity:()=>{},setView:()=>{},
@@ -204,6 +220,8 @@ try {
     assert.ok(!html.includes('cx-floor-tabs'),'Old floor tabs must be removed');
     assert.ok(!html.includes('cx-floor-stepper'),'Old toolbar stepper must be removed');
     assert.ok(html.includes('bp-navigation-stage'),'Floor navigation must be attached to the map');
+    assert.ok(html.includes('Practical / laboratory'),
+      'Session type must be editable before the booking dialog to unblock laboratory bookings');
     assert.ok(!html.includes('cx-floor-label'),'Redundant building heading row must be removed');
     assert.ok(!html.includes('cx-hero')&&!html.includes('Find space for the next class.'),
       'Removed hero banner must not render in Campus map');
@@ -274,6 +292,20 @@ try {
     ['Announcements',pages.AnnouncementsPage,'Campus announcements'],
     ['Admin',pages.AdminPage,'Campus administration']
   ];
+  const calendarErrorMarkup=renderToString(React.createElement(pages.CalendarPage,{
+    ...shared,loading:false,error:'Connection unavailable',onRetry:()=>{}
+  }));
+  assert.ok(calendarErrorMarkup.includes('Timetable unavailable')&&
+    calendarErrorMarkup.includes('Retry')&&!calendarErrorMarkup.includes('No events'),
+    'Calendar network errors must not masquerade as an empty schedule');
+  const calendarLoadingMarkup=renderToString(React.createElement(pages.CalendarPage,{
+    ...shared,loading:true
+  }));
+  assert.ok(calendarLoadingMarkup.includes('Loading timetable')&&
+    !calendarLoadingMarkup.includes('No events'),
+    'Calendar must distinguish pending data from no events');
+  assert.ok(!appSource.includes('className="page-intro"'),
+    'The redundant global heading above every full-page heading must remain removed');
   // Radix Dialog portals mount on the client, not in Node SSR. Test the
   // registered academic-group label separately from browser-only dialog UI.
   const example=previewCohorts.find(c=>c.branch==='AI ML'&&c.academic_year===2&&c.section==='A');
