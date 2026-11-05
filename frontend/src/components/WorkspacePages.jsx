@@ -47,7 +47,7 @@ export function CalendarPage({date,setDate,initialDate,calendarBookings,rooms,on
         <div><b>{b.title}</b><span>{b.room_id} · {b.kind||'Session'}</span></div><StatePill status={b.status}/><ArrowUpRight size={16}/></button>)}
       {!events.some(b=>localDay(b.starts_at)>=date)&&<Empty icon={CalendarDays} title="No upcoming allocations" body="No scheduled events were returned for this period."/>}
     </div>:<div className={'ig-cal-columns '+(mode==='day'?'is-day':'')}>
-      {days.map(day=><div className="ig-cal-day-column" key={day}><div className="ig-cal-day-head"><strong>{new Date(day+'T12:00:00Z').toLocaleDateString('en-IN',{weekday:'short',timeZone:'UTC'})}</strong>
+      {days.map(day=><div className={'ig-cal-day-column'+(day===initialDate?' is-today':'')} key={day}><div className="ig-cal-day-head"><strong>{new Date(day+'T12:00:00Z').toLocaleDateString('en-IN',{weekday:'short',timeZone:'UTC'})}</strong>
         <span>{new Date(day+'T12:00:00Z').getUTCDate()}</span>{day===initialDate&&<small>Today</small>}</div>
         <div className="ig-cal-day-body">{byDay(day).map(b=><button className={'ig-cal-booking '+(b.status==='pending'?'pending':'')} key={b.id}
           type="button" onClick={()=>onOpenRoom(b.room_id,b.starts_at)}>
@@ -62,18 +62,25 @@ export function CalendarPage({date,setDate,initialDate,calendarBookings,rooms,on
 export function BookingsPage({bookings,rooms,setView,onOpenRoom}) {
   const [filter,setFilter]=useState('upcoming');
   const now=Date.now();
-  const filtered=[...bookings].filter(b=>{
-    if(filter==='pending')return b.status==='pending';
-    if(filter==='past')return new Date(b.ends_at).getTime()<now||['cancelled','rejected'].includes(b.status);
-    if(filter==='upcoming')return new Date(b.ends_at).getTime()>=now&&!['cancelled','rejected'].includes(b.status);
+  const matches=(booking,tab)=>{
+    if(tab==='pending')return booking.status==='pending';
+    if(tab==='past')return new Date(booking.ends_at).getTime()<now||['cancelled','rejected'].includes(booking.status);
+    if(tab==='upcoming')return new Date(booking.ends_at).getTime()>=now&&!['cancelled','rejected'].includes(booking.status);
     return true;
-  }).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
+  };
+  const filtered=[...bookings].filter(b=>matches(b,filter))
+    .sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
+  const bookingCounts=Object.fromEntries(['upcoming','pending','past','all'].map(tab=>[
+    tab,bookings.filter(b=>matches(b,tab)).length
+  ]));
   return <div className="ig-page-stack"><section className="ig-card ig-booking-page">
     <PanelHead eyebrow="BOOKING REGISTRY" title="Classroom reservations" description="All bookings visible to your account under institutional access rules." icon={BookOpen}
       action={<button className="ig-btn ig-btn-primary ig-btn-small" onClick={()=>setView('Explore rooms')}><Plus size={16}/> New reservation</button>}/>
     <div className="ig-tabs" role="group" aria-label="Booking status filter">{[
       ['upcoming','Upcoming'],['pending','Pending'],['past','Past / cancelled'],['all','All records']
-    ].map(([key,label])=><button key={key} className={filter===key?'active':''} aria-pressed={filter===key} onClick={()=>setFilter(key)}>{label}</button>)}</div>
+    ].map(([key,label])=><button key={key} type="button" className={filter===key?'active':''}
+      aria-pressed={filter===key} onClick={()=>setFilter(key)}>{label}
+      <span className="ig-tab-counter">{bookingCounts[key]}</span></button>)}</div>
     {filtered.length?<div className="ig-booking-list">{filtered.map(b=><button className="ig-booking-item" key={b.id} onClick={()=>onOpenRoom(b.room_id,b.starts_at)}>
       <span className="ig-booking-room"><DoorOpen size={18}/></span>
       <span className="ig-booking-main"><b>{b.title}</b><small>{b.room_id} · {b.kind||'lecture'}</small></span>
@@ -84,12 +91,17 @@ export function BookingsPage({bookings,rooms,setView,onOpenRoom}) {
 }
 export function AnnouncementsPage({notices,markNoticeRead,noticeReadBusy,setReport}) {
   const [filter,setFilter]=useState('all');
-  const filtered=notices.filter(n=>filter==='all'||(filter==='important'?n.priority==='high':!n.read_at));
+  const matches=(notice,tab)=>tab==='all'||(tab==='important'?notice.priority==='high':!notice.read_at);
+  const filtered=notices.filter(n=>matches(n,filter));
+  const noticeCounts=Object.fromEntries(['all','important','unread'].map(tab=>[
+    tab,notices.filter(n=>matches(n,tab)).length
+  ]));
   return <div className="ig-page-stack"><section className="ig-card ig-notice-page">
     <PanelHead eyebrow="INSTITUTIONAL BULLETIN" title="Campus announcements" icon={Bell}
       description="Official notices and critical schedule updates, visible according to your account."/>
     <div className="ig-tabs" role="group" aria-label="Announcement filter">{[['all','All updates'],['important','Important'],['unread','Unread']].map(([k,v])=>
-      <button key={k} aria-pressed={filter===k} className={filter===k?'active':''} onClick={()=>setFilter(k)}>{v}</button>)}</div>
+      <button key={k} type="button" aria-pressed={filter===k} className={filter===k?'active':''}
+        onClick={()=>setFilter(k)}>{v}<span className="ig-tab-counter">{noticeCounts[k]}</span></button>)}</div>
     {filtered.length?<div className="ig-notice-feed">{filtered.map(n=><article className="ig-notice-entry" key={n.id}>
       <span className={'ig-notice-emblem '+(n.priority==='high'?'high':'')}><Bell size={19}/></span>
       <div className="ig-notice-text"><div className="ig-notice-heading"><h3>{n.title}</h3>{n.priority==='high'&&<span className="ig-urgent">IMPORTANT</span>}</div>
