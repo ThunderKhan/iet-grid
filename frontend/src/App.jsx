@@ -8,15 +8,15 @@ import ProfilePage from './components/ProfilePage';
 import {CalendarPage,BookingsPage,AnnouncementsPage,AdminPage} from './components/WorkspacePages';
 import CampusExperience from './components/CampusExperience';
 import ReservationDialog from './components/ReservationDialog';
-import {previewCohorts,formatCohort,branchLabel} from './academicCohorts';
+import {branchLabel} from './academicCohorts';
 import {getActiveRoomSessions} from './currentSessions';
-import {buildings,sampleRooms,demoBookings,demoNotices,localDate,occupancy,recommend,dateTimes} from './data';
+import {buildings,localDate,dateTimes} from './data';
 const initialDate=localDate();
 const menu=[['Explore rooms',MapIcon],['Calendar',CalendarDays],['My bookings',BookOpen],['Announcements',Bell],['Admin',Shield]];
 const fmt=(v,opts)=>new Date(v).toLocaleString('en-IN',opts||{hour:'numeric',minute:'2-digit'});
 function IconTag({children}){return <span className="tag">{children}</span>}
 export default function App(){
-const [session,setSession]=useState(null);const [recovering,setRecovering]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='reset');const [guest,setGuest]=useState(()=>import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview')==='1');const [profile,setProfile]=useState(null);const [rooms,setRooms]=useState(configured&&!guest?[]:sampleRooms);const [bookings,setBookings]=useState(configured&&!guest?[]:demoBookings);const [notices,setNotices]=useState(configured&&!guest?[]:demoNotices);const [view,setView]=useState('Explore rooms');const [building,setBuilding]=useState('IET');const [floor,setFloor]=useState('First');const [date,setDate]=useState(initialDate);const [hour,setHour]=useState('11');const [duration,setDuration]=useState(1);const [capacity,setCapacity]=useState(75);const [requiredEquipment,setRequiredEquipment]=useState('');const [selected,setSelected]=useState('IET19');const [toast,setToast]=useState('');const [loading,setLoading]=useState(false);const [showBooking,setShowBooking]=useState(false);const [bookingTitle,setBookingTitle]=useState('Extra lecture');const [bookingKind,setBookingKind]=useState('lecture');const [report,setReport]=useState(false);const [noticeTitle,setNoticeTitle]=useState('');const [noticeBody,setNoticeBody]=useState('');
+const [session,setSession]=useState(null);const [authReady,setAuthReady]=useState(!configured);const [recovering,setRecovering]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='reset');const [profile,setProfile]=useState(null);const [rooms,setRooms]=useState([]);const [bookings,setBookings]=useState([]);const [notices,setNotices]=useState([]);const [view,setView]=useState('Explore rooms');const [building,setBuilding]=useState('IET');const [floor,setFloor]=useState('First');const [date,setDate]=useState(initialDate);const [hour,setHour]=useState('11');const [duration,setDuration]=useState(1);const [capacity,setCapacity]=useState(75);const [requiredEquipment,setRequiredEquipment]=useState('');const [selected,setSelected]=useState('IET19');const [toast,setToast]=useState('');const [loading,setLoading]=useState(false);const [showBooking,setShowBooking]=useState(false);const [bookingTitle,setBookingTitle]=useState('Extra lecture');const [bookingKind,setBookingKind]=useState('lecture');const [report,setReport]=useState(false);const [noticeTitle,setNoticeTitle]=useState('');const [noticeBody,setNoticeBody]=useState('');
 const [cohorts,setCohorts]=useState([]);
 const [cohortId,setCohortId]=useState('');
 const [cohortError,setCohortError]=useState('');
@@ -32,9 +32,7 @@ const [accountRole,setAccountRole]=useState('faculty');
 const [accountBusy,setAccountBusy]=useState(false);
 const [noticeReadBusy,setNoticeReadBusy]=useState('');
 
-const demo=!configured||guest;
-const availableCohorts=demo?previewCohorts:cohorts;
-const chosenCohort=availableCohorts.find(c=>c.id===cohortId)||null;
+const chosenCohort=cohorts.find(c=>c.id===cohortId)||null;
 const [liveDataError,setLiveDataError]=useState('');
 const API_BASE=import.meta.env.VITE_API_BASE_URL||'';
 const [apiAvailability,setApiAvailability]=useState(null);
@@ -58,7 +56,7 @@ async function apiFetch(route,opts={}){
  return data;
 }
 useEffect(()=>{
-  if(demo||!session?.access_token){setCohorts([]);setCohortError('');return;}
+  if(!session?.access_token){setCohorts([]);setCohortError('');return;}
   let cancelled=false;
   setCohortError('');
   apiFetch('/api/v1/cohorts').then(data=>{
@@ -70,14 +68,25 @@ useEffect(()=>{
     if(!cancelled){setCohorts([]);setCohortError('Academic groups unavailable: '+error.message)}
   });
   return ()=>{cancelled=true};
-},[demo,session?.access_token]);
-useEffect(()=>{if(!configured)return;supabase.auth.getSession().then(({data})=>setSession(data.session));const {data:{subscription}}=supabase.auth.onAuthStateChange((_,s)=>setSession(s));return()=>subscription.unsubscribe()},[]);
+},[session?.access_token]);
 useEffect(()=>{
- if(!session||demo)return;
+ if(!configured)return;
+ let active=true;
+ supabase.auth.getSession()
+   .then(({data})=>{if(active)setSession(data.session||null)})
+   .catch(()=>{if(active)setSession(null)})
+   .finally(()=>{if(active)setAuthReady(true)});
+ const {data:{subscription}}=supabase.auth.onAuthStateChange((_,nextSession)=>{
+   if(active){setSession(nextSession);setAuthReady(true)}
+ });
+ return()=>{active=false;subscription.unsubscribe()};
+},[]);
+useEffect(()=>{
+ if(!session)return;
  let ignore=false;
  // A new login must not temporarily display the previous account's profile.
  setProfile(null);
- // Authenticated mode must never display the locally seeded demo records.
+ // Always load records authorized for the active signed-in account.
  setRooms([]);setBookings([]);setNotices([]);setLiveDataError('');
  (async()=>{
   try{
@@ -94,14 +103,14 @@ useEffect(()=>{
     setLiveDataError('Some live campus records could not be loaded. Do not rely on incomplete schedules.');
   }catch(_error){
    if(!ignore){setRooms([]);setBookings([]);setNotices([]);
-    setLiveDataError('Live campus records are unavailable. No sample records are shown in authenticated mode.')}
+    setLiveDataError('Campus data could not be loaded. Check your backend and database connection.')}
   }
  })();
  return()=>{ignore=true};
-},[session,demo]);
+},[session?.user?.id,session?.access_token]);
 // Avatar files are private. Only the owner can create a short-lived signed URL.
 useEffect(()=>{
-  if(demo||!session?.user?.id||!profile?.avatar_path){setAvatarUrl('');return;}
+  if(!session?.user?.id||!profile?.avatar_path){setAvatarUrl('');return;}
   let cancelled=false;
   const path=profile.avatar_path;
   const refresh=async()=>{
@@ -112,11 +121,11 @@ useEffect(()=>{
   refresh();
   const timer=window.setInterval(refresh,45*60*1000);
   return()=>{cancelled=true;window.clearInterval(timer);};
-},[demo,session?.user?.id,profile?.avatar_path]);
+},[session?.user?.id,profile?.avatar_path]);
 function alert(msg){setToast(msg);setTimeout(()=>setToast(''),4000)}
 const {start,end}=useMemo(()=>dateTimes(date,hour,duration),[date,hour,duration]);
 useEffect(()=>{
- if(demo||!session?.access_token)return;
+ if(!session?.access_token)return;
  let disposed=false;
  setApiAvailability(null);setApiRecommendations([]);setApiWarning('');
  const query='start='+encodeURIComponent(start)+'&end='+encodeURIComponent(end)+
@@ -131,13 +140,13 @@ useEffect(()=>{
    .catch(e=>{if(disposed)return;setApiAvailability(null);setApiRecommendations([]);
      setApiWarning('Live availability could not be verified: '+e.message)});
  return()=>{disposed=true};
-},[demo,session?.access_token,start,end,capacity,building,bookingKind,requiredEquipment,refreshTick]);
+},[session?.access_token,start,end,capacity,building,bookingKind,requiredEquipment,refreshTick]);
 const [liveCalendar,setLiveCalendar]=useState([]);
 const [currentTimeMs,setCurrentTimeMs]=useState(()=>Date.now());
 const [runningAllocations,setRunningAllocations]=useState([]);
 const [runningScheduleStatus,setRunningScheduleStatus]=useState('loading');
 useEffect(()=>{
- if(demo||!session?.access_token)return;
+ if(!session?.access_token)return;
  let disposed=false;setLiveCalendar([]);
  const first=new Date(date+'T00:00:00');
  const last=new Date(first.getTime()+7*86400000);
@@ -149,11 +158,10 @@ useEffect(()=>{
  })))})
  .catch(()=>{if(!disposed)setLiveCalendar([])});
  return()=>{disposed=true};
-},[demo,session?.access_token,date,refreshTick]);
+},[session?.access_token,date,refreshTick]);
 // Running sessions are independent of the reservation time being browsed.
 // The calendar API already applies RLS and redacts inaccessible titles.
 useEffect(()=>{
-  if(demo){setRunningAllocations([]);setRunningScheduleStatus('demo');return;}
   if(!session?.access_token||view!=='Explore rooms'){
     setRunningAllocations([]);setRunningScheduleStatus('unavailable');return;
   }
@@ -192,29 +200,20 @@ useEffect(()=>{
   document.addEventListener('visibilitychange',onVisible);
   return()=>{cancelled=true;window.clearInterval(polling);
     document.removeEventListener('visibilitychange',onVisible);};
-},[demo,session?.access_token,view,refreshTick]);
-useEffect(()=>{
-  if(!demo)return;
-  const timer=window.setInterval(()=>setCurrentTimeMs(Date.now()),30000);
-  return()=>window.clearInterval(timer);
-},[demo]);
-const activeSessions=useMemo(()=>getActiveRoomSessions(demo?bookings:runningAllocations,currentTimeMs),
-  [demo,bookings,runningAllocations,currentTimeMs]);
-const nowScheduleState=demo?'demo':runningScheduleStatus;
-const calendarBookings=demo?bookings:liveCalendar;
+},[session?.access_token,view,refreshTick]);
+const activeSessions=useMemo(()=>getActiveRoomSessions(runningAllocations,currentTimeMs),
+  [runningAllocations,currentTimeMs]);
+const nowScheduleState=runningScheduleStatus;
+const calendarBookings=liveCalendar;
 const current=rooms.find(r=>r.id===selected);
-const isAvailable=r=>demo?!occupancy(r.id,start,end,bookings):
-    apiAvailability?.some(x=>x.id===r.id&&x.available===true)===true;
-const matching=useMemo(()=>demo?
-  recommend(rooms,bookings,start,end,capacity,building).filter(r=>!requiredEquipment||r.verified&&(r.equipment||[]).includes(requiredEquipment)):
-  apiRecommendations,[demo,rooms,bookings,start,end,capacity,building,requiredEquipment,apiRecommendations]);
-const filtered=rooms.filter(r=>r.building===building&&r.floor===floor);
-const userRole=demo?'faculty':profile?.role||'student';
-const canBook=demo||(['faculty','coordinator','admin'].includes(userRole)&&profile?.verified);
-const canAdmin=demo||(['coordinator','admin'].includes(userRole)&&profile?.verified);
+const isAvailable=r=>apiAvailability?.some(x=>x.id===r.id&&x.available===true)===true;
+const matching=apiRecommendations;
+const userRole=profile?.role||'student';
+const canBook=['faculty','coordinator','admin'].includes(userRole)&&profile?.verified===true;
+const canAdmin=['coordinator','admin'].includes(userRole)&&profile?.verified===true;
 
 useEffect(()=>{
-  if(demo||!session?.access_token||view!=='Admin'||!canAdmin){
+  if(!session?.access_token||view!=='Admin'||!canAdmin){
     setAuditRows([]);setAuditTotal(0);setAuditError('');return;
   }
   let ignore=false;
@@ -228,28 +227,27 @@ useEffect(()=>{
     if(!ignore){setAuditRows([]);setAuditTotal(0);setAuditError('Audit history could not be loaded: '+err.message);}
   }).finally(()=>{if(!ignore)setAuditLoading(false)});
   return()=>{ignore=true;};
-},[demo,session?.access_token,view,canAdmin,auditOffset,auditRoom,auditAction,refreshTick]);
+},[session?.access_token,view,canAdmin,auditOffset,auditRoom,auditAction,refreshTick]);
 
 
 useEffect(()=>{
- if(demo||!session?.access_token||view!=='Admin'||!canAdmin){setPendingQueue([]);setPendingError('');return;}
+ if(!session?.access_token||view!=='Admin'||!canAdmin){setPendingQueue([]);setPendingError('');return;}
  let disposed=false;
  setPendingLoading(true);setPendingError('');
  apiFetch('/api/v1/bookings/pending').then(data=>{if(!disposed)setPendingQueue(data.bookings||[]);})
   .catch(err=>{if(!disposed){setPendingQueue([]);setPendingError('Unable to load pending requests: '+err.message);}})
   .finally(()=>{if(!disposed)setPendingLoading(false);});
  return()=>{disposed=true;};
-},[demo,view,canAdmin,session?.access_token,refreshTick]);
+},[view,canAdmin,session?.access_token,refreshTick]);
 useEffect(()=>{
- if(demo||!session?.access_token)return;
+ if(!session?.access_token)return;
  let disposed=false;
  apiFetch('/api/v1/announcements').then(data=>{if(!disposed)setNotices(data.announcements||[]);})
  .catch(()=>{});
  return()=>{disposed=true;};
-},[demo,session?.access_token,refreshTick]);
+},[session?.access_token,refreshTick]);
 async function reviewPendingBooking(booking,approve){
- if(demo)return alert('Approval actions require a signed-in administrator.');
- if(reviewBusy)return;
+  if(reviewBusy)return;
  setReviewBusy(booking.id);
  try{
    await apiFetch('/api/v1/admin/bookings/'+encodeURIComponent(booking.id)+'/review',{
@@ -270,8 +268,7 @@ async function reviewPendingBooking(booking,approve){
  }finally{setReviewBusy('');}
 }
 async function grantTestRole(){
- if(demo)return alert('Role provisioning requires a live administrator.');
- if(accountBusy)return;
+  if(accountBusy)return;
  const id=accountUuid.trim();
  if(!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(id))
    return alert('Enter a valid existing Supabase Auth user UUID.');
@@ -287,7 +284,7 @@ async function grantTestRole(){
  finally{setAccountBusy(false);}
 }
 async function markNoticeRead(noticeId){
- if(demo||noticeReadBusy)return;
+ if(noticeReadBusy)return;
  setNoticeReadBusy(noticeId);
  try{
   await apiFetch('/api/v1/announcements/'+encodeURIComponent(noticeId)+'/read',{method:'POST'});
@@ -300,20 +297,14 @@ async function doBook(){
  if(!current)return;
  if(!isAvailable(current))return alert('This room is not verified as available at that time.');
  if(current.capacity<capacity)return alert('Requested capacity exceeds room size.');
- setLoading(true);let success=false;
  const selectedGroup=chosenCohort;
  if(bookingKind!=='event'&&!selectedGroup)return alert('Choose a registered academic group before submitting.');
  const rawTitle=bookingTitle.trim();
  if(rawTitle.length<3)return alert('Enter a session title of at least three characters.');
  const groupPrefix=selectedGroup?branchLabel(selectedGroup.branch)+' · ':'';
  const title=(groupPrefix+rawTitle).slice(0,180);
+ setLoading(true);let success=false;
  try{
-  if(demo){
-   setBookings(prev=>[...prev,{id:'local-'+Date.now(),room_id:current.id,title,
-    starts_at:start,ends_at:end,status:['exam','event'].includes(bookingKind)?'pending':'confirmed',
-    kind:bookingKind,cohort_id:selectedGroup?.id||null,cohort_label:formatCohort(selectedGroup)}]);
-   alert(['exam','event'].includes(bookingKind)?'Demo request pending approval (local only). Not saved to university records.':'Demo reservation added locally. Not saved to university records.');
-  }else{
    const result=await apiFetch('/api/v1/bookings',{method:'POST',body:JSON.stringify({
      room_id:current.id,title,starts_at:start,ends_at:end,kind:bookingKind,required_capacity:capacity,
      idempotency_key:crypto.randomUUID(),cohort_id:selectedGroup?.id||null,
@@ -323,13 +314,11 @@ async function doBook(){
    setRefreshTick(v=>v+1);
    alert(result.status==='pending'?'Reservation request submitted for approval.':
      'Reservation confirmed and saved in Supabase.');
-  }
   success=true;
  }catch(e){alert(e.message||'Booking failed. No reservation was confirmed.')}
  finally{setLoading(false);if(success)setShowBooking(false)}
 }
 async function submitReport(){
- if(demo){alert('Sample issue recorded for demonstration only.');setReport(false);return}
  try{
   await apiFetch('/api/v1/reports',{method:'POST',body:JSON.stringify({
    details:'Potential incorrect schedule reported for '+(selected||'unselected room')+' on '+date
@@ -343,11 +332,6 @@ async function addNotice(){
  if(noticeTitle.trim().length<3)return alert('Announcement title must be at least 3 characters.');
  setNoticeBusy(true);
  try{
-  if(demo){
-   setNotices(prev=>[{id:'local-'+Date.now(),title:noticeTitle.trim(),body:noticeBody,
-    priority:noticePriority,created_at:new Date().toISOString()},...prev]);
-   alert('Preview only: announcement was not persisted.');
-  }else{
    await apiFetch('/api/v1/admin/announcements',{method:'POST',body:JSON.stringify({
     title:noticeTitle.trim(),body:noticeBody,priority:noticePriority
    })});
@@ -357,7 +341,6 @@ async function addNotice(){
      setNotices(response.announcements||[]);
    }catch(err){alert('Notice published, but feed refresh failed: '+err.message);}
    setRefreshTick(n=>n+1);
-  }
   setNoticeTitle('');setNoticeBody('');setNoticePriority('normal');
  }catch(err){alert('Announcement could not be published: '+(err.message||String(err)));}
  finally{setNoticeBusy(false);}
@@ -380,17 +363,18 @@ function openRoomAt(roomId,startIso){
   }
   setView('Explore rooms');
 }
-if(recovering||(!session&&!guest))return <AuthScreen recovery={recovering} onRecoveryComplete={finishRecovery} onRecoveryCancel={finishRecovery}/>;
+if(!authReady)return <div className="ig-auth-loading" role="status">Checking your sign-in…</div>;
+if(recovering||!session)return <AuthScreen recovery={recovering} onRecoveryComplete={finishRecovery} onRecoveryCancel={finishRecovery}/>;
 return <div className="app-shell">
 <TopNavigation items={menu.filter(([name])=>name!=='Admin'||canAdmin)}
   active={view} onNavigate={setView}
-  demo={demo} noticeCount={notices.length}
-  userName={profile?.full_name||(demo?'Demo Faculty':session?.user?.email?.split('@')[0]||'User')}
+  noticeCount={notices.length}
+  userName={profile?.full_name||session?.user?.email?.split('@')[0]||'User'}
   userRole={userRole} avatarUrl={avatarUrl}
-  onSignOut={()=>{if(demo)setGuest(false);else supabase.auth.signOut();setView('Explore rooms')}}/>
+  onSignOut={()=>{supabase.auth.signOut();setView('Explore rooms')}}/>
 <div className="workarea">
 <main className="main-content">
-  {!demo&&liveDataError&&<p role="alert" className="form-error">{liveDataError}</p>}
+  {liveDataError&&<p role="alert" className="form-error">{liveDataError}</p>}
   {view!=='Explore rooms'&&view!=='My profile'&&(<div className="page-intro"><div><div className="eyebrow">IET GRID / {view.toUpperCase()}</div>
     <h1>{view==='Overview'?'Campus overview':view}</h1>
     <p>{view==='Overview'?'Classrooms, bookings, and academic updates in one workspace.':
@@ -405,7 +389,7 @@ return <div className="app-shell">
   )}
 {view==='My profile'&&<ProfilePage
     supabase={supabase} session={session} profile={profile} role={userRole}
-    demo={demo} avatarUrl={avatarUrl} onProfileChanged={setProfile}/>}
+    avatarUrl={avatarUrl} onProfileChanged={setProfile}/>}
 {view==='Explore rooms'&&<CampusExperience buildings={buildings} rooms={rooms} building={building}
     setBuilding={setBuilding} floor={floor} setFloor={setFloor} selected={selected} setSelected={setSelected}
     date={date} setDate={setDate} hour={hour} setHour={setHour} duration={duration}
@@ -414,15 +398,15 @@ return <div className="app-shell">
     requiredEquipment={requiredEquipment} setRequiredEquipment={setRequiredEquipment}
     apiAvailability={apiAvailability} apiWarning={apiWarning} isAvailable={isAvailable}
     matching={matching} current={current} canBook={canBook}
-    setShowBooking={setShowBooking} setView={setView} demo={demo}
+    setShowBooking={setShowBooking} setView={setView}
     activeSessions={activeSessions} nowScheduleState={nowScheduleState} currentTimeMs={currentTimeMs}/>}
   {view==='Calendar'&&<CalendarPage date={date} setDate={setDate} initialDate={initialDate}
     calendarBookings={calendarBookings} rooms={rooms} onOpenRoom={openRoomAt}/>}
   {view==='My bookings'&&<BookingsPage bookings={bookings} rooms={rooms}
     setView={setView} onOpenRoom={openRoomAt}/>}
-  {view==='Announcements'&&<AnnouncementsPage notices={notices} demo={demo}
+  {view==='Announcements'&&<AnnouncementsPage notices={notices}
     markNoticeRead={markNoticeRead} noticeReadBusy={noticeReadBusy} setReport={setReport}/>}
-  {view==='Admin'&&<AdminPage canAdmin={canAdmin} demo={demo} userRole={userRole}
+  {view==='Admin'&&<AdminPage canAdmin={canAdmin} userRole={userRole}
     rooms={rooms} bookings={bookings} notices={notices} noticeTitle={noticeTitle}
     setNoticeTitle={setNoticeTitle} noticeBody={noticeBody} setNoticeBody={setNoticeBody}
     noticePriority={noticePriority} setNoticePriority={setNoticePriority}
@@ -443,7 +427,7 @@ return <div className="app-shell">
   cohorts={availableCohorts} cohortId={cohortId} setCohortId={setCohortId}
   cohortError={cohortError} loading={loading} canBook={canBook}
   available={!!current&&isAvailable(current)&&current.capacity>=capacity}
-  onConfirm={doBook} demo={demo}/>
+  onConfirm={doBook}/>
 {report&&<div className="modal-overlay"><section className="modal" role="dialog" aria-modal="true" aria-labelledby="ig-report-title"><div className="modal-head"><h2 id="ig-report-title">Report an issue</h2><button onClick={()=>setReport(false)}><X/></button></div><p className="muted">Flag incorrect or outdated schedule information. This will not modify official bookings.</p><button className="button-primary" onClick={submitReport}>Submit schedule report</button></section></div>}
 {toast&&<div className="toast"><Info size={17}/>{toast}<button onClick={()=>setToast('')}><X size={15}/></button></div>}</div>
 }
