@@ -52,6 +52,7 @@ class TimetableRow(BaseModel):
     room_id: str | None = None
     kind: str = Field(default="lecture", pattern="^(lecture|practical|exam|event)$")
     required_equipment: list[str] = Field(default_factory=list, max_length=8)
+    kind: str = Field(default="lecture", pattern="^(lecture|practical|exam|event)$")
 
 
 class TimetableDocument(BaseModel):
@@ -75,6 +76,7 @@ class PreviewRequest(BaseModel):
 
 class ConfirmRow(BaseModel):
     row_index: int
+    title: str = Field(min_length=3, max_length=180)
     room_id: str
     starts_at: datetime
     ends_at: datetime
@@ -438,10 +440,10 @@ async def confirm_timetable(body: ConfirmRequest, request: Request, me: Principa
         try:
             booking_id = await db.rpc("request_room_booking_with_equipment", {
                 "p_room_id": item.room_id,
-                "p_title": f"Timetable import #{item.row_index}",
+                "p_title": item.title,
                 "p_starts_at": item.starts_at.isoformat(),
                 "p_ends_at": item.ends_at.isoformat(),
-                "p_kind": "practical" if equipment else "lecture",
+                "p_kind": item.kind,
                 "p_required_capacity": item.required_capacity,
                 "p_idempotency_key": str(key),
                 "p_cohort_id": str(item.cohort_id) if item.cohort_id else None,
