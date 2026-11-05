@@ -25,14 +25,14 @@ function PanelHead({eyebrow,title,description,action,icon:Icon}){
 function Empty({icon:Icon=BookOpen,title,body,action}) {
   return <div className="ig-empty"><div className="ig-empty-icon"><Icon size={24}/></div><h3>{title}</h3><p>{body}</p>{action}</div>;
 }
-export function CalendarPage({date,setDate,initialDate,calendarBookings,rooms,onOpenRoom}) {
+export function CalendarPage({date,setDate,initialDate,calendarBookings,rooms,onOpenRoom,loading=false,error='',onRetry=()=>{}}) {
   const [mode,setMode]=useState('week');
   const days=mode==='day'?[date]:Array.from({length:5},(_,n)=>offsetDay(date,n));
   const events=[...calendarBookings].filter(b=>b.starts_at&&b.ends_at).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
   const byDay=day=>events.filter(e=>localDay(e.starts_at)===day);
   return <div className="ig-page-stack"><section className="ig-card ig-calendar-page">
     <div className="ig-calendar-top">
-      <div><span className="ig-overline">TEMPORAL VIEW</span><h2><CalendarDays size={20}/> Campus timetable</h2><p>Bookings and campus allocations, shown in India Standard Time (IST).</p></div>
+      <div><h2><CalendarDays size={20}/> Campus timetable</h2><p>Bookings and campus allocations, shown in India Standard Time (IST).</p></div>
       <div className="ig-calendar-actions"><button type="button" className="ig-icon-button" aria-label="Previous day" onClick={()=>setDate(offsetDay(date,mode==='day'?-1:-5))}><ChevronLeft size={18}/></button>
         <input type="date" value={date} aria-label="Calendar start date" onChange={e=>setDate(e.target.value)}/>
         <button type="button" className="ig-icon-button" aria-label="Next day" onClick={()=>setDate(offsetDay(date,mode==='day'?1:5))}><ChevronRight size={18}/></button>
@@ -41,7 +41,15 @@ export function CalendarPage({date,setDate,initialDate,calendarBookings,rooms,on
     <div className="ig-calendar-mode" role="group" aria-label="Calendar layout">
       {['day','week','agenda'].map(m=><button key={m} type="button" aria-pressed={mode===m} className={mode===m?'selected':''} onClick={()=>setMode(m)}>{m[0].toUpperCase()+m.slice(1)}</button>)}
     </div>
-    {mode==='agenda'?<div className="ig-agenda">
+    {error?<div className="ig-cal-feedback" role="alert"><Info size={20} aria-hidden="true"/>
+      <div><strong>Timetable unavailable</strong><p>{error}</p></div>
+      <button className="ig-btn ig-btn-outline ig-btn-small" type="button" onClick={onRetry}>
+        <RefreshCcw size={16}/> Retry
+      </button>
+    </div>:loading?<div className="ig-cal-feedback ig-cal-loading" role="status">
+      <span className="ig-cal-progress" aria-hidden="true"/>
+      <div><strong>Loading timetable</strong><p>Checking confirmed allocations for the selected dates…</p></div>
+    </div>:mode==='agenda'?<div className="ig-agenda">
       {events.filter(b=>localDay(b.starts_at)>=date).slice(0,40).map(b=><button type="button" key={b.id} className="ig-agenda-event" onClick={()=>onOpenRoom(b.room_id,b.starts_at)}>
         <div className="ig-agenda-date"><b>{strDate(b.starts_at)}</b><span>{strTime(b.starts_at)}</span></div>
         <div><b>{b.title}</b><span>{b.room_id} · {b.kind||'Session'}</span></div><StatePill status={b.status}/><ArrowUpRight size={16}/></button>)}
@@ -74,7 +82,7 @@ export function BookingsPage({bookings,rooms,setView,onOpenRoom}) {
     tab,bookings.filter(b=>matches(b,tab)).length
   ]));
   return <div className="ig-page-stack"><section className="ig-card ig-booking-page">
-    <PanelHead eyebrow="BOOKING REGISTRY" title="Classroom reservations" description="All bookings visible to your account under institutional access rules." icon={BookOpen}
+    <PanelHead title="Classroom reservations" description="All bookings visible to your account under institutional access rules." icon={BookOpen}
       action={<button type="button" className="ig-btn ig-btn-primary ig-btn-small" onClick={()=>setView('Explore rooms')}><Plus size={16}/> New reservation</button>}/>
     <div className="ig-tabs" role="group" aria-label="Booking status filter">{[
       ['upcoming','Upcoming'],['pending','Pending'],['past','Past / cancelled'],['all','All records']
@@ -114,7 +122,7 @@ export function AnnouncementsPage({notices,markNoticeRead,noticeReadBusy,setRepo
 }
 export function AdminPage({canAdmin,userRole,rooms,bookings,notices,noticeTitle,setNoticeTitle,noticeBody,setNoticeBody,noticePriority,setNoticePriority,noticeBusy,addNotice,pendingQueue,pendingLoading,pendingError,reviewBusy,reviewPendingBooking,setRefreshTick,accountUuid,setAccountUuid,accountRole,setAccountRole,accountBusy,grantTestRole,apiWarning,apiAvailability,auditRows,auditTotal,auditOffset,setAuditOffset,auditRoom,setAuditRoom,auditAction,setAuditAction,auditLoading,auditError}) {
   return <div className="ig-page-stack">
-    <section className="ig-admin-intro"><div><span className="ig-overline">OPERATIONS CENTER</span><h2>Campus administration</h2><p>Review allocations, publish academic updates, and manage permitted access.</p></div><StatePill status={canAdmin?'available':'restricted'}>{canAdmin?'Verified operator':'Restricted access'}</StatePill></section>
+    <section className="ig-admin-intro"><div><h2>Campus administration</h2><p>Review allocations, publish academic updates, and manage permitted access.</p></div><StatePill status={canAdmin?'available':'restricted'}>{canAdmin?'Verified operator':'Restricted access'}</StatePill></section>
     {!canAdmin?<section className="ig-card"><Empty icon={LockKeyhole} title="Administrator access required" body="These controls are limited to verified university administrators and coordinators."/></section>:<>
       <div className="ig-admin-metrics"><div><DoorOpen size={18}/><strong>{rooms.length}</strong><span>Rooms registered</span></div><div><BookOpen size={18}/><strong>{bookings.length}</strong><span>Visible bookings</span></div><div><Clock3 size={18}/><strong>{pendingQueue.length}</strong><span>Approval requests</span></div></div>
       <div className="ig-admin-grid">
