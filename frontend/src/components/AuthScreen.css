@@ -1,5 +1,5 @@
 /* IET Grid authentication — scoped styles, DESIGN.md palette and accessible controls. */
-.ig-auth-page{--ig-navy:var(--ig-navy);--ig-blue:var(--ig-primary);--ig-canvas:var(--ig-canvas);--ig-text:var(--ig-text);--ig-muted:var(--ig-muted);--ig-line:var(--ig-border);min-height:100dvh;padding:14px;background:var(--ig-canvas);color:var(--ig-text);font-family:Inter,system-ui,sans-serif}
+.ig-auth-page{--ig-blue:var(--ig-primary);--ig-line:var(--ig-border);min-height:100dvh;padding:14px;background:var(--ig-canvas);color:var(--ig-text);font-family:Inter,system-ui,sans-serif}
 .ig-auth-page *{box-sizing:border-box}
 .ig-auth-layout{display:grid;grid-template-columns:minmax(0,0.96fr) minmax(0,1.04fr);gap:16px;min-height:calc(100dvh - 28px)}
 .ig-auth-form-panel{display:flex;min-width:0;border:1px solid #D4DFEC;border-radius:16px;background:#fff;padding:clamp(28px,5.1vw,76px) clamp(24px,5.7vw,88px);align-items:center}

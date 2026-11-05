@@ -107,6 +107,14 @@ try {
     'Velaris must use the supplied simplex-noise blending shader');
   assert.equal(hexToUnitRGB('#315CE5').length,3,'Theme color conversion failed');
   // Architectural Minimalism must not revert to full-room status coloring.
+  const componentCSS=[
+    'AuthScreen.css','BlueprintSitePlan.css','CampusExperience.css','WorkspacePages.css',
+    'ProfilePage.css','ReservationDialog.css','TopNavigation.css','AppErrorBoundary.css'
+  ].map(name=>readFileSync('src/components/'+name,'utf8'));
+  for(const stylesheet of componentCSS) {
+    assert.doesNotMatch(stylesheet,/(--ig-[\\w-]+)\\s*:\\s*var\\(\\1\\)/,
+      'Stylesheets must not define circular CSS design tokens');
+  }
   const foundations=readFileSync('src/styles.css','utf8');
   assert.ok(foundations.includes('--ig-primary:#315CE5')&&foundations.includes('--ig-text:#17243B'),
     'Global design tokens must match the root DESIGN.md color system');
