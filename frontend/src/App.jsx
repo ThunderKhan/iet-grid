@@ -14,7 +14,6 @@ import {buildings,localDate,dateTimes} from './data';
 const initialDate=localDate();
 const menu=[['Explore rooms',MapIcon],['Calendar',CalendarDays],['My bookings',BookOpen],['Announcements',Bell],['Admin',Shield]];
 const fmt=(v,opts)=>new Date(v).toLocaleString('en-IN',opts||{hour:'numeric',minute:'2-digit'});
-function IconTag({children}){return <span className="tag">{children}</span>}
 export default function App(){
 const [session,setSession]=useState(null);const [authReady,setAuthReady]=useState(!configured);const [recovering,setRecovering]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='reset');const [profile,setProfile]=useState(null);const [rooms,setRooms]=useState([]);const [bookings,setBookings]=useState([]);const [notices,setNotices]=useState([]);const [view,setView]=useState('Explore rooms');const [building,setBuilding]=useState('IET');const [floor,setFloor]=useState('First');const [date,setDate]=useState(initialDate);const [hour,setHour]=useState('11');const [duration,setDuration]=useState(1);const [capacity,setCapacity]=useState(75);const [requiredEquipment,setRequiredEquipment]=useState('');const [selected,setSelected]=useState('IET19');const [toast,setToast]=useState('');const [loading,setLoading]=useState(false);const [showBooking,setShowBooking]=useState(false);const [bookingTitle,setBookingTitle]=useState('Extra lecture');const [bookingKind,setBookingKind]=useState('lecture');const [report,setReport]=useState(false);const [noticeTitle,setNoticeTitle]=useState('');const [noticeBody,setNoticeBody]=useState('');
 const [cohorts,setCohorts]=useState([]);
@@ -428,7 +427,6 @@ return <div className="app-shell">
   cohortError={cohortError} loading={loading} canBook={canBook}
   available={!!current&&isAvailable(current)&&current.capacity>=capacity}
   onConfirm={doBook}/>
-{report&&<div className="modal-overlay"><section className="modal" role="dialog" aria-modal="true" aria-labelledby="ig-report-title"><div className="modal-head"><h2 id="ig-report-title">Report an issue</h2><button onClick={()=>setReport(false)}><X/></button></div><p className="muted">Flag incorrect or outdated schedule information. This will not modify official bookings.</p><button className="button-primary" onClick={submitReport}>Submit schedule report</button></section></div>}
-{toast&&<div className="toast"><Info size={17}/>{toast}<button onClick={()=>setToast('')}><X size={15}/></button></div>}</div>
+{report&&<div className="modal-overlay"><section className="modal" role="dialog" aria-modal="true" aria-labelledby="ig-report-title" aria-describedby="ig-report-description"><div className="modal-head"><h2 id="ig-report-title">Report an issue</h2><button type="button" aria-label="Close issue report" onClick={()=>setReport(false)}><X size={18}/></button></div><p id="ig-report-description" className="muted">Flag incorrect or outdated schedule information. This will not modify official bookings.</p><button type="button" className="button-primary" onClick={submitReport}>Submit schedule report</button></section></div>}
+{toast&&<div className="toast" role="status" aria-live="polite"><Info size={17} aria-hidden="true"/><span>{toast}</span><button type="button" aria-label="Dismiss notification" onClick={()=>setToast('')}><X size={18}/></button></div>}</div>
 }
-function Stat({icon:Icon,label,value,sub}){return <div className="stat-card"><div className="stat-icon"><Icon size={18}/></div><span>{label}</span><b>{value}</b><small>{sub}</small></div>}
