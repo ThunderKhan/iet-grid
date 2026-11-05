@@ -9,6 +9,14 @@ import {createServer} from 'vite';
 const server=await createServer({server:{middlewareMode:true},appType:'custom',logLevel:'error'});
 try {
   const pages=await server.ssrLoadModule('/src/components/WorkspacePages.jsx');
+  const appSource=readFileSync('src/App.jsx','utf8');
+  const packageInfo=JSON.parse(readFileSync('package.json','utf8'));
+  assert.match(packageInfo.scripts.dev,/--port 5123 --strictPort/,'Dev server must bind exact requested port');
+  assert.ok(!appSource.includes('preview=1')&&!appSource.includes('sampleRooms')&&!appSource.includes('demoBookings'),
+    'Application may not enable the old preview or import sample records');
+  assert.ok(appSource.includes('if(recovering||!session)return <AuthScreen'),
+    'The real application must require Supabase sign-in');
+
   const {default: CampusExperience}=await server.ssrLoadModule('/src/components/CampusExperience.jsx');
   const {default: ProfilePage,validateProfileImage,profileFormFrom}=await server.ssrLoadModule('/src/components/ProfilePage.jsx');
   const fileOK={type:'image/png',size:120000};
@@ -24,7 +32,7 @@ try {
     ['AI/ML','2','B']);
   const studentProfileMarkup=renderToString(React.createElement(ProfilePage,{
     profile:{full_name:'Example Student',role:'student',verified:true,branch:'CSE',academic_year:1,section:'A'},
-    session:{user:{email:'student@example.com',user_metadata:{}}},role:'student',demo:true,
+    session:{user:{email:'student@example.com',user_metadata:{}}},role:'student',
     onProfileChanged:()=>{}
   }));
   for(const label of ['My profile','Profile photo','Full name','Branch / programme','Academic year','Section','Save changes'])
@@ -33,7 +41,7 @@ try {
   assert.ok(studentProfileMarkup.includes('Demo changes')===false);
   const facultyProfileMarkup=renderToString(React.createElement(ProfilePage,{
     profile:{full_name:'Example Faculty',role:'faculty',verified:true},
-    session:{user:{email:'faculty@example.com',user_metadata:{}}},role:'faculty',demo:true,
+    session:{user:{email:'faculty@example.com',user_metadata:{}}},role:'faculty',
     onProfileChanged:()=>{}
   }));
   assert.ok(facultyProfileMarkup.includes('Department / teaching area'),'Faculty fields must be role-aware');
@@ -43,8 +51,8 @@ try {
   const navigationItems=[['Explore rooms',()=>null],['Calendar',()=>null],['My bookings',()=>null],
     ['Announcements',()=>null],['Admin',()=>null]];
   const navHtml=renderToString(React.createElement(TopNavigation,{
-    items:navigationItems,active:'Explore rooms',onNavigate:()=>{},demo:true,noticeCount:2,
-    userName:'Demo Faculty',userRole:'faculty',onSignOut:()=>{}
+    items:navigationItems,active:'Explore rooms',onNavigate:()=>{},noticeCount:2,
+    userName:'Test Faculty',userRole:'faculty',onSignOut:()=>{}
   }));
   assert.ok(navHtml.includes('ig-topnav')&&navHtml.includes('ig-primary-nav'),'New global top bar must render');
   assert.ok(navHtml.includes('ig-slide-track')&&navHtml.includes('ig-slide-cursor'),'Supplied slide-tabs animation must be represented');
@@ -54,8 +62,8 @@ try {
   const navSource=readFileSync('src/components/TopNavigation.jsx','utf8');
   assert.ok(navSource.includes("navigate('My profile')"),
     'Profile dropdown must navigate to My profile');
-  assert.ok(navHtml.includes('DEMO')&&navHtml.includes('Announcements'),
-    'Demo and announcement context must remain available');
+  assert.ok(!navHtml.includes('DEMO')&&navHtml.includes('Announcements'),
+    'Navigation must show real notifications without demo labels');
   assert.ok(navHtml.includes('aria-haspopup="menu"')&&navHtml.includes('ig-profile-trigger'),
     'Desktop profile menu must remain accessible and expose account controls');
   assert.ok(navHtml.includes('aria-controls="ig-mobile-nav"'),
@@ -105,8 +113,8 @@ try {
     'Occupied status remains legible');
   const {default: BlueprintSitePlan}=await server.ssrLoadModule('/src/components/BlueprintSitePlan.jsx');
   const {default: ReservationDialog,AcademicGroupFields}=await server.ssrLoadModule('/src/components/ReservationDialog.jsx');
-  const {previewCohorts,formatCohort,cohortBranchOptions,cohortYearOptions,cohortSectionOptions,cohortMatches}=await server.ssrLoadModule('/src/academicCohorts.js');
-  const {sampleRooms: allRooms}=await server.ssrLoadModule('/src/data.js');
+  const {formatCohort,cohortBranchOptions,cohortYearOptions,cohortSectionOptions,cohortMatches}=await server.ssrLoadModule('/src/academicCohorts.js');
+  const {previewCohorts,sampleRooms:allRooms}=await server.ssrLoadModule('/scripts/test-fixtures.js');
   for(const [building,floor,roomId] of [
     ['IET','Ground','LIBRARY'],['IET','First','IET19'],
     ['IET','Second','IET32'],['DEEK','Ground','LH04'],['DEEK','First','LH14']
@@ -144,7 +152,7 @@ try {
         {id:'DEEK',short:'Deeksha Bhawan',floors:['Ground','First']}],
       rooms:allRooms,building:whichBuilding,floor:currentFloor,selected:'',
       date:'2026-11-05',hour:'11',duration:1,capacity:75,apiAvailability:null,
-      matching:[],demo:true,canBook:false,isAvailable:()=>false,
+      matching:[],canBook:false,isAvailable:()=>false,
       setBuilding:()=>{},setFloor:()=>{},setSelected:()=>{},setDate:()=>{},
       setHour:()=>{},setDuration:()=>{},setCapacity:()=>{},setView:()=>{},
       setShowBooking:()=>{}
