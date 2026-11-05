@@ -136,7 +136,7 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
             </button>)}
           </div>}
         </div>
-        <p>Select a room to see availability and make a reservation.</p>
+
       </div>
       <div className="bp-head-actions">
         <span role="status" className={'bp-live-count '+(liveCount?'has-live':'')}>
