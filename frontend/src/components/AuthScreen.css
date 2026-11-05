@@ -49,9 +49,9 @@
 .ig-auth-page button:focus-visible{outline:3px solid #9FB5FD;outline-offset:3px}
 .ig-auth-page a:focus-visible{outline:3px solid #315CE5;outline-offset:3px}
 .ig-auth-art-panel{position:relative;isolation:isolate;display:flex;min-width:0;overflow:hidden;border-radius:16px;background:#07162C;color:#fff;min-height:640px}
-.ig-auth-art-fallback{position:absolute;inset:0;background:radial-gradient(ellipse at 90% 8%,#6184E8 0%,#315CE5 19%,transparent 54%),radial-gradient(ellipse at 5% 100%,#2349A6 0%,transparent 56%),#07162C;z-index:-2}
-.ig-auth-shader{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;opacity:.83;z-index:-1;pointer-events:none}
-.ig-auth-art-veil{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg,#07162C30 0%,#07162C58 42%,#07162CDE 100%);pointer-events:none}
+.ig-auth-art-fallback{position:absolute;inset:-12%;background:radial-gradient(ellipse at 90% 8%,#6184E8 0%,#315CE5 19%,transparent 54%),radial-gradient(ellipse at 5% 100%,#2349A6 0%,transparent 56%),#07162C;z-index:-2;animation:ig-auth-background-drift 16s ease-in-out infinite alternate;will-change:transform}
+.ig-auth-shader{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;opacity:1;z-index:-1;pointer-events:none}
+.ig-auth-art-veil{position:absolute;inset:0;z-index:0;background:linear-gradient(135deg,#07162C44 0%,#07162C30 52%,#07162C52 100%);pointer-events:none}
 .ig-auth-art-content{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;flex:1;min-width:0;gap:28px;padding:clamp(26px,3.5vw,52px)}
 .ig-auth-art-center{max-width:680px}
 .ig-auth-art-center h2{font-size:clamp(40px,4.25vw,70px);font-weight:650;line-height:1.02;letter-spacing:-.055em;color:#fff;margin:24px 0 20px;text-wrap:balance}
@@ -63,7 +63,7 @@
 @media (max-width:850px){.ig-auth-layout{grid-template-columns:minmax(0,1fr)}.ig-auth-art-panel{min-height:390px}.ig-auth-form-panel{padding:36px 26px}.ig-auth-form-content{max-width:560px}.ig-auth-brand{margin-bottom:32px}.ig-auth-art-center{display:block}.ig-auth-art-center h2{font-size:38px}.ig-auth-art-content{gap:20px}}
 @media (max-width:600px){.ig-auth-page{padding:0}.ig-auth-layout{display:flex;flex-direction:column;gap:0}.ig-auth-form-panel{border:0;border-radius:0;padding:28px 20px 32px;min-height:100dvh;align-items:flex-start}.ig-auth-form-content{max-width:420px}.ig-auth-eyebrow{font-size:9px}.ig-auth-heading h1{font-size:34px}.ig-auth-heading{margin-bottom:28px}.ig-auth-brand{margin-bottom:44px}.ig-auth-socials{grid-template-columns:1fr}.ig-auth-art-panel{border-radius:0;min-height:330px}.ig-auth-art-center h2{font-size:36px}.ig-auth-name-grid{gap:10px}}
 @media (max-width:350px){.ig-auth-name-grid{grid-template-columns:1fr}.ig-auth-heading h1{font-size:30px}}
-@media (prefers-reduced-motion:reduce){.ig-auth-page *{transition:none!important;animation:none!important}.ig-auth-shader{display:none!important}}
+@media (prefers-reduced-motion:reduce){.ig-auth-page *{transition:none!important;animation:none!important}.ig-auth-shader{display:none!important}.ig-auth-art-fallback{animation:none!important;transform:none!important}}
 
 /* Fit both panels into one desktop viewport: no page or nested-panel scrolling.
    Keep natural document flow on small/zoomed screens so fields are never clipped. */
@@ -98,3 +98,5 @@
   .ig-auth-brand{margin-bottom:24px}
   .ig-auth-heading{margin-bottom:22px}
 }
+
+@keyframes ig-auth-background-drift{from{transform:translate3d(-2%,1%,0) scale(1)}to{transform:translate3d(3%,-3%,0) scale(1.08)}}

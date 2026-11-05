@@ -39,7 +39,16 @@ export default function AuthScreen({recovery=false, onRecoveryComplete, onRecove
   const [showPassword,setShowPassword] = useState(false);
   const [busy,setBusy] = useState('');
   const [feedback,setFeedback] = useState(null);
-  const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const [reducedMotion, setReducedMotion] = useState(() =>
+    typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  );
+  useEffect(() => {
+    const preference = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    if (!preference) return undefined;
+    const onChange = (event) => setReducedMotion(event.matches);
+    preference.addEventListener?.('change', onChange);
+    return () => preference.removeEventListener?.('change', onChange);
+  }, []);
   useEffect(() => { if(recovery) setMode('reset'); }, [recovery]);
 
   const signup = mode === 'signup', signin = mode === 'signin', forgot = mode === 'forgot', reset = mode === 'reset';
@@ -151,8 +160,9 @@ export default function AuthScreen({recovery=false, onRecoveryComplete, onRecove
       </section>
       <aside className="ig-auth-art-panel" aria-label="IET Grid campus introduction">
         <div className="ig-auth-art-fallback"/>
-        <GrainGradient className="ig-auth-shader" speed={reducedMotion?0:0.16} scale={1} rotation={0} offsetX={0} offsetY={0}
-          softness={0.62} intensity={0.48} noise={0.22} shape="corners"
+        <GrainGradient className="ig-auth-shader" speed={reducedMotion ? 0 : 1} frame={2854.5}
+          fit="cover" width="100%" height="100%" scale={1} rotation={0} offsetX={0} offsetY={0}
+          softness={0.55} intensity={0.65} noise={0.25} shape="corners"
           colors={['#315CE5','#10213B','#6C8FF7','#CFDDFC']} colorBack="#07162C"/>
         <div className="ig-auth-art-veil"/>
         <div className="ig-auth-art-content">
