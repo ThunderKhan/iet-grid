@@ -29,7 +29,7 @@ export default function CampusExperience({
   buildings,rooms,building,setBuilding,floor,setFloor,selected,setSelected,
   date,setDate,hour,setHour,duration,setDuration,capacity,setCapacity,
   bookingKind,setBookingKind,requiredEquipment,setRequiredEquipment,
-  apiAvailability,apiWarning,isAvailable,matching,current,canBook,
+  apiAvailability,apiWarning,isAvailable,matching,current,canBook,inventoryLoading=false,
   setShowBooking,setView,selectedCohortLabel,
   activeSessions={},nowScheduleState='loading',currentTimeMs=Date.now()
 }) {
@@ -73,7 +73,7 @@ export default function CampusExperience({
     else revealMap();
   };
   const roomInfo=current?<div className="cx-room-info">
-    <div className="cx-room-name"><div><span className="cx-overline">SELECTED CLASSROOM</span><h2>{current.id}</h2>
+    <div className="cx-room-name"><div><h2>{current.id}</h2>
       <p>{current.floor} floor · {current.type}</p></div><Badge value={currentStatus}/></div>
     {runningInSelectedRoom&&<section className="cx-running-room" aria-label="Class currently running in selected room">
       <div className="cx-running-heading"><span className="cx-running-indicator"/> CLASS IN PROGRESS NOW</div>
@@ -114,8 +114,11 @@ export default function CampusExperience({
     setSheetOpen(false);
   };
   return <div className="cx-page">
-    {apiWarning&&<div className="cx-warning" role="alert"><Info size={17}/>{apiWarning}</div>}
-    <section className="cx-map-hero" ref={mapRef} aria-label="Campus floor explorer">
+    {apiWarning&&<div className="cx-warning" role="status"><Info size={17} aria-hidden="true"/>{apiWarning}</div>}
+    {inventoryLoading&&<div className="cx-loading" role="status">
+      <span className="cx-loading-indicator" aria-hidden="true"/> Loading campus classrooms from the university database…
+    </div>}
+    <section className="cx-map-hero" ref={mapRef} aria-label="Campus floor explorer" aria-busy={inventoryLoading}>
       <BlueprintSitePlan rooms={rooms} building={building} floor={floor} selected={selected}
         onSelect={selectRoom} getStatus={getStatus} mode={mode}
         floorOptions={floorOptions} onNavigateFloor={goToFloor} onModeChange={setMode}
@@ -174,7 +177,7 @@ export default function CampusExperience({
       </section>
       </div>
       <aside className="cx-aside">
-        <div className="cx-side-head"><span className="cx-overline">BOOKING DETAILS</span><small>Step 1 of 2 · Select room</small></div>
+        <div className="cx-side-head"><h2>Room details</h2></div>
         {roomInfo}
         {matching.length>0&&<div className="cx-other"><div className="cx-other-head"><span>Other suitable rooms</span><span>{matching.length} found</span></div>
           {matching.filter(r=>r.id!==selected).slice(0,3).map(r=><button type="button" key={r.id} onClick={()=>selectAlternative(r)}>
