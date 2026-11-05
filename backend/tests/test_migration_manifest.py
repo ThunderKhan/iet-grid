@@ -11,6 +11,8 @@ EXPECTED = {
     "006_imports_and_in_app_receipts.sql",
     "007_fix_allocation_trigger_dispatch.sql",
     "008_scoped_reads_and_notice_publication.sql",
+    "009_exam_approval_notices.sql",
+    "010_confirmed_identity_provisioning.sql",
 }
 
 
