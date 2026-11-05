@@ -66,3 +66,9 @@ Twenty RLS-protected public tables model buildings, floors, rooms, students/coho
 [MVP](docs/MVP.md) · [PRD](docs/PRD.md) · [Implementation Plan](docs/IMPLEMENTATION_PLAN.md) · [Decisions](docs/DECISIONS.md) · [Architecture](docs/ARCHITECTURE.md) · [Backend Implementation](docs/BACKEND_IMPLEMENTATION.md) · [System](docs/SYSTEM.md) · [Design](docs/DESIGN.md) · [Test Plan](docs/TEST_PLAN.md) · [Requirement Traceability](docs/REQUIREMENTS_TRACEABILITY.md)
 
 **Submission:** 5 November 2026, 21:00 IST — public app, GitHub link, and Word written solution. Deployment READY does not by itself establish production correctness.
+
+## Project team
+
+- **Ayan Khan** — [@ThunderKhan](https://github.com/ThunderKhan)
+- **Shreydhar Dubey** — Team member
+- **Vivek Shukla** — Team member
