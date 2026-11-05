@@ -1,4 +1,6 @@
 -- Tighten private booking detail reads and announcement publication scope.
+alter table public.academic_cohorts add column if not exists home_building text
+ references public.buildings(code) default 'IET';
 drop policy if exists bookings_read_scoped on public.bookings;
 create policy bookings_read_scoped on public.bookings for select to authenticated using(
  created_by=(select auth.uid())
@@ -31,8 +33,6 @@ create policy announcements_read_scoped on public.announcements for select to au
  or exists(select 1 from public.student_memberships m
    where m.user_id=(select auth.uid()) and m.cohort_id=announcements.cohort_id and m.verified and m.active)
 );
-alter table public.academic_cohorts add column if not exists home_building text
- references public.buildings(code) default 'IET';
 -- All read acknowledgements must use the guarded RPC, not a direct insert.
 revoke insert on public.announcement_reads from anon,authenticated;
 drop policy if exists reads_insert_self on public.announcement_reads;
