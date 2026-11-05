@@ -1,5 +1,5 @@
 import React, {useMemo, useState} from 'react';
-import {DoorOpen, Info} from 'lucide-react';
+import {ChevronLeft, ChevronRight, DoorOpen, Info} from 'lucide-react';
 import './BlueprintSitePlan.css';
 
 /* Source: DDUGU Build With AI brief, page 1, IET & Deeksha floor blueprint.
@@ -93,7 +93,7 @@ function Room({item,room,availability,selected,onSelect}){
     <title>{item.id+' — '+(room?statuses[s]:'Not in dataset')}</title>
   </g>;
 }
-export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSelect,getStatus,mode='plan'}){
+export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSelect,getStatus,mode='plan',floorOptions=[],onNavigateFloor=()=>{}}){
   const layout=(layouts[building+':'+floor]||[]).filter(item=>Boolean(item.id));
   const filtered=rooms.filter(r=>r.building===building&&r.floor===floor);
   const byId=useMemo(()=>new Map(filtered.map(r=>[r.id,r])),[filtered]);
@@ -102,10 +102,19 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
   const sorted=useMemo(()=>[...filtered].sort((a,b)=>sortBy==='capacity'?b.capacity-a.capacity:a.id.localeCompare(b.id)),[filtered,sortBy]);
   const stateOf=r=>status(r?getStatus(r):'unknown');
   const isDeek=building==='DEEK';
+  const availableFloors=floorOptions.length?floorOptions:[floor];
+  const floorIndex=availableFloors.indexOf(floor);
   return <section className="bp-board" aria-label={(isDeek?'Deeksha Bhawan':'IET')+' '+floor+' floor'}>
     <header className="bp-head"><div><h2>Classroom layout</h2>
       <p>Select a room to see availability and make a reservation.</p></div>
       <span className="bp-source"><Info size={14}/> Based on supplied campus floor plans</span></header>
+    <div className="bp-navigation-stage" role="group" aria-label="Floor plan and navigation">
+      <button type="button" className="bp-floor-arrow bp-floor-previous"
+        aria-label="Previous floor"
+        title={floorIndex>0?'Previous floor: '+availableFloors[floorIndex-1]:'First floor reached'}
+        disabled={floorIndex<=0} onClick={()=>onNavigateFloor(-1)}>
+        <ChevronLeft size={22}/>
+      </button>
     {mode==='list'?<div className="bp-list">
       <div className="bp-list-top"><span>{filtered.length} mapped spaces</span><label>Sort <select value={sortBy} onChange={e=>setSortBy(e.target.value)}><option value="id">Room number</option><option value="capacity">Capacity</option></select></label></div>
       <div className="bp-list-rooms">{sorted.map(r=><button type="button" key={r.id} className={'bp-list-row'+(selected===r.id?' is-selected':'')} onClick={()=>onSelect(r)}>
@@ -122,6 +131,18 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
         <text x="472" y={isDeek?548:447} textAnchor="middle" className="bp-disclaimer">ROOM ARRANGEMENT BASED ON SUPPLIED PLAN · SIMPLIFIED NOT TO SCALE</text>
       </svg><div className="bp-mobile-cue">← Scroll sideways for the full floor plan →</div>
     </div>}
+      <button type="button" className="bp-floor-arrow bp-floor-next"
+        aria-label="Next floor"
+        title={floorIndex>=0&&floorIndex<availableFloors.length-1?'Next floor: '+availableFloors[floorIndex+1]:'Last floor reached'}
+        disabled={floorIndex<0||floorIndex>=availableFloors.length-1} onClick={()=>onNavigateFloor(1)}>
+        <ChevronRight size={22}/>
+      </button>
+    </div>
+    <div className="bp-floor-position" role="status" aria-live="polite" aria-atomic="true">
+      <span className="bp-floor-position-dot" aria-hidden="true"/>
+      <strong>{floor} floor</strong>
+      <span className="bp-floor-position-count">{floorIndex+1} of {availableFloors.length}</span>
+    </div>
     <footer className="bp-footer"><div className="bp-legend">
       {Object.entries(statuses).filter(([s])=>s!=='pending').map(([s,label])=><span key={s}><i className={'bp-dot bp-dot-'+s}/>{label}</span>)}
     </div>{missing.length>0&&<p>{missing.length} imported room(s) not located in the supplied drawing. Choose them in List view.</p>}</footer>

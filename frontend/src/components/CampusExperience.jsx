@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import * as Dialog from '@radix-ui/react-dialog';
 import VelarisGradient from './VelarisGradient';
-import {ArrowRight, BookOpenText, Building2, CalendarDays, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Clock3, DoorOpen, Info, Layers3, List, Map as MapIcon, Settings2, SlidersHorizontal, Users, X} from 'lucide-react';
+import {ArrowRight, BookOpenText, Building2, CalendarDays, CheckCircle2, ChevronDown, Clock3, DoorOpen, Info, Layers3, List, Map as MapIcon, Settings2, SlidersHorizontal, Users, X} from 'lucide-react';
 import BlueprintSitePlan from './BlueprintSitePlan';
 import './CampusExperience.css';
 
@@ -77,9 +77,9 @@ export default function CampusExperience({
     <p>Select a room from the floor map to see its status and reserve it for your class.</p></div>;
   const buildingName=building==='IET'?'Institute of Engineering & Technology':'Deeksha Bhawan';
   const floorOptions=buildings.find(b=>b.id===building)?.floors||[];
-  const floorIndex=floorOptions.indexOf(floor);
   const goToFloor=offset=>{
-    const nextFloor=floorOptions[floorIndex+offset];
+    const index=floorOptions.indexOf(floor);
+    const nextFloor=index>=0?floorOptions[index+offset]:null;
     if(!nextFloor)return;
     setFloor(nextFloor);
     setSelected('');
@@ -105,22 +105,7 @@ export default function CampusExperience({
             className={building===b.id?'active':''} onClick={()=>chooseBuilding(b.id)}>
             <Building2 size={16}/>{b.id==='DEEK'?'Deeksha':b.short}</button>)}
         </div>
-        <span className="cx-divider" aria-hidden="true"/>
-        <div className="cx-floor-stepper" role="group" aria-label="Navigate floors">
-          <button type="button" className="cx-floor-arrow" aria-label="Previous floor"
-            title="Previous floor" disabled={floorIndex<=0} onClick={()=>goToFloor(-1)}>
-            <ChevronLeft size={18}/>
-          </button>
-          <div className="cx-floor-current" role="status" aria-live="polite" aria-atomic="true">
-            <span className="cx-floor-indicator" aria-hidden="true"/>
-            <strong>{floor} floor</strong>
-            <small>{floorIndex+1} of {floorOptions.length}</small>
-          </div>
-          <button type="button" className="cx-floor-arrow" aria-label="Next floor"
-            title="Next floor" disabled={floorIndex<0||floorIndex>=floorOptions.length-1} onClick={()=>goToFloor(1)}>
-            <ChevronRight size={18}/>
-          </button>
-        </div>
+
       </div>
       <Popover.Root>
         <Popover.Trigger asChild><button type="button" className="cx-schedule-trigger" aria-label="Edit selected date, time and room requirements">
@@ -153,7 +138,8 @@ export default function CampusExperience({
           </div>
         </div>
         <BlueprintSitePlan rooms={rooms} building={building} floor={floor} selected={selected}
-          onSelect={selectRoom} getStatus={getStatus} mode={mode}/>
+          onSelect={selectRoom} getStatus={getStatus} mode={mode}
+          floorOptions={floorOptions} onNavigateFloor={goToFloor}/>
       </div>
       <aside className="cx-aside">
         <div className="cx-side-head"><span className="cx-overline">BOOKING DETAILS</span><small>Step 1 of 2 · Select room</small></div>

@@ -67,3 +67,30 @@
  .bp-footer{padding:12px 14px}.bp-legend{gap:8px 12px}
 }
 @media(prefers-reduced-motion:reduce){.bp-room-surface,.bp-room-border{transition:none}}
+/* Arrow navigation occupies dedicated gutters beside the floor plan; the
+   current floor sits centered below the drawing, above the room-status legend. */
+.bp-navigation-stage{display:grid;grid-template-columns:52px minmax(0,1fr) 52px;align-items:center;
+  background:#F8FAFE;min-width:0;gap:0;padding:13px 8px 0}
+.bp-navigation-stage>.bp-viewport,.bp-navigation-stage>.bp-list{grid-column:2;grid-row:1;min-width:0}
+.bp-navigation-stage>.bp-floor-previous{grid-column:1;grid-row:1;justify-self:center}
+.bp-navigation-stage>.bp-floor-next{grid-column:3;grid-row:1;justify-self:center}
+.bp-navigation-stage .bp-viewport{padding:12px 0 17px}
+.bp-navigation-stage .bp-list{width:100%}
+.bp-floor-arrow{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;
+  background:#fff;border:1px solid #C4D3E9;color:#315CE5;cursor:pointer;
+  transition:background .15s,border-color .15s,box-shadow .15s}
+.bp-floor-arrow:hover:not(:disabled){background:#EDF2FF;border-color:#7E9FE7;box-shadow:0 3px 10px #315CE514}
+.bp-floor-arrow:focus-visible{outline:3px solid #A5BBFF;outline-offset:2px}
+.bp-floor-arrow:disabled{opacity:.35;color:#70839B;cursor:not-allowed;background:#F4F7FB}
+.bp-floor-position{display:flex;align-items:center;justify-content:center;gap:9px;padding:13px 16px 17px;
+  background:#F8FAFE;border-bottom:1px solid #E5EBF4;color:#244DC5}
+.bp-floor-position strong{font-size:12px;font-weight:760}
+.bp-floor-position-dot{width:8px;height:8px;border-radius:50%;background:#315CE5}
+.bp-floor-position-count{font-size:11px;color:#637FA7;font-weight:650}
+@media(max-width:700px){
+  .bp-navigation-stage{grid-template-columns:43px minmax(0,1fr) 43px;padding:7px 3px 0}
+  .bp-floor-arrow{width:39px;height:39px}
+  .bp-navigation-stage .bp-viewport{padding:7px 0 10px}
+  .bp-floor-position{padding:12px 12px 15px}
+}
+@media(prefers-reduced-motion:reduce){.bp-floor-arrow{transition:none}}

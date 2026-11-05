@@ -51,6 +51,17 @@ try {
     assert.ok(html.includes('aria-label="Previous floor"'),'Missing previous floor arrow');
     assert.ok(html.includes('aria-label="Next floor"'),'Missing next floor arrow');
     assert.ok(!html.includes('cx-floor-tabs'),'Old floor tabs must be removed');
+    assert.ok(!html.includes('cx-floor-stepper'),'Old toolbar stepper must be removed');
+    assert.ok(html.includes('bp-navigation-stage'),'Floor navigation must be attached to the map');
+    const mapStart=html.indexOf('bp-navigation-stage');
+    const prevPosition=html.indexOf('aria-label="Previous floor"');
+    const nextPosition=html.indexOf('aria-label="Next floor"');
+    const currentPosition=html.indexOf('bp-floor-position"');
+    const footerPosition=html.indexOf('bp-footer"');
+    assert.ok(mapStart>=0&&prevPosition>mapStart&&nextPosition>prevPosition,
+      'Floor arrows must flank the room board');
+    assert.ok(currentPosition>nextPosition&&footerPosition>currentPosition,
+      'Current floor label must appear below the drawing and above the legend');
     assert.ok(html.includes(currentFloor+' floor'),'Current floor label must be visible');
     assert.ok(html.includes((floors===2?'2':'3')+' floors')===false,'Floor counter must remain concise');
     if(whichBuilding==='DEEK'){
