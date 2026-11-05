@@ -162,7 +162,7 @@ function Room({item,room,availability,selected,onSelect,activeSession}){
   const maxTitleLength=Math.max(10,Math.floor((item.w-22)/6.1));
   const shortLiveTitle=activeTitle.length>maxTitleLength
     ?activeTitle.slice(0,maxTitleLength-1).trimEnd()+'…':activeTitle;
-  return <g className={'bp-room bp-'+s+(active?' is-selected':'')} role={room?'button':'img'}
+  return <g data-room-id={item.id} className={'bp-room bp-'+s+(active?' is-selected':'')} role={room?'button':'img'}
     tabIndex={room?0:undefined} aria-pressed={room?active:undefined}
     aria-label={item.id+', '+(room?statuses[s]:'Not in dataset')+(room?', '+room.capacity+' seats':'')
       +(hasLive?', Now running: '+activeTitle:'')}
@@ -193,6 +193,23 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
   const byId=useMemo(()=>new Map(filtered.map(r=>[r.id,r])),[filtered]);
   const missing=filtered.filter(r=>!layout.some(l=>l.id===r.id));
   const [sortBy,setSortBy]=useState('id');
+  const viewportRef=useRef(null);
+  useEffect(()=>{
+    const viewport=viewportRef.current;
+    if(mode!=='plan'||!selected||!viewport||viewport.scrollWidth<=viewport.clientWidth+2)return;
+    const roomNode=Array.from(viewport.querySelectorAll('[data-room-id]'))
+      .find(node=>node.getAttribute('data-room-id')===selected);
+    if(!roomNode)return;
+    const frame=viewport.getBoundingClientRect();
+    const bounds=roomNode.getBoundingClientRect();
+    const offset=bounds.left+bounds.width/2-frame.left-frame.width/2;
+    if(Math.abs(offset)<18)return;
+    const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    viewport.scrollTo({
+      left:Math.max(0,viewport.scrollLeft+offset),
+      behavior:reduced?'instant':'smooth'
+    });
+  },[selected,building,floor,mode]);
   const sorted=useMemo(()=>[...filtered].sort((a,b)=>sortBy==='capacity'?b.capacity-a.capacity:a.id.localeCompare(b.id)),[filtered,sortBy]);
   const stateOf=r=>status(r?getStatus(r):'unknown');
   const isDeek=building==='DEEK';
@@ -243,7 +260,7 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
             <small className="bp-list-live-title">{activeSessions[r.id].title}</small></>:statuses[stateOf(r)]}
         </span>
       </button>)}{!sorted.length&&<p className="bp-list-empty">No rooms loaded for this floor.</p>}</div>
-    </div>:<div className="bp-viewport">
+    </div>:<div className="bp-viewport" ref={viewportRef}>
       <svg viewBox={isDeek?'0 70 940 455':'0 80 940 335'} className="bp-svg" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Interactive classroom floor plan. Use Tab and Enter to select a room.">
         <Shell building={building} floor={floor}/>
         {layout.map(item=><Room key={item.id} item={item} room={byId.get(item.id)} availability={stateOf(byId.get(item.id))}
