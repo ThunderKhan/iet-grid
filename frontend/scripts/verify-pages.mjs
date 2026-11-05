@@ -30,7 +30,7 @@ try {
     accountRole:'faculty',setAccountRole:noop,accountBusy:false,grantTestRole:noop};
   const views=[
     ['Overview',pages.OverviewPage,'Quick room finder'],
-    ['Explore rooms',pages.ExplorePage,'Interactive floor board'],
+    ['Explore rooms',pages.ExplorePage,'Campus map'],
     ['Calendar',pages.CalendarPage,'Campus timetable'],
     ['My bookings',pages.BookingsPage,'Classroom reservations'],
     ['Announcements',pages.AnnouncementsPage,'Campus announcements'],

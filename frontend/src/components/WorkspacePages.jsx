@@ -1,7 +1,8 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import {ArrowRight, ArrowUpRight, Bell, BookOpen, Building2, CalendarDays, Check, CheckCheck, CheckCircle2, ChevronLeft, ChevronRight, Clock3, DoorOpen, Filter, Info, Layers, ListFilter, LockKeyhole, MapPin, Plus, RefreshCcw, Search, Send, Shield, SlidersHorizontal, Sparkles, Users, X} from 'lucide-react';
-import FloorPlan from './FloorPlan';
+import BlueprintBoard from './BlueprintBoard';
+import './CampusMapPage.css';
 import './WorkspacePages.css';
 
 const strDate = (value) => new Date(value).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Kolkata'});
@@ -101,116 +102,128 @@ export function OverviewPage({rooms,bookings,notices,matching,buildings,selected
 }
 const TIME_OPTIONS=Array.from({length:11},(_,i)=>i+8);
 function FieldSelect({label,value,onChange,children}){return <label className="ig-control-field"><span>{label}</span><select value={value} onChange={onChange}>{children}</select></label>}
-export function ExplorePage({buildings,rooms,building,setBuilding,floor,setFloor,selected,setSelected,date,setDate,hour,setHour,duration,setDuration,capacity,setCapacity,bookingKind,setBookingKind,requiredEquipment,setRequiredEquipment,apiAvailability,apiWarning,isAvailable,matching,current,canBook,setShowBooking,setView,demo}) {
-  const [isMobile,setIsMobile]=useState(()=>typeof window!=='undefined' && window.matchMedia('(max-width:720px)').matches);
+export function ExplorePage({buildings,rooms,building,setBuilding,floor,setFloor,selected,setSelected,date,setDate,hour,setHour,duration,setDuration,capacity,setCapacity,apiAvailability,apiWarning,isAvailable,matching,current,canBook,setShowBooking,setView,demo}) {
+  const [isMobile,setIsMobile]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(max-width:720px)').matches);
   const [sheetOpen,setSheetOpen]=useState(false);
   useEffect(()=>{
     const media=window.matchMedia('(max-width:720px)');
-    const changed=(event)=>setIsMobile(event.matches);
-    media.addEventListener('change',changed);
-    return ()=>media.removeEventListener('change',changed);
+    const cb=e=>setIsMobile(e.matches);
+    media.addEventListener('change',cb);
+    return ()=>media.removeEventListener('change',cb);
   },[]);
-  useEffect(()=>{
-    setSheetOpen(Boolean(isMobile&&selected));
-  },[selected,isMobile]);
-  const selectRoom=(room)=>{setSelected(room.id);if(isMobile)setSheetOpen(true)};
-  const getStatus=(r)=>{
-    if(!demo&&!apiAvailability)return 'unknown';
-    const record=apiAvailability?.find(a=>a.id===r.id);
-    if(!demo&&!record)return 'unknown';
-    if(!demo && record.reason==='ineligible')return 'restricted';
-    if(r.capacity<capacity)return 'restricted';
-    return isAvailable(r)?'available':'occupied';
+  useEffect(()=>{if(!isMobile)setSheetOpen(false)},[isMobile]);
+  const getStatus=room=>{
+    if(room.capacity<capacity)return 'restricted';
+    if(!demo){
+      if(!apiAvailability)return 'unknown';
+      const result=apiAvailability.find(r=>r.id===room.id);
+      if(!result)return 'unknown';
+      if(result.reason==='ineligible')return 'restricted';
+    }
+    return isAvailable(room)?'available':'occupied';
   };
-  const getCurrentStatus=current?getStatus(current):'unknown';
-  const selectedAvailability=current?apiAvailability?.find(r=>r.id===current.id):null;
-  const bookingNeedsApproval=bookingKind==='exam'||bookingKind==='event'||Boolean(current?.restricted);
-  const provisionalCount=rooms.filter(r=>r.verified!==true).length;
-  const eligible=!!current&&getCurrentStatus==='available'&&canBook;
-  const chooseBuilding=id=>{setBuilding(id);setFloor(buildings.find(b=>b.id===id)?.floors?.[0]||'Ground');setSelected('')};
-  return <div className="ig-page-stack">
-    <section className="ig-card ig-filters-card">
-      <div className="ig-filter-title"><div><span className="ig-overline">BOOKING CONSOLE</span><h2><SlidersHorizontal size={19}/> Find a space</h2></div><span className="ig-filter-help"><Info size={14}/> Availability is checked for the selected interval.</span></div>
-      <div className="ig-building-select" role="group" aria-label="Campus building">{buildings.map(b=><button type="button" key={b.id}
-        aria-pressed={building===b.id} className={building===b.id?'active':''} onClick={()=>chooseBuilding(b.id)}><Building2 size={16}/>{b.short}</button>)}</div>
-      <div className="ig-filter-controls">
-        <FieldSelect label="Floor" value={floor} onChange={e=>{setFloor(e.target.value);setSelected('')}}>
-          {buildings.find(b=>b.id===building)?.floors.map(f=><option key={f} value={f}>{f} floor</option>)}</FieldSelect>
-        <label className="ig-control-field"><span>Date</span><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></label>
-        <FieldSelect label="Start time (IST)" value={hour} onChange={e=>setHour(e.target.value)}>
-          {TIME_OPTIONS.map(h=><option key={h} value={String(h)}>{String(h).padStart(2,'0')}:00</option>)}</FieldSelect>
-        <FieldSelect label="Duration" value={duration} onChange={e=>setDuration(Number(e.target.value))}><option value={1}>1 hour</option><option value={2}>2 hours</option><option value={3}>3 hours</option></FieldSelect>
-        <FieldSelect label="Seats required" value={capacity} onChange={e=>setCapacity(Number(e.target.value))}>{[30,75,150,200].map(n=><option key={n} value={n}>{n} seats</option>)}</FieldSelect>
-        <FieldSelect label="Session type" value={bookingKind} onChange={e=>setBookingKind(e.target.value)}><option value="lecture">Extra lecture</option><option value="practical">Practical</option><option value="exam">Examination</option><option value="event">Academic event</option></FieldSelect>
-        <FieldSelect label="Required equipment" value={requiredEquipment} onChange={e=>setRequiredEquipment(e.target.value)}><option value="">No requirement</option><option value="projector">Projector</option><option value="computer">Computer</option><option value="microphone">Microphone</option></FieldSelect>
+  const currentStatus=current?getStatus(current):'unknown';
+  const bookable=!!current&&canBook&&currentStatus==='available';
+  const selectRoom=room=>{setSelected(room.id);if(isMobile)setSheetOpen(true)};
+  const selectBuilding=id=>{
+    setBuilding(id);
+    setFloor(buildings.find(b=>b.id===id)?.floors[0]||'Ground');
+    setSelected('');
+    setSheetOpen(false);
+  };
+  const onSuggestion=room=>{
+    setBuilding(room.building);setFloor(room.floor);
+    setSelected(room.id);if(isMobile)setSheetOpen(true);
+  };
+  const roomSpecs=<>
+    {current&&<>
+      <div className="bp-inspector-title">
+        <div><h2>{current.id}</h2><p>{current.building==='IET'?'IET':'Deeksha Bhawan'} · {current.floor} floor</p></div>
+        <StatePill status={currentStatus}/>
+      </div>
+      <hr className="bp-inspector-separator"/>
+      <div className="bp-inspector-specs">
+        <div><span>Seats</span><b>{current.capacity}{current.verified?'':'*'} students</b></div>
+        <div><span>Type</span><b className="ig-capitalize">{current.type}</b></div>
+        <div><span>Date</span><b>{dayLabel(date)}</b></div>
+        <div><span>Time</span><b>{String(hour).padStart(2,'0')}:00 · {duration} hour{duration>1?'s':''}</b></div>
+      </div>
+      <div className="bp-inspector-actions">
+        <button type="button" className="bp-inspector-primary" disabled={!bookable}
+          onClick={()=>{setSheetOpen(false);setShowBooking(true)}}>Reserve classroom <ArrowRight size={16}/></button>
+        <button type="button" className="bp-inspector-secondary" onClick={()=>{setSheetOpen(false);setView('Calendar')}}>
+          <CalendarDays size={16}/> View timetable</button>
+      </div>
+      {!canBook&&<p className="bp-inspector-disclaimer">Room reservations require a verified faculty or operator account.</p>}
+      {canBook&&!bookable&&<p className="bp-inspector-disclaimer">This room is not verified as available and eligible for the selected interval.</p>}
+      {!current.verified&&<p className="bp-inspector-disclaimer">* Capacity is provisional. Source drawing shows room location; capacities need university verification.</p>}
+    </>}
+  </>;
+  return <div className="bp-home">
+    <div className="bp-heading">
+      <div><h1>Campus map</h1><p>Find and reserve classrooms using the original IET and Deeksha Bhawan floor plans.</p></div>
+      <span className="bp-heading-source"><MapPin size={14}/> Supplied architectural blueprint</span>
+    </div>
+    <section className="bp-filters" aria-label="Room search filters">
+      <div className="bp-primary-filters">
+        <div className="bp-choice-group" role="group" aria-label="Choose building">
+          <span>Building</span>
+          {buildings.map(b=><button key={b.id} type="button" aria-pressed={building===b.id} onClick={()=>selectBuilding(b.id)}>
+            <Building2 size={15}/>{b.short}</button>)}
+        </div>
+        <div className="bp-choice-group" role="group" aria-label="Choose floor">
+          <span>Floor</span>
+          {buildings.find(b=>b.id===building)?.floors.map(f=><button key={f} type="button" aria-pressed={floor===f}
+            onClick={()=>{setFloor(f);setSelected('');setSheetOpen(false)}}>{f}</button>)}
+        </div>
+      </div>
+      <div className="bp-secondary-filters">
+        <label><span>Date</span><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></label>
+        <label><span>Start time · IST</span><select value={hour} onChange={e=>setHour(e.target.value)}>
+          {TIME_OPTIONS.map(h=><option key={h} value={String(h)}>{String(h).padStart(2,'0')}:00</option>)}</select></label>
+        <label><span>Duration</span><select value={duration} onChange={e=>setDuration(Number(e.target.value))}>
+          {[1,2,3].map(h=><option key={h} value={h}>{h} hour{h>1?'s':''}</option>)}</select></label>
+        <label><span>Required seats</span><select value={capacity} onChange={e=>setCapacity(Number(e.target.value))}>
+          {[30,75,150,200].map(n=><option key={n} value={n}>{n} students</option>)}</select></label>
       </div>
     </section>
-    <div className="ig-metadata-summary"><Info size={15}/>{rooms.filter(r=>r.verified===true).length} verified capacity records · {provisionalCount} provisional. Equipment and accessibility are not documented for current room inventory. No missing feature is assumed to exist.</div>
-    {apiWarning&&<div className="ig-alert" role="alert"><Info size={18}/>{apiWarning}</div>}
-    <div className="ig-explore-columns">
-      <section className="ig-map-column"><FloorPlan rooms={rooms} building={building} floor={floor} selected={selected} onSelect={selectRoom} getStatus={getStatus}/></section>
-      <aside className="ig-explore-inspector">
-        <section className="ig-card ig-inspector-card">
-          <PanelHead eyebrow="ROOM INSPECTOR" title="Selected space" icon={DoorOpen}/>
-          {current?<div className="ig-inspector-body">
-            <div className="ig-inspector-title"><div><h3>{current.id}</h3><small>{current.building==='IET'?'IET':'Deeksha Bhawan'} · {current.floor} floor</small></div><StatePill status={getCurrentStatus}/></div>
-            <div className="ig-metadata-badges"><span className={current.verified?'ig-metadata-verified':'ig-metadata-provisional'}>{current.verified?'Verified capacity':'Provisional capacity'}</span>
-            {bookingNeedsApproval&&<span className="ig-metadata-review">Approval required for {bookingKind==='exam'?'examination':bookingKind==='event'?'event':'restricted room'}</span>}</div>
-            <div className="ig-inspector-features">
-              <div><Users size={18}/><span>Capacity</span><strong>{current.capacity}{current.verified?'':'*'} seats</strong></div>
-              <div><Layers size={18}/><span>Room type</span><strong className="ig-capitalize">{current.type}</strong></div>
-              <div><Clock3 size={18}/><span>Requested interval</span><strong>{String(hour).padStart(2,'0')}:00 · {duration}h</strong></div>
-              <div><CalendarDays size={18}/><span>Date</span><strong>{dayLabel(date)}</strong></div>
-            </div>
-            <button type="button" className="ig-btn ig-btn-primary ig-btn-block" disabled={!eligible} onClick={()=>setShowBooking(true)}>{bookingNeedsApproval?'Request this room':'Reserve this room'} <ArrowRight size={17}/></button>
-            {!canBook&&<p className="ig-inspector-explain">Only verified faculty and approved staff can book rooms.</p>}
-            {canBook&&!eligible&&<p className="ig-inspector-explain">This room is not confirmed eligible for the selected time and capacity. Choose a verified available alternative.</p>}
-            {!current.verified&&<p className="ig-note"><Info size={14}/> Capacity is provisional until validated by the institute.</p>}
-            {current.accessible==null&&<p className="ig-note"><Info size={14}/> Accessibility information has not been documented.</p>}
-            {!current.equipment?.length&&<p className="ig-note"><Info size={14}/> Equipment is not recorded; do not assume a projector or computer is present.</p>}
-            {!!requiredEquipment&&selectedAvailability?.reason==='ineligible'&&<p className="ig-note"><Info size={14}/> Requested equipment must appear in verified room metadata before booking.</p>}
-            <button type="button" className="ig-btn ig-btn-outline ig-btn-block" onClick={()=>setView('Calendar')}><CalendarDays size={16}/> View schedule</button>
-          </div>:<Empty icon={DoorOpen} title="Choose a classroom" body="Select any room from the map or list to inspect its eligibility and reservation options."/>}
+    {apiWarning&&<p className="bp-toast-inline" role="alert">{apiWarning}</p>}
+    <div className="bp-layout">
+      <section className="bp-main" aria-label="Campus blueprint">
+        <BlueprintBoard rooms={rooms} building={building} floor={floor} selected={selected}
+          onSelect={selectRoom} getStatus={getStatus}/>
+      </section>
+      <aside className="bp-aside">
+        <section className="bp-inspector">
+          <div className="bp-inspector-head"><strong>Room details</strong><span>Selected floor</span></div>
+          <div className="bp-inspector-content">
+            {current?roomSpecs:<div className="bp-no-selection"><DoorOpen size={25}/>
+              <h3>Select a room on the plan</h3>
+              <p>Click a classroom outline or choose Rooms to inspect details and availability.</p></div>}
+          </div>
         </section>
-        <section className="ig-card ig-alternative-card">
-          <PanelHead eyebrow="ALTERNATIVE SPACES" title="Recommended rooms" icon={Sparkles} description="Constraint-checked suggestions, not AI confidence"/>
-          <div className="ig-alternatives">{matching.slice(0,5).map((r,i)=><button key={r.id} className="ig-alternative" onClick={()=>{setBuilding(r.building);setFloor(r.floor);setSelected(r.id);if(isMobile)setSheetOpen(true)}}>
-            <span className="ig-alternative-rank">{String(i+1).padStart(2,'0')}</span><span className="ig-alternative-meta"><b>{r.id}</b><small>{r.building} · {r.floor} · {r.capacity}{r.verified?'':'*'} seats</small><small>{r.verified?'Verified capacity':'Provisional capacity'}{r.requires_approval?' · Approval required':''}</small></span>
-            <span className="ig-fit">{typeof r.score==='number'?'Fit '+r.score+'/100':'Matched'}</span><ArrowUpRight size={16}/></button>)}
-            {!matching.length&&<Empty icon={Search} title="No matching rooms" body={requiredEquipment?'No rooms have verified records for that equipment. Remove the requirement or obtain confirmed metadata.':'Try another date, session type, start time, or capacity.'}/>}</div>
-        </section>
+        <details className="bp-alternatives">
+          <summary><span>Other available rooms</span><small>{matching.length} matches</small><ArrowUpRight size={15}/></summary>
+          <div className="bp-alternative-list">
+            {matching.slice(0,7).map(room=><button type="button" key={room.id} onClick={()=>onSuggestion(room)}>
+              <strong>{room.id}</strong><small>{room.building==='IET'?'IET':'Deeksha'} · {room.floor} · {room.capacity} seats</small></button>)}
+            {!matching.length&&<p>No rooms meet the selected constraints. Change the time or capacity.</p>}
+            <p>Suggestions are checked against the selected interval; the server rechecks conflicts on booking.</p>
+          </div>
+        </details>
       </aside>
     </div>
-    <Dialog.Root open={sheetOpen&&isMobile&&!!current} onOpenChange={setSheetOpen}>
+    <Dialog.Root open={!!current&&isMobile&&sheetOpen} onOpenChange={setSheetOpen}>
       <Dialog.Portal>
-        <Dialog.Overlay className="ig-room-sheet-overlay"/>
-        <Dialog.Content className="ig-room-sheet" aria-describedby="ig-room-sheet-description">
-          <div className="ig-room-sheet-handle" aria-hidden="true"/>
-          <div className="ig-room-sheet-head">
-            <div><span className="ig-overline">CLASSROOM DETAILS</span>
-              <Dialog.Title>{current?.id || 'Selected room'}</Dialog.Title>
-            </div>
-            <Dialog.Close className="ig-icon-button" aria-label="Close room details"><X size={19}/></Dialog.Close>
+        <Dialog.Overlay className="bp-sheet-overlay"/>
+        <Dialog.Content className="bp-sheet" aria-describedby="bp-sheet-description">
+          <div className="bp-sheet-handle"/>
+          <div className="bp-sheet-heading">
+            <Dialog.Title>{current?.id||'Room details'}</Dialog.Title>
+            <Dialog.Close aria-label="Close room details"><X size={18}/></Dialog.Close>
           </div>
-          <Dialog.Description id="ig-room-sheet-description">
-            {current?.building==='IET'?'IET':'Deeksha Bhawan'} · {current?.floor} floor · {dayLabel(date)} at {String(hour).padStart(2,'0')}:00 IST
-          </Dialog.Description>
-          {current&&<div className="ig-room-sheet-details">
-            <StatePill status={getCurrentStatus}/>
-            {bookingNeedsApproval&&<p className="ig-note">Approval is required before this space is reserved.</p>}
-            <div className="ig-room-sheet-stats">
-              <div><Users size={17}/><span>Capacity</span><b>{current.capacity}{current.verified?'':'*'} seats</b></div>
-              <div><Layers size={17}/><span>Room type</span><b className="ig-capitalize">{current.type}</b></div>
-              <div><Clock3 size={17}/><span>Duration</span><b>{duration} hour{duration>1?'s':''}</b></div>
-            </div>
-            {!current.verified&&<p className="ig-note"><Info size={14}/> Capacity is provisional until university validation.</p>}
-            {current.accessible==null&&<p className="ig-note"><Info size={14}/> Accessibility is not documented.</p>}
-            {!current.equipment?.length&&<p className="ig-note"><Info size={14}/> Room equipment has not been documented.</p>}
-            <button className="ig-btn ig-btn-primary ig-btn-block" disabled={!eligible}
-              onClick={()=>{setSheetOpen(false);setShowBooking(true)}}>{bookingNeedsApproval?'Request this room':'Reserve this room'} <ArrowRight size={17}/></button>
-            {!eligible&&<p className="ig-inspector-explain">{!canBook?'A verified faculty or operator role is required.':'Availability or eligibility is not verified for this interval.'}</p>}
-            <button className="ig-btn ig-btn-outline ig-btn-block" onClick={()=>{setSheetOpen(false);setView('Calendar')}}><CalendarDays size={16}/> View campus schedule</button>
-          </div>}
+          <Dialog.Description id="bp-sheet-description" className="bp-sheet-subtitle">Classroom availability and reservation</Dialog.Description>
+          {roomSpecs}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
