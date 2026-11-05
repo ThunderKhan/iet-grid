@@ -112,7 +112,7 @@
   .ig-auth-input-wrap{min-height:52px}
   .ig-auth-input-wrap input{min-height:50px;font-size:16px}
   .ig-auth-submit{min-height:52px;font-size:16px}
-  .ig-auth-switch button,.ig-auth-forgot button{font-size:14px;min-height:38px;padding:7px 5px}
+  .ig-auth-switch button,.ig-auth-forgot button{font-size:14px;min-height:44px;padding:7px 5px}
   .ig-auth-switch{margin-top:16px;line-height:1.55}
   .ig-auth-feedback{overflow-wrap:anywhere}
 }

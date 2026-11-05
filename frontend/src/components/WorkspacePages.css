@@ -13,7 +13,7 @@
 .ig-btn-primary{background:var(--ig-primary);color:#fff;border-color:var(--ig-primary)}.ig-btn-primary:hover:not(:disabled){background:var(--ig-primary-hover)}.ig-btn-outline{background:#fff;color:#354A68;border-color:#C9D5E5}.ig-btn-outline:hover:not(:disabled){background:#F4F7FD;border-color:#8FA5C2}
 .ig-btn-light{background:#fff;color:#203B72;border-color:#fff}.ig-btn-light:hover{background:#EDF2FF}.ig-btn-ghost-light{color:#E4EBFF;border-color:#FFFFFF50;background:#FFFFFF18}.ig-btn-ghost-light:hover{background:#FFFFFF2C}
 .ig-btn-block{display:flex;width:100%;margin-top:12px}.ig-btn-small{min-height:36px;padding:7px 12px;font-size:12px}
-.ig-icon-button{display:grid;place-items:center;width:38px;height:38px;border:1px solid #D6DFEB;background:#fff;color:#405774;border-radius:9px;flex-shrink:0}.ig-icon-button:hover{background:#F0F4FF;color:var(--ig-primary)}
+.ig-icon-button{display:grid;place-items:center;width:44px;height:44px;border:1px solid #D6DFEB;background:#fff;color:#405774;border-radius:9px;flex-shrink:0}.ig-icon-button:hover{background:#F0F4FF;color:var(--ig-primary)}
 .ig-btn:disabled,.ig-icon-button:disabled{cursor:not-allowed;opacity:.5}
 .ig-note{display:flex;align-items:flex-start;gap:7px;margin:14px 0 0;font-size:12px;line-height:1.55;color:var(--ig-muted)}.ig-note svg{flex-shrink:0;margin-top:1px}
 .ig-muted{font-size:13px;color:#65758D;line-height:1.6}
@@ -55,7 +55,7 @@
 .ig-filters-card{padding:20px 22px}.ig-filter-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:15px}.ig-filter-title h2{font-size:18px;color:#203553;display:flex;align-items:center;gap:9px;margin:5px 0 0}.ig-filter-title h2 svg{color:var(--ig-primary)}.ig-filter-help{display:flex;align-items:center;gap:6px;color:var(--ig-muted);font-size:12px}
 .ig-building-select{display:flex;gap:5px;align-items:center;padding:5px;width:fit-content;max-width:100%;border-radius:11px;background:#F0F3F8;margin:0 0 17px;border:1px solid #E0E6EE}
 .ig-building-select button{display:flex;align-items:center;justify-content:center;gap:9px;background:transparent;color:#596B84;border-radius:8px;padding:10px 15px;font-size:13px;font-weight:750;white-space:nowrap}.ig-building-select button.active{background:#fff;color:var(--ig-primary);box-shadow:0 2px 7px #1B365214}.ig-building-select button:hover{color:var(--ig-primary-hover)}
-.ig-filter-controls{display:grid;grid-template-columns:1.15fr 1.1fr 1fr .9fr 1fr;gap:12px;align-items:end}.ig-control-field{min-width:0;display:grid;gap:7px}.ig-control-field>span{font-size:13px;color:#596C86;font-weight:700}.ig-control-field input,.ig-control-field select{height:43px;min-width:0;width:100%;border:1px solid #C9D5E5;border-radius:9px;padding:0 10px;background:#fff;color:#243B59;font-size:13px;font-weight:550}
+.ig-filter-controls{display:grid;grid-template-columns:1.15fr 1.1fr 1fr .9fr 1fr;gap:12px;align-items:end}.ig-control-field{min-width:0;display:grid;gap:7px}.ig-control-field>span{font-size:13px;color:#596C86;font-weight:700}.ig-control-field input,.ig-control-field select{height:44px;min-width:0;width:100%;border:1px solid #C9D5E5;border-radius:9px;padding:0 10px;background:#fff;color:#243B59;font-size:13px;font-weight:550}
 .ig-control-field :is(input,select):focus-visible{outline:3px solid #9BB5FA;outline-offset:1px}
 .ig-explore-columns{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.8fr);gap:18px;align-items:start}.ig-explore-inspector{display:grid;gap:16px;position:sticky;top:92px;min-width:0}.ig-map-column{min-width:0}
 .ig-inspector-card{padding:19px}.ig-inspector-card .ig-card-head{margin-bottom:14px}.ig-inspector-title{display:flex;align-items:flex-start;justify-content:space-between;gap:9px;padding-bottom:13px;border-bottom:1px solid #E5EBF2}
@@ -71,7 +71,7 @@
 .ig-fit{font-size:12px;font-weight:800;color:#47658B;white-space:nowrap}
 .ig-calendar-page{padding:23px}.ig-calendar-top{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;flex-wrap:wrap}
 .ig-calendar-top h2{display:flex;align-items:center;gap:10px;font-size:19px;color:#1E3553;margin:5px 0}.ig-calendar-top h2 svg{color:var(--ig-primary)}.ig-calendar-top p{font-size:12px;line-height:1.6;color:#61748B;margin:0}
-.ig-calendar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ig-calendar-actions input{height:38px;max-width:175px;border:1px solid #CCD8E5;border-radius:9px;padding:0 9px;color:#263D59;background:#fff;font-size:13px}
+.ig-calendar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ig-calendar-actions input{height:44px;max-width:175px;border:1px solid #CCD8E5;border-radius:9px;padding:0 9px;color:#263D59;background:#fff;font-size:13px}
 .ig-calendar-mode{display:flex;gap:5px;width:fit-content;border:1px solid #DFE5EE;background:#F4F7FB;padding:5px;border-radius:10px;margin:22px 0 16px}.ig-calendar-mode button{background:transparent;color:#65768E;padding:9px 17px;border-radius:7px;font-size:13px;font-weight:700}.ig-calendar-mode button.selected{background:#fff;color:var(--ig-primary);box-shadow:0 1px 5px #162D4918}
 .ig-cal-columns{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;min-height:360px;border:1px solid #DFE7F1;border-radius:12px;overflow:hidden}
 .ig-cal-columns.is-day{grid-template-columns:minmax(0,1fr)}.ig-cal-day-column{border-right:1px solid #E2EAF3;min-width:0;background:#FDFEFF}.ig-cal-day-column:last-child{border:0}
@@ -97,7 +97,7 @@
 .ig-admin-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.ig-admin-metrics>div{display:flex;align-items:center;gap:9px;flex-wrap:wrap;border:1px solid #DFE7F1;border-radius:13px;background:#fff;padding:19px}
 .ig-admin-metrics svg{color:#4267BD}.ig-admin-metrics strong{font-size:25px;color:#203A5B;letter-spacing:-.04em;line-height:1}.ig-admin-metrics span{width:100%;font-size:12px;color:var(--ig-muted)}
 .ig-admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}.ig-admin-form{display:grid;gap:15px}.ig-admin-form label{display:grid;gap:7px;color:#536A86;font-size:12px;font-weight:700}
-.ig-admin-form input,.ig-admin-form select,.ig-admin-form textarea{width:100%;border:1px solid #C7D3E3;border-radius:9px;background:#fff;padding:11px;color:#223A59;font-size:13px;min-height:43px}
+.ig-admin-form input,.ig-admin-form select,.ig-admin-form textarea{width:100%;border:1px solid #C7D3E3;border-radius:9px;background:#fff;padding:11px;color:#223A59;font-size:13px;min-height:44px}
 .ig-admin-form textarea{resize:vertical;line-height:1.5}
 .ig-approval-list{display:grid;gap:12px}.ig-approval{border:1px solid #E0E8F1;border-radius:11px;padding:15px;background:#FAFBFE}
 .ig-approval-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.ig-approval-head small{text-transform:capitalize;color:var(--ig-muted)}
@@ -140,7 +140,7 @@
 .ig-audit-card{display:grid;gap:16px}
 .ig-audit-filters{display:flex;gap:14px;align-items:end;flex-wrap:wrap}
 .ig-audit-filters label{display:grid;gap:7px;color:#59718e;font-size:12px;font-weight:650;min-width:150px}
-.ig-audit-filters input,.ig-audit-filters select{border:1px solid #dae4ef;border-radius:8px;min-height:39px;background:#fff;padding:8px 10px;color:#203855;outline-offset:2px}
+.ig-audit-filters input,.ig-audit-filters select{border:1px solid #dae4ef;border-radius:8px;min-height:44px;background:#fff;padding:8px 10px;color:#203855;outline-offset:2px}
 .ig-audit-scroll{overflow:auto;border:1px solid #e1e8f1;border-radius:10px}
 .ig-audit-table{width:100%;min-width:690px;border-collapse:collapse;font-size:12px}
 .ig-audit-table th{text-align:left;background:#f4f7fb;color:#607493;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:13px 11px}
@@ -160,7 +160,7 @@
 .ig-overline{color:var(--ig-muted);letter-spacing:.11em}
 .ig-card-head p,.ig-calendar-top p{color:#63758D}
 .ig-tabs{background:var(--ig-canvas);border-color:#E0E7F0;padding:4px;gap:3px}
-.ig-tabs button{display:inline-flex;align-items:center;gap:7px;min-height:37px;
+.ig-tabs button{display:inline-flex;align-items:center;gap:7px;min-height:44px;
   border:1px solid transparent;transition:border-color .15s ease,background .15s ease,color .15s ease}
 .ig-tabs button:hover:not(.active){background:#EBF0F8;color:#334E74}
 .ig-tabs button.active{border-color:#D8E1F0;background:#fff;color:#244FC5;box-shadow:0 1px 3px #101B2C10}

@@ -31,7 +31,7 @@
   position:relative;display:flex;align-items:center;gap:2px;
   padding:5px;border:1px solid #365070;
   border-radius:13px;background:#182B46;
-  min-height:52px;max-width:100%;
+  min-height:54px;max-width:100%;
 }
 .app-shell .ig-slide-cursor{
   display:block;position:absolute;z-index:0;left:0;top:5px;
@@ -42,7 +42,7 @@
 .app-shell .ig-slide-tab{
   position:relative;z-index:1;flex:0 0 auto;
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  min-height:40px;padding:8px clamp(10px,1.05vw,16px);
+  min-height:44px;padding:8px clamp(10px,1.05vw,16px);
   border-radius:9px;background:transparent;
   color:#BED0E7;font-size:13px;white-space:nowrap;font-weight:680;
   transition:color .14s ease;
@@ -62,7 +62,7 @@
 }
 .app-shell .ig-topnav-icon{
   position:relative;display:grid;place-items:center;
-  height:40px;width:40px;border-radius:9px;
+  height:44px;width:44px;border-radius:9px;
   color:#C4D2E5;background:transparent;
 }
 .app-shell .ig-topnav-icon:hover,.app-shell .ig-topnav-icon:focus-visible{background:#223A5B;color:#fff}
@@ -73,7 +73,7 @@
 .app-shell .ig-profile-wrap{position:relative;display:flex;align-items:center}
 .app-shell .ig-profile-trigger{
   display:flex;align-items:center;gap:8px;
-  min-height:42px;padding:4px 9px 4px 5px;
+  min-height:44px;padding:4px 9px 4px 5px;
   background:#1C304E;border:1px solid #365073;border-radius:10px;color:#D8E4F2;
 }
 .app-shell .ig-profile-trigger:hover,.app-shell .ig-profile-trigger:focus-visible{background:#253E60;border-color:#587DB2}
@@ -97,7 +97,7 @@
   padding:12px 10px;font-size:13px;font-weight:670;
 }
 .app-shell .ig-profile-dropdown button:hover{background:#F1F5FD;color:var(--ig-primary)}
-.app-shell .ig-mobile-menu-button{display:none;align-items:center;justify-content:center;width:42px;height:42px;background:#1C304E;color:#DBE6F7;border:1px solid #3D5374;border-radius:9px}
+.app-shell .ig-mobile-menu-button{display:none;align-items:center;justify-content:center;width:44px;height:44px;background:#1C304E;color:#DBE6F7;border:1px solid #3D5374;border-radius:9px}
 .app-shell .ig-mobile-layer{position:absolute;left:0;right:0;top:100%;z-index:65}
 .app-shell .ig-mobile-panel{
   position:relative;z-index:2;display:grid;gap:5px;
@@ -108,7 +108,7 @@
 .app-shell .ig-mobile-link{
   min-height:46px;display:flex;align-items:center;gap:13px;width:100%;
   border-radius:9px;text-align:left;padding:11px 14px;
-  background:transparent;color:#B9C9DE;font-size:13px;font-weight:680;
+  background:transparent;color:#B9C9DE;font-size:14px;font-weight:680;
 }
 .app-shell .ig-mobile-link svg{flex-shrink:0}
 .app-shell .ig-mobile-link:hover,.app-shell .ig-mobile-link:focus-visible{color:#fff;background:#1D3250}
@@ -148,7 +148,7 @@
   .app-shell .ig-topnav-logo{width:36px;height:36px;border-radius:10px}
   .app-shell .ig-topnav-brand-copy strong{font-size:15px}
     .app-shell .ig-topnav-actions{gap:4px}
-  .app-shell .ig-topnav-icon{width:37px;height:40px}
+  .app-shell .ig-topnav-icon{width:44px;height:44px}
 }
 @media(max-width:350px){
   .app-shell .ig-topnav-brand-copy strong{font-size:14px}

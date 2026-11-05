@@ -1,5 +1,5 @@
 /* Authenticated app shell. Token values match repository-root DESIGN.md.
-   Imported after legacy styles while the workspace is migrated to independent pages. */
+   Imported after shared foundations; each screen owns its component styles. */
 .app-shell{
   display:flex;flex-direction:column;min-height:100dvh;
   background:var(--ig-canvas);color:var(--ig-text);
@@ -19,7 +19,7 @@
 .app-shell .modal{width:min(100%,530px);max-height:min(91dvh,790px);overflow:auto;position:relative;background:#fff;border-radius:16px;padding:27px;box-shadow:0 25px 85px #071A33A0;border:1px solid #D4DFEA}
 .app-shell .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:16px}
 .app-shell .modal-head h2{font-size:23px;color:#1B3453;margin:4px 0;letter-spacing:-.03em}
-.app-shell .modal-head button{display:grid;place-items:center;width:36px;height:36px;border-radius:8px;background:#F0F4F9;color:#405C7B}
+.app-shell .modal-head button{display:grid;place-items:center;width:44px;height:44px;border-radius:8px;background:#F0F4F9;color:#405C7B}
 .app-shell .modal .muted{font-size:13px;color:#52637B;line-height:1.6}
 .app-shell .booking-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:13px 0}
 .app-shell .booking-summary>div{display:flex;flex-direction:column;gap:6px;border:1px solid #DDE6F2;border-radius:9px;padding:12px;background:#F7F9FD;min-width:0}
@@ -40,7 +40,7 @@
   .app-shell .main-content{padding:19px 12px 45px}
   .app-shell .page-intro{align-items:flex-start;flex-direction:column;gap:14px;margin-bottom:18px}
   .app-shell .page-intro h1{font-size:25px}
-  .app-shell .page-intro p{font-size:12px}
+  .app-shell .page-intro p{font-size:14px}
   .app-shell .intro-actions{width:100%}
   .app-shell .intro-actions button{width:100%}
   .app-shell .modal-overlay{padding:0;align-items:end}
