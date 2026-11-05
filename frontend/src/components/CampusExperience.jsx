@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import * as Dialog from '@radix-ui/react-dialog';
-import {ArrowRight, BookOpenText, CalendarDays, CheckCircle2, ChevronDown, Clock3, DoorOpen, Info, Layers3, Settings2, SlidersHorizontal, Users, X} from 'lucide-react';
+import {ArrowRight,CalendarDays,ChevronDown,Clock3,DoorOpen,Info,Layers3,Settings2,Users,X} from 'lucide-react';
 import BlueprintSitePlan from './BlueprintSitePlan';
 import {sessionTimeIST} from '../currentSessions';
 import './CampusExperience.css';

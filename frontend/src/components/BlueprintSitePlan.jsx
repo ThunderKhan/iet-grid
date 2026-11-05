@@ -1,5 +1,5 @@
 import React, {useEffect, useId, useMemo, useRef, useState} from 'react';
-import {Building2, ChevronLeft, ChevronRight, Clock3, DoorOpen, List, Map as MapIcon, Search, X} from 'lucide-react';
+import {Building2,ChevronLeft,ChevronRight,Clock3,DoorOpen,List,Map as MapIcon,Search,X} from 'lucide-react';
 import './BlueprintSitePlan.css';
 
 /* Source: DDUGU Build With AI brief, page 1, IET & Deeksha floor blueprint.

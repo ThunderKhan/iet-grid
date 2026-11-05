@@ -1,6 +1,6 @@
 
 import React,{useState,useEffect,useMemo} from 'react';
-import {LayoutDashboard,CalendarDays,Map as MapIcon,BookOpen,GraduationCap,Shield,Settings,Search,Bell,ChevronDown,ChevronLeft,ChevronRight,Plus,ArrowUpRight,Clock,Users,CheckCircle2,AlertTriangle,LogOut,Lock,Building2,Layers,PanelLeftClose,Command,Filter,MapPin,Sparkles,ArrowRight,DoorOpen,Check,Menu,X,Info,Send,BookMarked,RefreshCcw} from 'lucide-react';
+import {CalendarDays,Map as MapIcon,BookOpen,Shield,Bell,AlertTriangle,Check,X,Info,RefreshCcw} from 'lucide-react';
 import {supabase,configured} from './supabase';
 import AuthScreen from './components/AuthScreen';
 import TopNavigation from './components/TopNavigation';
@@ -13,7 +13,6 @@ import {getActiveRoomSessions} from './currentSessions';
 import {buildings,localDate,dateTimes} from './data';
 const initialDate=localDate();
 const menu=[['Explore rooms',MapIcon],['Calendar',CalendarDays],['My bookings',BookOpen],['Announcements',Bell],['Admin',Shield]];
-const fmt=(v,opts)=>new Date(v).toLocaleString('en-IN',opts||{hour:'numeric',minute:'2-digit'});
 export default function App(){
 const [session,setSession]=useState(null);const [authReady,setAuthReady]=useState(!configured);const [recovering,setRecovering]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='reset');const [profile,setProfile]=useState(null);const [rooms,setRooms]=useState([]);const [bookings,setBookings]=useState([]);const [notices,setNotices]=useState([]);const [view,setView]=useState('Explore rooms');const [building,setBuilding]=useState('IET');const [floor,setFloor]=useState('First');const [date,setDate]=useState(initialDate);const [hour,setHour]=useState('11');const [duration,setDuration]=useState(1);const [capacity,setCapacity]=useState(75);const [requiredEquipment,setRequiredEquipment]=useState('');const [selected,setSelected]=useState('IET19');const [toast,setToast]=useState('');const [loading,setLoading]=useState(false);const [showBooking,setShowBooking]=useState(false);const [bookingTitle,setBookingTitle]=useState('Extra lecture');const [bookingKind,setBookingKind]=useState('lecture');const [report,setReport]=useState(false);const [noticeTitle,setNoticeTitle]=useState('');const [noticeBody,setNoticeBody]=useState('');
 const [cohorts,setCohorts]=useState([]);
