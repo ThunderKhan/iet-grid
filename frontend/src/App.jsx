@@ -4,6 +4,7 @@ import {LayoutDashboard,CalendarDays,Map as MapIcon,BookOpen,GraduationCap,Shiel
 import {supabase,configured} from './supabase';
 import AuthScreen from './components/AuthScreen';
 import TopNavigation from './components/TopNavigation';
+import ProfilePage from './components/ProfilePage';
 import {CalendarPage,BookingsPage,AnnouncementsPage,AdminPage} from './components/WorkspacePages';
 import CampusExperience from './components/CampusExperience';
 import ReservationDialog from './components/ReservationDialog';
@@ -20,6 +21,7 @@ const [cohorts,setCohorts]=useState([]);
 const [cohortId,setCohortId]=useState('');
 const [cohortError,setCohortError]=useState('');
 const [noticePriority,setNoticePriority]=useState('normal');
+const [avatarUrl,setAvatarUrl]=useState('');
 const [noticeBusy,setNoticeBusy]=useState(false);
 const [pendingQueue,setPendingQueue]=useState([]);
 const [pendingLoading,setPendingLoading]=useState(false);
@@ -73,6 +75,8 @@ useEffect(()=>{if(!configured)return;supabase.auth.getSession().then(({data})=>s
 useEffect(()=>{
  if(!session||demo)return;
  let ignore=false;
+ // A new login must not temporarily display the previous account's profile.
+ setProfile(null);
  // Authenticated mode must never display the locally seeded demo records.
  setRooms([]);setBookings([]);setNotices([]);setLiveDataError('');
  (async()=>{
@@ -95,6 +99,20 @@ useEffect(()=>{
  })();
  return()=>{ignore=true};
 },[session,demo]);
+// Avatar files are private. Only the owner can create a short-lived signed URL.
+useEffect(()=>{
+  if(demo||!session?.user?.id||!profile?.avatar_path){setAvatarUrl('');return;}
+  let cancelled=false;
+  const path=profile.avatar_path;
+  const refresh=async()=>{
+    const {data,error}=await supabase.storage.from('iet-profile-avatars').createSignedUrl(path,3600);
+    if(!cancelled)setAvatarUrl(error?'':data?.signedUrl||'');
+  };
+  setAvatarUrl('');
+  refresh();
+  const timer=window.setInterval(refresh,45*60*1000);
+  return()=>{cancelled=true;window.clearInterval(timer);};
+},[demo,session?.user?.id,profile?.avatar_path]);
 function alert(msg){setToast(msg);setTimeout(()=>setToast(''),4000)}
 const {start,end}=useMemo(()=>dateTimes(date,hour,duration),[date,hour,duration]);
 useEffect(()=>{
@@ -368,12 +386,12 @@ return <div className="app-shell">
   active={view} onNavigate={setView}
   demo={demo} noticeCount={notices.length}
   userName={profile?.full_name||(demo?'Demo Faculty':session?.user?.email?.split('@')[0]||'User')}
-  userRole={userRole}
+  userRole={userRole} avatarUrl={avatarUrl}
   onSignOut={()=>{if(demo)setGuest(false);else supabase.auth.signOut();setView('Explore rooms')}}/>
 <div className="workarea">
 <main className="main-content">
   {!demo&&liveDataError&&<p role="alert" className="form-error">{liveDataError}</p>}
-  {view!=='Explore rooms'&&(<div className="page-intro"><div><div className="eyebrow">IET GRID / {view.toUpperCase()}</div>
+  {view!=='Explore rooms'&&view!=='My profile'&&(<div className="page-intro"><div><div className="eyebrow">IET GRID / {view.toUpperCase()}</div>
     <h1>{view==='Overview'?'Campus overview':view}</h1>
     <p>{view==='Overview'?'Classrooms, bookings, and academic updates in one workspace.':
       view==='Explore rooms'?'Select a building, check a time slot, and inspect available classrooms.':
@@ -385,6 +403,9 @@ return <div className="app-shell">
       <Search size={16}/> Find a room</button></div>}
   </div>
   )}
+{view==='My profile'&&<ProfilePage
+    supabase={supabase} session={session} profile={profile} role={userRole}
+    demo={demo} avatarUrl={avatarUrl} onProfileChanged={setProfile}/>}
 {view==='Explore rooms'&&<CampusExperience buildings={buildings} rooms={rooms} building={building}
     setBuilding={setBuilding} floor={floor} setFloor={setFloor} selected={selected} setSelected={setSelected}
     date={date} setDate={setDate} hour={hour} setHour={setHour} duration={duration}
