@@ -72,7 +72,7 @@ export function AcademicGroupFields({open,cohorts,cohortId,setCohortId,groupRequ
 export default function ReservationDialog({
   open,onOpenChange,room,date,hour,duration,bookingTitle,setBookingTitle,
   bookingKind,setBookingKind,cohorts,cohortId,setCohortId,
-  cohortError,loading,canBook,available,onConfirm,demo
+  cohortError,loading,canBook,available,onConfirm
 }) {
   const group=cohorts.find(c=>c.id===cohortId);
   const groupRequired=bookingKind!=='event';
@@ -103,8 +103,7 @@ export default function ReservationDialog({
           <span className="rc-label">Academic group {groupRequired?'(required)':'(optional)'}</span>
           <AcademicGroupFields open={open} cohorts={cohorts} cohortId={cohortId}
             setCohortId={setCohortId} groupRequired={groupRequired}/>
-          <p className="rc-helper">{demo?'Preview groups only; no official data is changed.':
-            group?'This booking will be linked to the registered cohort.':
+          <p className="rc-helper">{group?'This booking will be linked to the registered cohort.':
             cohortError||(!cohorts.length?'No registered academic cohorts were returned. Contact a coordinator.':'Select the class this booking is for.')}</p>
         </div>
         <div className="rc-section">

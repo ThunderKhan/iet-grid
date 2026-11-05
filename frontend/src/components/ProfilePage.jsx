@@ -24,10 +24,10 @@ export function validateProfileImage(file){
   if(file.size<=0||file.size>MAX_PHOTO_SIZE)return 'Profile photos must be smaller than 2 MB.';
   return '';
 }
-export function profileFormFrom(profile,user,demo=false){
+export function profileFormFrom(profile,user){
   const meta=user?.user_metadata||{};
   return {
-    fullName:safeText(profile?.full_name||meta.full_name||(demo?'Demo Faculty':''),90),
+    fullName:safeText(profile?.full_name||meta.full_name||'',90),
     phone:safeText(meta.campus_phone,24),
     bio:safeText(meta.campus_bio,240),
     branch:safeText(meta.campus_branch,60),
@@ -41,14 +41,13 @@ const imageFor=(src,name,large=false)=>src
   ?<img src={src} alt={'Profile photo of '+name} className={'igp-photo'+(large?' large':'')}/>
   :<span className={'igp-avatar-initial'+(large?' large':'')} aria-label="No profile picture">{initial(name)}</span>;
 
-export default function ProfilePage({supabase,session,profile,role='student',demo=false,
+export default function ProfilePage({supabase,session,profile,role='student',
   avatarUrl='',onProfileChanged=()=>{}}){
   const user=session?.user;
-  const [form,setForm]=useState(()=>profileFormFrom(profile,user,demo));
+  const [form,setForm]=useState(()=>profileFormFrom(profile,user));
   const [file,setFile]=useState(null);
   const [removeAvatar,setRemoveAvatar]=useState(false);
   const [previewUrl,setPreviewUrl]=useState('');
-  const [savedDemoAvatar,setSavedDemoAvatar]=useState('');
   const [busy,setBusy]=useState(false);
   const [feedback,setFeedback]=useState(null);
   const [passwordBusy,setPasswordBusy]=useState(false);
@@ -56,13 +55,13 @@ export default function ProfilePage({supabase,session,profile,role='student',dem
   const fileInput=useRef(null);
   const isStudent=role==='student';
   const fullName=form.fullName.trim()||'Campus member';
-  const imageSource=removeAvatar?'':previewUrl||savedDemoAvatar||avatarUrl;
+  const imageSource=removeAvatar?'':previewUrl||avatarUrl;
   const institutionalLine=profile?.branch
     ?[profile.branch,profile.academic_year?'Year '+profile.academic_year:'',profile.section?'Section '+profile.section:'']
        .filter(Boolean).join(' · '):'No institutional class assigned';
-  const isVerified=!!profile?.verified&&!demo;
+  const isVerified=!!profile?.verified;
   useEffect(()=>{
-    if(demo||role!=='student'||!supabase||!user?.id){setOfficialCohorts([]);return;}
+    if(role!=='student'||!supabase||!user?.id){setOfficialCohorts([]);return;}
     let closed=false;
     const load=async()=>{
       const members=await supabase.from('student_memberships')
@@ -80,17 +79,17 @@ export default function ProfilePage({supabase,session,profile,role='student',dem
     };
     load();
     return()=>{closed=true;};
-  },[demo,role,supabase,user?.id]);
+  },[role,supabase,user?.id]);
 
   // Populate once when the institutional profile finishes loading. Do not
   // overwrite form edits after a successful save or Auth token refresh.
   const hydratedProfile=useRef(!!profile);
   useEffect(()=>{
-    if(!demo&&profile&&!hydratedProfile.current){
-      setForm(profileFormFrom(profile,user,demo));
+    if(profile&&!hydratedProfile.current){
+      setForm(profileFormFrom(profile,user));
       hydratedProfile.current=true;
     }
-  },[profile,demo,user]);
+  },[profile,user]);
 
   useEffect(()=>{
     if(!file){setPreviewUrl('');return;}
@@ -115,7 +114,6 @@ export default function ProfilePage({supabase,session,profile,role='student',dem
   };
   const clearPhoto=()=>{
     setFile(null);
-    setSavedDemoAvatar('');
     setRemoveAvatar(true);
     setFeedback(null);
   };
@@ -137,16 +135,6 @@ export default function ProfilePage({supabase,session,profile,role='student',dem
     setBusy(true);
     setFeedback(null);
     try{
-      if(demo){
-        onProfileChanged({...profile,full_name:form.fullName.trim()});
-        // Preview changes exist only in this mounted component.
-        if(removeAvatar){setSavedDemoAvatar('');setFile(null);}
-        // Keep the demo File object mounted while its object URL is displayed.
-        // Revoking the URL before use would leave a broken preview image.
-        setRemoveAvatar(false);
-        setFeedback({error:false,text:'Preview updated. Demo changes are not saved to the university database.'});
-        return;
-      }
       if(!supabase||!user?.id)throw new Error('Sign in again before editing your profile.');
 
       const previousAvatar=profile?.avatar_path||null;
@@ -201,7 +189,6 @@ export default function ProfilePage({supabase,session,profile,role='student',dem
   };
 
   const requestPasswordReset=async()=>{
-    if(demo){setFeedback({error:false,text:'Password management is disabled in preview mode.'});return;}
     if(!supabase||!user?.email)return;
     setPasswordBusy(true);setFeedback(null);
     try{
@@ -220,7 +207,6 @@ export default function ProfilePage({supabase,session,profile,role='student',dem
       <h1>My profile</h1>
       <p>Manage how your name and photo appear in IET Grid, and review your academic information.</p>
     </div>
-    {demo&&<div className="igp-demo"><Info size={16}/> Preview mode — changes here do not modify real accounts or university records.</div>}
     {feedback&&<div className={'igp-feedback'+(feedback.error?' is-error':' is-success')}
       role={feedback.error?'alert':'status'}>
       {feedback.error?<Info size={16}/>:<Check size={16}/>}
@@ -264,7 +250,7 @@ export default function ProfilePage({supabase,session,profile,role='student',dem
                   value={form.fullName} onChange={e=>change('fullName',e.target.value)}
                   placeholder="Your full name"/></label>
               <label className="igp-field"><span>Email address</span>
-                <div className="igp-input-lock"><input type="email" value={user?.email|| (demo?'demo@iet-grid.local':'')}
+                <div className="igp-input-lock"><input type="email" value={user?.email||''}
                   readOnly aria-describedby="igp-email-readonly"/><Lock size={16}/></div>
                 <small id="igp-email-readonly">Managed through your sign-in account.</small></label>
               <label className="igp-field"><span>Contact number <small>(optional)</small></span>
@@ -324,9 +310,9 @@ export default function ProfilePage({supabase,session,profile,role='student',dem
             <b>{titleRole(role)}</b></div>
           <div className="igp-account-row"><span><ShieldCheck size={15}/> Verification</span>
             <b className={isVerified?'igp-status-verified':'igp-status-unverified'}>
-              {demo?'Demo only':isVerified?'Verified':'Not verified'}</b></div>
+              {isVerified?'Verified':'Not verified'}</b></div>
           <div className="igp-account-row"><span><Mail size={15}/> Email</span>
-            <b className="igp-break">{user?.email||(demo?'Preview account':'—')}</b></div>
+            <b className="igp-break">{user?.email||'—'}</b></div>
           <p className="igp-official-note">Roles and verification are managed by authorized campus staff.</p>
         </section>
         <section className="igp-card igp-official-card">

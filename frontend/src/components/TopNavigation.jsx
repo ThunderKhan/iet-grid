@@ -77,7 +77,7 @@ export function SlideTabs({items,active,onNavigate}) {
 }
 
 export default function TopNavigation({
-  items,active,onNavigate,demo=false,noticeCount=0,
+  items,active,onNavigate,noticeCount=0,
   userName='Guest',userRole='student',avatarUrl='',onSignOut
 }) {
   const [mobileOpen,setMobileOpen]=useState(false);
@@ -144,7 +144,6 @@ export default function TopNavigation({
       <SlideTabs items={visibleItems} active={active} onNavigate={navigate}/>
 
       <div className="ig-topnav-actions">
-        {demo&&<span className="ig-topnav-demo" title="This workspace contains demonstration data">DEMO</span>}
         <button type="button" className="ig-topnav-icon" aria-label={'Announcements'+(noticeCount?' ('+noticeCount+' notices)':'')}
           title="Announcements" onClick={()=>navigate('Announcements')}>
           <Bell size={18}/>
@@ -161,7 +160,7 @@ export default function TopNavigation({
             <ChevronDown size={15} aria-hidden="true"/>
           </button>
           {profileOpen&&<div className="ig-profile-dropdown" id="ig-profile-menu" role="menu">
-            <div className="ig-profile-heading"><strong>{userName}</strong><small>{demo?'Demo workspace':userRole+' account'}</small></div>
+            <div className="ig-profile-heading"><strong>{userName}</strong><small>{userRole+' account'}</small></div>
             <button type="button" role="menuitem" onClick={()=>navigate('My profile')}>
               <UserRound size={16}/> My profile
             </button>
@@ -196,7 +195,7 @@ export default function TopNavigation({
           </button>
           <div className="ig-mobile-profile">
             <span className="ig-profile-avatar">{avatarUrl?<img src={avatarUrl} alt="" className="ig-nav-avatar-image"/>:initials(userName)}</span>
-            <span><strong>{userName}</strong><small>{demo?'Preview workspace':userRole+' account'}</small></span>
+            <span><strong>{userName}</strong><small>{userRole+' account'}</small></span>
             <button type="button" aria-label="Sign out" onClick={signOut}><LogOut size={18}/></button>
           </div>
         </nav>

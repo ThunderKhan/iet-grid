@@ -82,7 +82,7 @@ export function BookingsPage({bookings,rooms,setView,onOpenRoom}) {
       <Empty icon={BookOpen} title="Nothing in this category" body="When bookings match this status, they will appear here." action={<button className="ig-btn ig-btn-outline" onClick={()=>setView('Explore rooms')}>Find a room <ArrowRight size={16}/></button>}/>}
   </section></div>;
 }
-export function AnnouncementsPage({notices,demo,markNoticeRead,noticeReadBusy,setReport}) {
+export function AnnouncementsPage({notices,markNoticeRead,noticeReadBusy,setReport}) {
   const [filter,setFilter]=useState('all');
   const filtered=notices.filter(n=>filter==='all'||(filter==='important'?n.priority==='high':!n.read_at));
   return <div className="ig-page-stack"><section className="ig-card ig-notice-page">
@@ -94,17 +94,17 @@ export function AnnouncementsPage({notices,demo,markNoticeRead,noticeReadBusy,se
       <span className={'ig-notice-emblem '+(n.priority==='high'?'high':'')}><Bell size={19}/></span>
       <div className="ig-notice-text"><div className="ig-notice-heading"><h3>{n.title}</h3>{n.priority==='high'&&<span className="ig-urgent">IMPORTANT</span>}</div>
         <p>{n.body}</p><div className="ig-notice-footer"><time>{strDate(n.created_at)}</time>
-          {!demo&&(n.read_at?<span className="ig-read"><CheckCheck size={14}/> Read</span>:<button className="ig-link" disabled={noticeReadBusy===n.id} onClick={()=>markNoticeRead(n.id)}><Check size={15}/> {noticeReadBusy===n.id?'Saving…':'Mark as read'}</button>)}</div>
+          {n.read_at?<span className="ig-read"><CheckCheck size={14}/> Read</span>:<button className="ig-link" disabled={noticeReadBusy===n.id} onClick={()=>markNoticeRead(n.id)}><Check size={15}/> {noticeReadBusy===n.id?'Saving…':'Mark as read'}</button>}</div>
       </div></article>)}</div>:<Empty icon={Bell} title="No announcements found" body="Try another filter, or check back when new campus notices are published."/>}
     <div className="ig-report-callout"><div><h3>See incorrect timetable information?</h3><p>Report an issue for review. Reports do not change university schedules automatically.</p></div>
       <button className="ig-btn ig-btn-outline" type="button" onClick={()=>setReport(true)}>Report an issue <ArrowUpRight size={16}/></button></div>
   </section></div>;
 }
-export function AdminPage({canAdmin,demo,userRole,rooms,bookings,notices,noticeTitle,setNoticeTitle,noticeBody,setNoticeBody,noticePriority,setNoticePriority,noticeBusy,addNotice,pendingQueue,pendingLoading,pendingError,reviewBusy,reviewPendingBooking,setRefreshTick,accountUuid,setAccountUuid,accountRole,setAccountRole,accountBusy,grantTestRole,apiWarning,apiAvailability,auditRows,auditTotal,auditOffset,setAuditOffset,auditRoom,setAuditRoom,auditAction,setAuditAction,auditLoading,auditError}) {
+export function AdminPage({canAdmin,userRole,rooms,bookings,notices,noticeTitle,setNoticeTitle,noticeBody,setNoticeBody,noticePriority,setNoticePriority,noticeBusy,addNotice,pendingQueue,pendingLoading,pendingError,reviewBusy,reviewPendingBooking,setRefreshTick,accountUuid,setAccountUuid,accountRole,setAccountRole,accountBusy,grantTestRole,apiWarning,apiAvailability,auditRows,auditTotal,auditOffset,setAuditOffset,auditRoom,setAuditRoom,auditAction,setAuditAction,auditLoading,auditError}) {
   return <div className="ig-page-stack">
-    <section className="ig-admin-intro"><div><span className="ig-overline">OPERATIONS CENTER</span><h2>Campus administration</h2><p>Review allocations, publish academic updates, and manage permitted access.</p></div><StatePill status={canAdmin?'available':'restricted'}>{canAdmin?(demo?'Demo view':'Verified operator'):'Restricted access'}</StatePill></section>
+    <section className="ig-admin-intro"><div><span className="ig-overline">OPERATIONS CENTER</span><h2>Campus administration</h2><p>Review allocations, publish academic updates, and manage permitted access.</p></div><StatePill status={canAdmin?'available':'restricted'}>{canAdmin?'Verified operator':'Restricted access'}</StatePill></section>
     {!canAdmin?<section className="ig-card"><Empty icon={LockKeyhole} title="Administrator access required" body="These controls are limited to verified university administrators and coordinators."/></section>:<>
-      <div className="ig-admin-metrics"><div><DoorOpen size={18}/><strong>{rooms.length}</strong><span>Rooms registered</span></div><div><BookOpen size={18}/><strong>{bookings.length}</strong><span>Visible bookings</span></div><div><Clock3 size={18}/><strong>{demo?'—':pendingQueue.length}</strong><span>Approval requests</span></div></div>
+      <div className="ig-admin-metrics"><div><DoorOpen size={18}/><strong>{rooms.length}</strong><span>Rooms registered</span></div><div><BookOpen size={18}/><strong>{bookings.length}</strong><span>Visible bookings</span></div><div><Clock3 size={18}/><strong>{pendingQueue.length}</strong><span>Approval requests</span></div></div>
       <div className="ig-admin-grid">
         <section className="ig-card"><PanelHead eyebrow="INSTITUTIONAL MESSAGING" title="Publish announcement" description="Create an official campus notice" icon={Send}/>
           <div className="ig-admin-form">
@@ -112,14 +112,12 @@ export function AdminPage({canAdmin,demo,userRole,rooms,bookings,notices,noticeT
             <label>Title<input value={noticeTitle} onChange={e=>setNoticeTitle(e.target.value)} placeholder="Examination room change"/></label>
             <label>Announcement details<textarea rows={4} value={noticeBody} onChange={e=>setNoticeBody(e.target.value)} placeholder="Describe the revised room, session, and time."/></label>
             <button className="ig-btn ig-btn-primary" onClick={addNotice} disabled={noticeBusy||noticeTitle.trim().length<3}><Send size={16}/>{noticeBusy?'Publishing…':'Publish notice'}</button>
-            {demo&&<p className="ig-note"><Info size={14}/> Demonstration only. This action is not saved to official records.</p>}
           </div>
         </section>
         <section className="ig-card">
           <PanelHead eyebrow="WORKFLOW" title="Booking approvals" icon={Shield} description="Examinations and events requiring review"
             action={<button className="ig-icon-button" aria-label="Refresh approvals" disabled={pendingLoading} onClick={()=>setRefreshTick(n=>n+1)}><RefreshCcw size={17}/></button>}/>
-          {demo?<Empty icon={Shield} title="Demo review unavailable" body="Sign in as a verified campus operator to approve requests. Demonstration data is not persisted."/>:
-            pendingLoading?<p className="ig-muted">Loading approval requests…</p>:
+          {pendingLoading?<p className="ig-muted">Loading approval requests…</p>:
             pendingError?<div role="alert" className="ig-alert">{pendingError}</div>:
             pendingQueue.length===0?<Empty icon={CheckCircle2} title="All caught up" body="New pending examination and event requests will appear here."/>:
             <div className="ig-approval-list">{pendingQueue.map(b=><article key={b.id} className="ig-approval">
@@ -134,8 +132,7 @@ export function AdminPage({canAdmin,demo,userRole,rooms,bookings,notices,noticeT
       <div className="ig-admin-grid">
         {userRole==='admin'&&<section className="ig-card">
           <PanelHead eyebrow="IDENTITY & ACCESS" title="Provision test account" icon={Users} description="For previously registered, verified accounts only"/>
-          {demo?<Empty icon={LockKeyhole} title="Sign in to provision" body="An institutional administrator account is required for live user provisioning."/>:
-            <div className="ig-admin-form"><label>Registered user UUID<input value={accountUuid} onChange={e=>setAccountUuid(e.target.value)} placeholder="Supabase Auth user UUID"/></label>
+          {<div className="ig-admin-form"><label>Registered user UUID<input value={accountUuid} onChange={e=>setAccountUuid(e.target.value)} placeholder="Supabase Auth user UUID"/></label>
               <label>Verified role<select value={accountRole} onChange={e=>setAccountRole(e.target.value)}><option value="faculty">Faculty</option><option value="student">Student</option></select></label>
               <button className="ig-btn ig-btn-primary" disabled={accountBusy||!accountUuid.trim()} onClick={grantTestRole}><Shield size={16}/>{accountBusy?'Provisioning…':'Grant verified role'}</button>
               <p className="ig-note"><Info size={14}/> Confirm user ownership before granting access. The backend enforces role restrictions.</p>
@@ -144,8 +141,8 @@ export function AdminPage({canAdmin,demo,userRole,rooms,bookings,notices,noticeT
         <section className="ig-card">
           <PanelHead eyebrow="SERVICE READINESS" title="Integration status" icon={CheckCircle2} description="No simulated uptime or fabricated service-health metrics"/>
           <div className="ig-health-lines"><div><span>Application</span><b>Authenticated workspace</b></div>
-            <div><span>Data mode</span><StatePill status={demo?'pending':'available'}>{demo?'Demo data':'Connected session'}</StatePill></div>
-            <div><span>Live availability</span><StatePill status={demo||!apiAvailability||apiWarning?'unknown':'available'}>{demo?'Demo only':apiWarning||!apiAvailability?'Not verified':'API response received'}</StatePill></div>
+            <div><span>Data mode</span><StatePill status="available">Signed-in session</StatePill></div>
+            <div><span>Live availability</span><StatePill status={!apiAvailability||apiWarning?'unknown':'available'}>{apiWarning||!apiAvailability?'Not verified':'API response received'}</StatePill></div>
             <div><span>Floor geometry</span><StatePill status="unknown">Schematic / unverified</StatePill></div>
           </div>
         </section>
@@ -153,7 +150,7 @@ export function AdminPage({canAdmin,demo,userRole,rooms,bookings,notices,noticeT
         <PanelHead eyebrow="ACCOUNTABILITY" title="Booking audit history" icon={BookOpen}
           description="Real creation, approval, rejection and cancellation events, permission-scoped by building"
           action={<button className="ig-icon-button" aria-label="Refresh audit history" onClick={()=>setRefreshTick(n=>n+1)}><RefreshCcw size={17}/></button>}/>
-        {demo?<Empty icon={Shield} title="Live history unavailable in preview" body="Sign in as a verified administrator to inspect real audit events."/>:<>
+        {<>
           <div className="ig-audit-filters">
             <label>Room ID<input value={auditRoom} onChange={e=>{setAuditRoom(e.target.value);setAuditOffset(0)}} placeholder="All rooms / IET19" maxLength={30}/></label>
             <label>Event type<select value={auditAction} onChange={e=>{setAuditAction(e.target.value);setAuditOffset(0)}}><option value="">All events</option><option value="created">Created</option><option value="status">Status changes</option></select></label>

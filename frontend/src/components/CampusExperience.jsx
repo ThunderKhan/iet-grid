@@ -16,7 +16,7 @@ export default function CampusExperience({
   date,setDate,hour,setHour,duration,setDuration,capacity,setCapacity,
   bookingKind,setBookingKind,requiredEquipment,setRequiredEquipment,
   apiAvailability,apiWarning,isAvailable,matching,current,canBook,
-  setShowBooking,setView,demo,selectedCohortLabel,
+  setShowBooking,setView,selectedCohortLabel,
   activeSessions={},nowScheduleState='loading',currentTimeMs=Date.now()
 }) {
   const [mode,setMode]=useState('plan');
@@ -32,12 +32,10 @@ export default function CampusExperience({
   useEffect(()=>{if(!mobile)setSheetOpen(false)},[mobile]);
   const getStatus=room=>{
     if(room.capacity<capacity)return 'restricted';
-    if(!demo){
-      if(!apiAvailability)return 'unknown';
-      const status=apiAvailability.find(r=>r.id===room.id);
-      if(!status)return 'unknown';
-      if(status.reason==='ineligible')return 'restricted';
-    }
+    if(!apiAvailability)return 'unknown';
+    const status=apiAvailability.find(r=>r.id===room.id);
+    if(!status)return 'unknown';
+    if(status.reason==='ineligible')return 'restricted';
     return isAvailable(room)?'available':'occupied';
   };
   const currentStatus=current?getStatus(current):'unknown';
@@ -76,7 +74,7 @@ export default function CampusExperience({
       <small>{sessionTimeIST(runningInSelectedRoom.start)} – {sessionTimeIST(runningInSelectedRoom.end)} IST
         {!runningInSelectedRoom.detailsVisible?' · Details restricted':''}</small>
     </section>}
-    {nowScheduleState==='unavailable'&&!demo&&<p className="cx-assist">
+    {nowScheduleState==='unavailable'&&<p className="cx-assist">
       The current class schedule is unavailable; room activity cannot be confirmed.
     </p>}
     <div className="cx-room-details">
@@ -152,7 +150,6 @@ export default function CampusExperience({
            <span className="cx-live-item-content"><strong>{s.title}</strong>
              <small>{sessionTimeIST(s.start)} – {sessionTimeIST(s.end)} IST</small></span>
            <ArrowRight size={15}/></button>)}</div>}
-        {demo&&<small className="cx-demo-note">Sample timetable — local preview only.</small>}
       </section>
       </div>
       <aside className="cx-aside">
