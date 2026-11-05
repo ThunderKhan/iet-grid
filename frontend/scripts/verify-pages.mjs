@@ -103,7 +103,7 @@ try {
     reviewBusy:'',reviewPendingBooking:noop,setRefreshTick:noop,accountUuid:'',setAccountUuid:noop,
     accountRole:'faculty',setAccountRole:noop,accountBusy:false,grantTestRole:noop};
   const views=[
-    ['Campus map',CampusExperience,'Find space for the next class.'],
+    ['Campus map',CampusExperience,'Classroom layout'],
     ['Calendar',pages.CalendarPage,'Campus timetable'],
     ['My bookings',pages.BookingsPage,'Classroom reservations'],
     ['Announcements',pages.AnnouncementsPage,'Campus announcements'],
