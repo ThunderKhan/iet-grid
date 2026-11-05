@@ -113,9 +113,10 @@ export default function ProfilePage({supabase,session,profile,role='student',dem
       if(demo){
         onProfileChanged({...profile,full_name:form.fullName.trim()});
         // Preview changes exist only in this mounted component.
-        if(removeAvatar)setSavedDemoAvatar('');
-        else if(previewUrl)setSavedDemoAvatar(previewUrl);
-        setFile(null);setRemoveAvatar(false);
+        if(removeAvatar){setSavedDemoAvatar('');setFile(null);}
+        // Keep the demo File object mounted while its object URL is displayed.
+        // Revoking the URL before use would leave a broken preview image.
+        setRemoveAvatar(false);
         setFeedback({error:false,text:'Preview updated. Demo changes are not saved to the university database.'});
         return;
       }
