@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field, model_validator
 from app.core.auth import Principal, require_user, require_coordinator
 from app.core.gateway import Gateway
-from app.modules.campus import get_allocations, checked_interval
 from app.modules.scheduling import validate_interval
 
 router = APIRouter()
@@ -68,9 +67,11 @@ async def cohorts(request: Request, me: Principal = Depends(require_user)):
 @router.get("/calendar")
 async def calendar(request: Request, start: datetime, end: datetime,
                    room_id: str | None = None, me: Principal = Depends(require_user)):
-    checked_interval(start, end) if (end-start).total_seconds() <= 8*3600 else None
-    if start.tzinfo is None or end.tzinfo is None or end <= start or (end-start).days > 31:
-        raise HTTPException(422, "Calendar window must be timezone-aware and at most 31 days")
+    if (start.tzinfo is None or end.tzinfo is None
+        or start.utcoffset() is None or end.utcoffset() is None):
+        raise HTTPException(422, "Calendar timestamps must include a timezone")
+    if end <= start or (end - start).total_seconds() > 31 * 86400:
+        raise HTTPException(422, "Calendar window must be positive and at most 31 days")
     db = Gateway(request, me.token)
     base = {
         "starts_at": "lt." + end.isoformat(),
