@@ -1,0 +1,45 @@
+/* Blueprint-first booking interface; DESIGN.md colors + shadcn-inspired surfaces. */
+.bp-board{background:#fff;border:1px solid #DCE4EF;border-radius:12px;overflow:hidden;min-width:0}
+.bp-board-head{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:19px 22px;border-bottom:1px solid #E9EEF4}
+.bp-kicker{color:#7588A2;font-size:10px;font-weight:750;letter-spacing:.13em}
+.bp-board-head h2{font-size:16px;line-height:1.4;font-weight:680;letter-spacing:-.025em;color:#17243B;margin:5px 0 0}
+.bp-board-head h2 span{font-weight:500;color:#65748A}
+.bp-switch{display:flex;flex-shrink:0;gap:2px;background:#F2F5F9;border:1px solid #E4E9F0;border-radius:8px;padding:3px}
+.bp-switch button{display:flex;gap:7px;align-items:center;justify-content:center;background:transparent;padding:8px 11px;border-radius:6px;font-size:12px;font-weight:650;color:#5B6B84}
+.bp-switch button.on{background:#fff;color:#315CE5;box-shadow:0 1px 3px #14243D17}
+.bp-drawing-wrap{padding:clamp(16px,3vw,36px) clamp(12px,2vw,26px);background:#F8FAFC;display:flex;justify-content:center;align-items:center;min-height:265px}
+.bp-drawing{position:relative;width:100%;max-width:920px;min-width:0;line-height:0;background:#fff;border:1px solid #E7EAF0;box-shadow:0 3px 18px #17243B08}
+.bp-drawing img{display:block;width:100%;height:auto;image-rendering:auto;user-select:none;pointer-events:none}
+.bp-hotspot{position:absolute;border:1px solid transparent;background:transparent;border-radius:2px;cursor:pointer;outline:none;padding:0}
+.bp-hotspot:hover,.bp-hotspot:focus-visible{border:2px solid #315CE5;background:#315CE50D;z-index:2}
+.bp-hotspot.bp-active{border:2.5px solid #315CE5;background:#315CE515;box-shadow:inset 0 0 0 2px #FFFFFFB3;z-index:3}
+.bp-hotspot-dot{position:absolute;right:5px;top:5px;border-radius:50%;width:9px;height:9px;border:2px solid #fff;background:#8793A4;box-shadow:0 0 0 1px #FFFFFFBB,0 1px 3px #15284130}
+.bp-available .bp-hotspot-dot{background:#187A55}.bp-occupied .bp-hotspot-dot{background:#B42332}
+.bp-restricted .bp-hotspot-dot{background:#6941C6}.bp-unknown .bp-hotspot-dot{background:#8492A5}.bp-pending .bp-hotspot-dot{background:#8D5B12}
+.bp-board-foot{padding:13px 21px;background:#fff;border-top:1px solid #EDF0F4}
+.bp-legend{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:7px}
+.bp-legend span{display:inline-flex;gap:6px;align-items:center;font-size:11px;color:#51657F;font-weight:550}
+.bp-dot{width:7px;height:7px;display:inline-block;border-radius:50%;background:#8492A5}
+.bp-dot.is-available{background:#187A55}.bp-dot.is-occupied{background:#B42332}.bp-dot.is-restricted{background:#6941C6}
+.bp-board-foot p{font-size:11px;color:#7C8798;line-height:1.55;margin:5px 0 0}
+.bp-board-foot .bp-unmapped{color:#8D5B12}
+.bp-room-list{padding:10px 18px;display:grid;align-content:start;gap:0;background:#fff;max-height:480px;overflow:auto}
+.bp-room-row{display:flex;align-items:center;gap:12px;background:transparent;border-bottom:1px solid #ECF0F5;padding:13px 9px;color:#17243B;text-align:left}
+.bp-room-row:last-child{border-bottom:0}
+.bp-room-row:hover,.bp-room-row.active{background:#F5F8FE}
+.bp-room-row-icon{display:grid;place-items:center;width:32px;height:32px;border:1px solid #DCE4EF;border-radius:8px;color:#5F7799}
+.bp-room-row-info{display:grid;gap:3px;min-width:0;flex:1}
+.bp-room-row-info strong{font-size:13px;font-weight:700}.bp-room-row-info small{font-size:11px;color:#728399;text-transform:capitalize}
+.bp-room-row-check{color:#315CE5}
+.bp-state{font-size:11px;font-weight:650;border:1px solid transparent;border-radius:6px;padding:5px 8px;white-space:nowrap}
+.bp-state-available{color:#187A55;background:#E8F6EF}.bp-state-occupied{color:#B42332;background:#FDECEF}
+.bp-state-restricted{color:#6941C6;background:#F3EFFF}.bp-state-unknown{color:#58677D;background:#EEF2F6}
+.bp-no-plan{padding:40px;color:#52637B}
+@media(max-width:700px){
+ .bp-board-head{padding:13px 14px;align-items:start}.bp-board-head h2{font-size:14px}
+ .bp-switch button{font-size:11px;padding:7px 8px}
+ .bp-drawing-wrap{padding:12px 5px;min-height:200px}
+ .bp-drawing{border:0}.bp-hotspot-dot{width:7px;height:7px;right:2px;top:2px;border-width:1px}
+ .bp-board-foot{padding:12px 13px}.bp-legend{gap:10px}
+ .bp-board-foot p{font-size:10px}
+}
