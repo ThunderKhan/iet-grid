@@ -75,25 +75,39 @@ function Shell({building,floor}) {
     </>}
   </g>;
 }
-function Room({item,room,availability,selected,onSelect}){
+function Room({item,room,availability,selected,onSelect,activeSession}){
   const s=status(availability),active=selected===item.id,short=item.h<60;
+  const activeTitle=activeSession?.title||'';
+  const hasLive=Boolean(activeSession);
+  const maxTitleLength=Math.max(10,Math.floor((item.w-22)/6.1));
+  const shortLiveTitle=activeTitle.length>maxTitleLength
+    ?activeTitle.slice(0,maxTitleLength-1).trimEnd()+'…':activeTitle;
   return <g className={'bp-room bp-'+s+(active?' is-selected':'')} role={room?'button':'img'}
     tabIndex={room?0:undefined} aria-pressed={room?active:undefined}
-    aria-label={item.id+', '+(room?statuses[s]:'Not in dataset')+(room?', '+room.capacity+' seats':'')}
+    aria-label={item.id+', '+(room?statuses[s]:'Not in dataset')+(room?', '+room.capacity+' seats':'')
+      +(hasLive?', Now running: '+activeTitle:'')}
     onClick={()=>room&&onSelect(room)}
     onKeyDown={e=>{if(room&&(e.key==='Enter'||e.key===' ')){e.preventDefault();onSelect(room)}}}>
     <rect x={item.x} y={item.y} width={item.w} height={item.h} rx="9" className="bp-room-surface"/>
     <rect x={item.x} y={item.y} width={item.w} height={item.h} rx="9" className="bp-room-border"/>
     <text x={item.x+item.w/2} y={item.y+item.h/2+(item.sub?-9:short?5:2)} textAnchor="middle"
       className="bp-room-title" style={{fontSize:short?16:item.sub?18:22}}>{item.name||item.id}</text>
-    {item.sub&&<text x={item.x+item.w/2} y={item.y+item.h/2+17} textAnchor="middle" className="bp-room-subtitle">{item.sub}</text>}
-    {!item.sub&&!short&&<text x={item.x+item.w/2} y={item.y+item.h/2+25} textAnchor="middle" className="bp-room-subtitle">{room?(room.type==='lab'?'LABORATORY':room.type==='seminar'?'SEMINAR SPACE':room.type==='library'?'LIBRARY':'CLASSROOM'):'ROOM'}</text>}
+    {hasLive&&item.h>=80&&<g className="bp-now-tag" aria-hidden="true">
+      <rect x={item.x+9} y={item.y+8} width="55" height="18" rx="9" className="bp-now-chip"/>
+      <text x={item.x+36.5} y={item.y+21} textAnchor="middle" className="bp-now-chip-label">LIVE NOW</text>
+    </g>}
+    {hasLive&&!short?<text x={item.x+item.w/2} y={item.y+item.h/2+25} textAnchor="middle"
+      className="bp-room-ongoing-title">{shortLiveTitle}</text>:<>
+      {item.sub&&<text x={item.x+item.w/2} y={item.y+item.h/2+17} textAnchor="middle" className="bp-room-subtitle">{item.sub}</text>}
+      {!item.sub&&!short&&<text x={item.x+item.w/2} y={item.y+item.h/2+25} textAnchor="middle" className="bp-room-subtitle">{room?(room.type==='lab'?'LABORATORY':room.type==='seminar'?'SEMINAR SPACE':room.type==='library'?'LIBRARY':'CLASSROOM'):'ROOM'}</text>}
+    </>}
     <circle cx={item.x+item.w-16} cy={item.y+16} r="5.5" className="bp-room-indicator"/>
     {active&&<path d={`M${item.x+11} ${item.y+15} l5 5 l9 -11`} className="bp-room-selected-check"/>}
-    <title>{item.id+' — '+(room?statuses[s]:'Not in dataset')}</title>
+    <title>{item.id+' — '+(room?statuses[s]:'Not in dataset')
+      +(hasLive?' · Currently running: '+activeTitle:'')}</title>
   </g>;
 }
-export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSelect,getStatus,mode='plan',onModeChange=()=>{},floorOptions=[],onNavigateFloor=()=>{}}){
+export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSelect,getStatus,mode='plan',onModeChange=()=>{},floorOptions=[],onNavigateFloor=()=>{},activeSessions={},nowScheduleState='loading'}){
   const layout=(layouts[building+':'+floor]||[]).filter(item=>Boolean(item.id));
   const filtered=rooms.filter(r=>r.building===building&&r.floor===floor);
   const byId=useMemo(()=>new Map(filtered.map(r=>[r.id,r])),[filtered]);
@@ -104,15 +118,25 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
   const isDeek=building==='DEEK';
   const availableFloors=floorOptions.length?floorOptions:[floor];
   const floorIndex=availableFloors.indexOf(floor);
+  const liveCount=filtered.filter(r=>Boolean(activeSessions[r.id])).length;
+  const liveLabel=nowScheduleState==='loading'?'Checking current classes…':
+    nowScheduleState==='unavailable'?'Current timetable unavailable':
+    liveCount===0?'No classes currently listed':
+    liveCount+' class'+(liveCount===1?'':'es')+' running now';
   return <section className="bp-board" aria-label={(isDeek?'Deeksha Bhawan':'IET')+' '+floor+' floor'}>
     <header className="bp-head">
       <div className="bp-head-copy"><h2>Classroom layout</h2>
         <p>Select a room to see availability and make a reservation.</p></div>
+      <div className="bp-head-actions">
+        <span role="status" className={'bp-live-count '+(liveCount?'has-live':'')}>
+          {liveCount>0&&<i aria-hidden="true"/>}{liveLabel}
+        </span>
       <div className="bp-view-toggle" role="group" aria-label="Floor display mode">
         <button type="button" aria-pressed={mode==='plan'} className={mode==='plan'?'active':''}
           onClick={()=>onModeChange('plan')}><MapIcon size={15}/> Map</button>
         <button type="button" aria-pressed={mode==='list'} className={mode==='list'?'active':''}
           onClick={()=>onModeChange('list')}><List size={15}/> List</button>
+      </div>
       </div>
     </header>
     <div className="bp-navigation-stage" role="group" aria-label="Floor plan and navigation">
@@ -126,7 +150,10 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
       <div className="bp-list-top"><span>{filtered.length} mapped spaces</span><label>Sort <select value={sortBy} onChange={e=>setSortBy(e.target.value)}><option value="id">Room number</option><option value="capacity">Capacity</option></select></label></div>
       <div className="bp-list-rooms">{sorted.map(r=><button type="button" key={r.id} className={'bp-list-row'+(selected===r.id?' is-selected':'')} onClick={()=>onSelect(r)}>
         <span className="bp-list-icon"><DoorOpen size={17}/></span><span className="bp-list-id"><strong>{r.id}</strong><small>{r.type} · {r.capacity}{r.verified?'':'*'} seats</small></span>
-        <span className={'bp-list-status bp-list-'+stateOf(r)}>{statuses[stateOf(r)]}</span>
+        <span className={'bp-list-status bp-list-'+stateOf(r)}>
+          {activeSessions[r.id]?<><span className="bp-list-live">Running now</span>
+            <small className="bp-list-live-title">{activeSessions[r.id].title}</small></>:statuses[stateOf(r)]}
+        </span>
       </button>)}{!sorted.length&&<p className="bp-list-empty">No rooms loaded for this floor.</p>}</div>
     </div>:<div className="bp-viewport">
       <svg viewBox={isDeek?'0 0 940 568':'0 0 940 470'} className="bp-svg" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Interactive floor plan. Use Tab then Enter to select rooms.">
@@ -134,7 +161,7 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
         <text x="40" y="50" className="bp-drawing-title">ROOM LAYOUT</text>
         <Shell building={building} floor={floor}/>
         {layout.map(item=><Room key={item.id} item={item} room={byId.get(item.id)} availability={stateOf(byId.get(item.id))}
-          selected={selected} onSelect={onSelect}/>)}
+          selected={selected} onSelect={onSelect} activeSession={activeSessions[item.id]}/>)}
         <text x="472" y={isDeek?548:447} textAnchor="middle" className="bp-disclaimer">ROOM ARRANGEMENT BASED ON SUPPLIED PLAN · SIMPLIFIED NOT TO SCALE</text>
       </svg><div className="bp-mobile-cue">← Scroll sideways for the full floor plan →</div>
     </div>}
@@ -151,7 +178,8 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
       <span className="bp-floor-position-count">{floorIndex+1} of {availableFloors.length}</span>
     </div>
     <footer className="bp-footer"><div className="bp-legend">
-      {Object.entries(statuses).filter(([s])=>s!=='pending').map(([s,label])=><span key={s}><i className={'bp-dot bp-dot-'+s}/>{label}</span>)}
+      {Object.entries(statuses).filter(([s])=>s!=='pending').map(([s,label])=><span key={s}><i className={'bp-dot bp-dot-'+s}/>{label} for selected time</span>)}
+      <span><i className="bp-dot bp-dot-live"/>Running now (separate from selected time)</span>
     </div>{missing.length>0&&<p>{missing.length} imported room(s) not located in the supplied drawing. Choose them in List view.</p>}</footer>
   </section>;
 }
