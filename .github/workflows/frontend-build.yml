@@ -25,3 +25,5 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Build frontend
         run: npm run build
+      - name: Smoke-test all six workspace pages
+        run: node scripts/verify-pages.mjs
