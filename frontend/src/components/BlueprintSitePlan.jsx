@@ -1,5 +1,5 @@
-import React, {useMemo, useState} from 'react';
-import {Building2, ChevronLeft, ChevronRight, DoorOpen, List, Map as MapIcon} from 'lucide-react';
+import React, {useEffect, useId, useMemo, useRef, useState} from 'react';
+import {Building2, ChevronLeft, ChevronRight, DoorOpen, List, Map as MapIcon, Search, X} from 'lucide-react';
 import './BlueprintSitePlan.css';
 
 /* Source: DDUGU Build With AI brief, page 1, IET & Deeksha floor blueprint.
@@ -58,6 +58,86 @@ const layouts={
 const statuses={available:'Available',occupied:'Occupied',restricted:'Ineligible',unknown:'Not verified',pending:'Pending approval'};
 const status=s=>Object.prototype.hasOwnProperty.call(statuses,s)?s:'unknown';
 
+// Find only existing, loaded campus rooms; never manufacture suggested rooms.
+export function findRoomMatches(rooms,rawQuery,limit=6){
+  const query=String(rawQuery||'').trim().toLocaleUpperCase('en-US');
+  if(!query)return [];
+  return rooms.filter(room=>String(room.id||'').toLocaleUpperCase('en-US').includes(query))
+    .sort((a,b)=>{
+      const aExact=a.id.toLocaleUpperCase('en-US')===query;
+      const bExact=b.id.toLocaleUpperCase('en-US')===query;
+      return Number(bExact)-Number(aExact)||a.id.localeCompare(b.id,undefined,{numeric:true});
+    }).slice(0,limit);
+}
+function RoomQuickFind({rooms,onFindRoom}){
+  const [query,setQuery]=useState('');
+  const [open,setOpen]=useState(false);
+  const [highlight,setHighlight]=useState(0);
+  const inputRef=useRef(null);
+  const outerRef=useRef(null);
+  const listId=useId();
+  const results=useMemo(()=>findRoomMatches(rooms,query),[rooms,query]);
+  useEffect(()=>{
+    if(!open)return;
+    const onPointerDown=event=>{if(!outerRef.current?.contains(event.target))setOpen(false)};
+    const onEscape=event=>{if(event.key==='Escape')setOpen(false)};
+    document.addEventListener('pointerdown',onPointerDown);
+    document.addEventListener('keydown',onEscape);
+    return()=>{
+      document.removeEventListener('pointerdown',onPointerDown);
+      document.removeEventListener('keydown',onEscape);
+    };
+  },[open]);
+  const pick=room=>{
+    onFindRoom(room);
+    setQuery('');
+    setHighlight(0);
+    setOpen(false);
+  };
+  const onKeyDown=event=>{
+    if(event.key==='Escape'){setOpen(false);return;}
+    if(event.key==='ArrowDown'&&results.length){
+      event.preventDefault();setOpen(true);setHighlight(i=>(i+1)%results.length);
+    }else if(event.key==='ArrowUp'&&results.length){
+      event.preventDefault();setOpen(true);setHighlight(i=>(i-1+results.length)%results.length);
+    }else if(event.key==='Enter'&&results.length){
+      event.preventDefault();pick(results[Math.min(highlight,results.length-1)]);
+    }
+  };
+  return <div className="bp-quick-find" ref={outerRef}>
+    <div className={'bp-search-field'+(open?' is-open':'')}>
+      <Search size={16} aria-hidden="true"/>
+      <input ref={inputRef} type="search" autoComplete="off" spellCheck={false}
+        aria-label="Find a classroom by room number" aria-controls={listId}
+        aria-expanded={open&&query.trim().length>0} aria-autocomplete="list" role="combobox"
+        aria-activedescendant={open&&results.length?listId+'-room-'+highlight:undefined}
+        value={query} placeholder="Find a room..."
+        onFocus={()=>setOpen(true)}
+        onKeyDown={onKeyDown}
+        onChange={event=>{setQuery(event.target.value);setHighlight(0);setOpen(true)}}/>
+      {query&&<button type="button" className="bp-search-clear" aria-label="Clear room search"
+        onClick={()=>{setQuery('');setHighlight(0);inputRef.current?.focus()}}><X size={14}/></button>}
+    </div>
+    {open&&query.trim()&&<div className="bp-search-results" id={listId} role="listbox"
+      aria-label="Matching campus rooms">
+      <span className="bp-search-caption">JUMP TO CLASSROOM</span>
+      {results.length?results.map((room,index)=><button type="button" key={room.id}
+        id={listId+'-room-'+index} role="option" aria-selected={index===highlight}
+        className={'bp-search-result'+(index===highlight?' is-highlighted':'')}
+        onMouseEnter={()=>setHighlight(index)} onClick={()=>pick(room)}>
+        <span className="bp-search-result-id">{room.id}</span>
+        <span className="bp-search-result-meta">
+          {room.building==='DEEK'?'Deeksha':'IET'} · {room.floor} floor
+        </span>
+        <span className="bp-search-result-arrow" aria-hidden="true">↗</span>
+      </button>):
+      <p className="bp-search-empty">No matching room is loaded.</p>}
+      {results.length>0&&<small className="bp-search-hint">↑ ↓ to navigate · Enter to open</small>}
+    </div>}
+  </div>;
+}
+
+
 function Shell({building,floor}) {
   const isIET=building==='IET';
   return <g aria-hidden="true" className="bp-shell">
@@ -107,7 +187,7 @@ function Room({item,room,availability,selected,onSelect,activeSession}){
       +(hasLive?' · Currently running: '+activeTitle:'')}</title>
   </g>;
 }
-export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSelect,getStatus,mode='plan',onModeChange=()=>{},floorOptions=[],onNavigateFloor=()=>{},buildings=[],onBuildingChange=()=>{},activeSessions={},nowScheduleState='loading'}){
+export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSelect,getStatus,mode='plan',onModeChange=()=>{},floorOptions=[],onNavigateFloor=()=>{},buildings=[],onBuildingChange=()=>{},onFindRoom=()=>{},activeSessions={},nowScheduleState='loading'}){
   const layout=(layouts[building+':'+floor]||[]).filter(item=>Boolean(item.id));
   const filtered=rooms.filter(r=>r.building===building&&r.floor===floor);
   const byId=useMemo(()=>new Map(filtered.map(r=>[r.id,r])),[filtered]);
@@ -139,10 +219,8 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
 
       </div>
       <div className="bp-head-actions">
-        <span role="status" className={'bp-live-count '+(liveCount?'has-live':'')}>
-          {liveCount>0&&<i aria-hidden="true"/>}{liveLabel}
-        </span>
-      <div className="bp-view-toggle" role="group" aria-label="Floor display mode">
+        <RoomQuickFind rooms={rooms} onFindRoom={onFindRoom}/>
+        <div className="bp-view-toggle" role="group" aria-label="Floor display mode">
         <button type="button" aria-pressed={mode==='plan'} className={mode==='plan'?'active':''}
           onClick={()=>onModeChange('plan')}><MapIcon size={15}/> Map</button>
         <button type="button" aria-pressed={mode==='list'} className={mode==='list'?'active':''}
@@ -168,8 +246,15 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
       </button>)}{!sorted.length&&<p className="bp-list-empty">No rooms loaded for this floor.</p>}</div>
     </div>:<div className="bp-viewport">
       <svg viewBox={isDeek?'0 0 940 568':'0 0 940 470'} className="bp-svg" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Interactive floor plan. Use Tab then Enter to select rooms.">
+        <defs>
+          <pattern id="bp-fine-grid" width="28" height="28" patternUnits="userSpaceOnUse">
+            <path d="M28 0H0V28" className="bp-grid-line"/>
+          </pattern>
+        </defs>
         <rect x="8" y="8" width="924" height={isDeek?551:453} rx="12" className="bp-page-outline"/>
-        <text x="40" y="50" className="bp-drawing-title">ROOM LAYOUT</text>
+        <rect x="12" y="12" width="916" height={isDeek?543:445} rx="10" fill="url(#bp-fine-grid)" aria-hidden="true"/>
+        <text x="40" y="50" className="bp-drawing-title">INTERACTIVE FLOOR PLAN</text>
+        <text x="900" y="50" textAnchor="end" className="bp-drawing-index">IET GRID · PLAN VIEW</text>
         <Shell building={building} floor={floor}/>
         {layout.map(item=><Room key={item.id} item={item} room={byId.get(item.id)} availability={stateOf(byId.get(item.id))}
           selected={selected} onSelect={onSelect} activeSession={activeSessions[item.id]}/>)}
