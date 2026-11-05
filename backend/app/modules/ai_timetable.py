@@ -83,6 +83,7 @@ class ConfirmRow(BaseModel):
     cohort_id: UUID | None = None
     required_capacity: int = Field(default=1, ge=1, le=2000)
     required_equipment: list[str] = Field(default_factory=list, max_length=8)
+    kind: str = Field(default="lecture", pattern="^(lecture|practical|exam|event)$")
 
 
 class ConfirmRequest(BaseModel):
