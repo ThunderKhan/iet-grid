@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {AnimatePresence, motion, useReducedMotion} from 'framer-motion';
-import {Bell, ChevronDown, Layers3, LogOut, Menu, X} from 'lucide-react';
+import {Bell, ChevronDown, Layers3, LogOut, Menu, UserRound, X} from 'lucide-react';
 import './TopNavigation.css';
 
 const displayName = value => value === 'Explore rooms' ? 'Campus map' : value;
@@ -73,7 +73,7 @@ export function SlideTabs({items,active,onNavigate}) {
 
 export default function TopNavigation({
   items,active,onNavigate,demo=false,noticeCount=0,
-  userName='Guest',userRole='student',onSignOut
+  userName='Guest',userRole='student',avatarUrl='',onSignOut
 }) {
   const [mobileOpen,setMobileOpen]=useState(false);
   const [profileOpen,setProfileOpen]=useState(false);
@@ -149,12 +149,17 @@ export default function TopNavigation({
           <button type="button" className="ig-profile-trigger" aria-haspopup="menu"
             aria-expanded={profileOpen} aria-controls="ig-profile-menu"
             onClick={()=>setProfileOpen(value=>!value)}>
-            <span className="ig-profile-avatar" aria-hidden="true">{initials(userName)}</span>
+            <span className="ig-profile-avatar" aria-hidden="true">
+              {avatarUrl?<img src={avatarUrl} alt="" className="ig-nav-avatar-image"/>:initials(userName)}
+            </span>
             <span className="ig-profile-name">{userName}</span>
             <ChevronDown size={15} aria-hidden="true"/>
           </button>
           {profileOpen&&<div className="ig-profile-dropdown" id="ig-profile-menu" role="menu">
             <div className="ig-profile-heading"><strong>{userName}</strong><small>{demo?'Demo workspace':userRole+' account'}</small></div>
+            <button type="button" role="menuitem" onClick={()=>navigate('My profile')}>
+              <UserRound size={16}/> My profile
+            </button>
             <button type="button" role="menuitem" onClick={signOut}><LogOut size={16}/> Sign out</button>
           </div>}
         </div>
@@ -180,8 +185,12 @@ export default function TopNavigation({
             <Icon size={19}/><span>{displayName(name)}</span>
             {name==='Announcements'&&badge>0&&<span className="ig-mobile-count">{badge}</span>}
           </button>)}
+          <button type="button" className={'ig-mobile-link'+(active==='My profile'?' is-active':'')}
+            onClick={()=>navigate('My profile')} aria-current={active==='My profile'?'page':undefined}>
+            <UserRound size={19}/><span>My profile</span>
+          </button>
           <div className="ig-mobile-profile">
-            <span className="ig-profile-avatar">{initials(userName)}</span>
+            <span className="ig-profile-avatar">{avatarUrl?<img src={avatarUrl} alt="" className="ig-nav-avatar-image"/>:initials(userName)}</span>
             <span><strong>{userName}</strong><small>{demo?'Preview workspace':userRole+' account'}</small></span>
             <button type="button" aria-label="Sign out" onClick={signOut}><LogOut size={18}/></button>
           </div>
