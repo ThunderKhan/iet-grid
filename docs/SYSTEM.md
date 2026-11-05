@@ -6,6 +6,13 @@
 
 An institution-specific scheduling system that identifies suitable IET/Deeksha rooms, prevents confirmed collisions at the database layer, lets authorized faculty submit bookings and gives students academic schedule and notice access.
 
+## Repository boundaries
+
+- `frontend/` — React + Vite SPA, client-side room discovery/calendar and public Supabase client.
+- `backend/` — Supabase SQL schema, RLS, booking/audit functions and migrations.
+- `docs/` — PRD, MVP, technical/design specifications and decisions.
+- Vercel builds exclusively from `frontend/`; Supabase database migrations are reviewed and applied separately. The backend folder is not a standalone web server.
+
 ## Running implementation
 
 - Frontend: React 19 + Vite 6, hosted on Vercel.
@@ -35,8 +42,8 @@ No imported student/batch/section data, incomplete recurring official timetable 
 
 ## Data migrations
 
-- [Initial schema](../supabase/migrations/001_iet_grid.sql)
-- [Security hardening](../supabase/migrations/002_security_hardening.sql)
+- [Initial schema](../backend/supabase/migrations/001_iet_grid.sql)
+- [Security hardening](../backend/supabase/migrations/002_security_hardening.sql)
 
 ## Related
 

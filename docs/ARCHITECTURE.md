@@ -25,15 +25,17 @@ Faculty / Student / Coordinator / Admin
 
 ## 2. Key application files
 
-| File | Responsibility |
+The project is organized into `frontend/` for the browser application and `backend/` for Supabase-managed server-side schema and logic. `docs/` remains at the repository root. This is a directory separation, not a new HTTP microservice.
+
+| Repository location | Responsibility |
 | --- | --- |
-| ../src/App.jsx | App shell, navigation, login/guest flow, room and calendar UI, booking and notice actions |
-| ../src/data.js | Building/room seed data, sample schedules, overlap and recommendation utilities |
-| ../src/supabase.js | Browser Supabase client initialized from public environment variables |
-| ../src/styles.css | Shared design tokens and responsive application styling |
-| ../supabase/migrations/001_iet_grid.sql | Tables, RLS policies, booking/approval/notice functions and seeded room inventory |
-| ../supabase/migrations/002_security_hardening.sql | Restrict trigger-function execution, move extension out of public |
-| ../vercel.json | SPA route rewriting |
+| ../frontend/src/App.jsx | App shell, navigation, login/guest flow, room and calendar UI, booking and notice actions |
+| ../frontend/src/data.js | Building/room seed data, sample schedules, overlap and recommendation utilities |
+| ../frontend/src/supabase.js | Browser Supabase client initialized from public environment variables |
+| ../frontend/src/styles.css | Shared design tokens and responsive application styling |
+| ../backend/supabase/migrations/001_iet_grid.sql | Tables, RLS policies, booking/approval/notice functions and seeded room inventory |
+| ../backend/supabase/migrations/002_security_hardening.sql | Restrict trigger-function execution, move extension out of public |
+| ../frontend/vercel.json | SPA route rewriting |
 
 ## 3. Current tables
 

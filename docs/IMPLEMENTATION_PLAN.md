@@ -4,6 +4,13 @@
 **Hard submission deadline:** **21:00 IST, 5 November 2026**  
 **Submission:** publicly accessible deployed link, GitHub source, written Word solution and setup instructions.
 
+## Monorepo organization
+
+- `frontend/`: independently buildable web app, Vercel root `frontend`.
+- `backend/`: database schema/migrations and server-side booking authorization in Supabase.
+- `docs/`: product and architecture artifacts, separate from both runtime folders.
+- Relocating migrations has **not** changed the live database. Future SQL migrations require a distinct reviewed deployment step.
+
 ## 1. Strategy
 
 Ship a **vertical slice**: faculty authentication → accurate vacancy search → viable recommendations → secure database booking → refreshed calendar → student academic update. The codebase may contain other features, but no incomplete feature should be advertised as tested.
@@ -31,6 +38,7 @@ Status meanings: **DONE** = repository/infrastructure confirmed; **PARTIAL** = s
 | INF-04 | P0 | Apply schema, seed rooms and enable RLS | DONE | Six RLS tables, 30 rooms |
 | INF-05 | P0 | Run security scan and restrict trigger functions | DONE | Internal trigger EXECUTE revoked |
 | INF-06 | P0 | Link Vercel env and redeploy | DONE | Latest deployment reported READY |
+| INF-07 | P0 | Split runtime source into `frontend/` and `backend/`; update Vercel root | DONE | Reorganized frontend build verified on Vercel |
 | AUTH-01 | P0 | Create first administrator and verified faculty through trusted provisioning | TODO | Independent faculty/admin/student sessions |
 | AUTH-02 | P0 | Verify login/logout, sessions and RLS denials | TODO | Test evidence with roles |
 | BOOK-01 | P0 | Book free classroom from authenticated UI and persist | PARTIAL | Refresh retains confirmed booking |

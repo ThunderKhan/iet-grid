@@ -19,6 +19,13 @@ Institute of Engineering & Technology (IET), Deen Dayal Upadhyaya Gorakhpur Univ
 | [SYSTEM.md](SYSTEM.md) | Concise system reference, operational invariants and known gaps | Engineering |
 | [DESIGN.md](DESIGN.md) | Brand, UX structure, visual rules and spatial/calendar interaction | Design + frontend |
 
+## Source layout
+
+- [Frontend application](../frontend/README.md): React/Vite code, public Supabase client, room explorer and calendar.
+- [Backend implementation](../backend/README.md): Supabase-managed authentication, RLS-enforced PostgreSQL tables and booking RPC SQL migrations.
+- The Vercel **Root Directory** is `frontend`. The backend is the separately managed Supabase project, **not** an independently hosted Express/FastAPI server.
+- Migration scripts were relocated with no live database schema changes. Changes to `backend/` do **not** run automatically on Git push.
+
 ## Project links
 
 - **Repository:** https://github.com/ThunderKhan/iet-grid

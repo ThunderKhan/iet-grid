@@ -1,44 +1,90 @@
 # IET Grid
 
-**Intelligent campus classroom scheduling and room booking** for DDUGU's Institute of Engineering & Technology (IET) and Deeksha Bhawan.
+**Intelligent campus classroom scheduling and room booking** for DDUGU's Institute of Engineering & Technology and Deeksha Bhawan.
 
 - **Live app:** https://iet-grid.vercel.app/
-- **Source:** https://github.com/ThunderKhan/iet-grid
+- **GitHub repository:** https://github.com/ThunderKhan/iet-grid
 - **Documentation hub:** [docs/README.md](docs/README.md)
 
-## Documentation
+## Repository layout
 
-| Document | Purpose |
+```text
+iet-grid/
+├── frontend/                     # React + Vite web application
+│   ├── src/                      # App UI, scheduling utilities, Supabase client
+│   ├── index.html
+│   ├── package.json
+│   ├── .env.example
+│   └── vercel.json
+├── backend/                      # Supabase/PostgreSQL backend
+│   ├── README.md
+│   └── supabase/
+│       └── migrations/
+│           ├── 001_iet_grid.sql
+│           └── 002_security_hardening.sql
+├── docs/                         # Product specs and implementation decisions
+│   ├── README.md
+│   ├── MVP.md
+│   ├── PRD.md
+│   ├── IMPLEMENTATION_PLAN.md
+│   └── ...                       # Architecture, design, decisions, testing
+├── LICENSE
+└── README.md
+```
+
+**Backend note:** Supabase Auth, managed PostgreSQL, Row Level Security and server-side SQL functions are the backend. There is no separately deployed Node/FastAPI server in the MVP. Moving files does **not** create a second backend process; the live database was not modified during this reorganization.
+
+## Local development
+
+Requires Node.js and a dedicated IET Grid Supabase project.
+
+```bash
+git clone https://github.com/ThunderKhan/iet-grid.git
+cd iet-grid/frontend
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `frontend/.env.local` using the Supabase project's **public publishable key** and URL. Never commit secrets or use a service-role key in the frontend.
+
+```bash
+cd frontend
+npm run build
+npm run preview
+```
+
+### Backend schema
+
+See [backend/README.md](backend/README.md). The schema is under [backend/supabase/migrations/](backend/supabase/migrations/). Run those files in order **only when provisioning a fresh dedicated database**; the migrations are already applied to the connected IET Grid project. Never blindly reapply schema creation to an existing database.
+
+### Deployment
+
+Vercel project settings:
+- **Root Directory:** `frontend`
+- **Framework:** Vite
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+- **Environment:** `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (public values only)
+
+Pushing `main` triggers frontend deployment. SQL changes in `backend/` are **not automatically applied** and require reviewed migrations.
+
+## Product documentation
+
+| File | Purpose |
 | --- | --- |
-| [MVP](docs/MVP.md) | Hackathon scope, demo scenario, explicit cuts and definition of done |
-| [PRD](docs/PRD.md) | Product requirements, personas, acceptance criteria and constraints |
-| [Implementation Plan](docs/IMPLEMENTATION_PLAN.md) | Prioritized execution board, verification and handoff |
-| [Decision Log](docs/DECISIONS.md) | All agreed planning and implementation choices |
-| [Architecture](docs/ARCHITECTURE.md) | Current services, data model, auth and booking algorithm |
-| [System](docs/SYSTEM.md) | Short operational reference |
-| [Design](docs/DESIGN.md) | Brand and interaction specification |
-| [Requirements Traceability](docs/REQUIREMENTS_TRACEABILITY.md) | Organizer requirements vs implementation status |
-| [Test Plan](docs/TEST_PLAN.md) | Acceptance tests and evidence requirements |
+| [MVP](docs/MVP.md) | Hackathon scope, critical flow, explicit cuts |
+| [PRD](docs/PRD.md) | Product requirements and acceptance criteria |
+| [Implementation Plan](docs/IMPLEMENTATION_PLAN.md) | Prioritized implementation and verification |
+| [Decision Log](docs/DECISIONS.md) | Product and technical decisions |
+| [Architecture](docs/ARCHITECTURE.md) | Application/backend interaction and data design |
+| [System](docs/SYSTEM.md) | Core constraints and backend invariants |
+| [Design](docs/DESIGN.md) | Unified design language and spatial/calendar UX |
+| [Requirements Traceability](docs/REQUIREMENTS_TRACEABILITY.md) | Organizer requirements and status |
+| [Test Plan](docs/TEST_PLAN.md) | Acceptance verification |
+ 
+## Current limitations
 
-## Local setup
+The room explorer uses **schematic**, not architecturally exact floor polygons. Some capacities and lab designations are unverified. The organizer's student/batch dataset and recurring lecture timetables have not yet been imported. Production role verification and real booking workflows need end-to-end user testing. Demo reservations are labeled and not persisted to Supabase.
 
-1. Install Node.js and run **npm install**.
-2. Create a new, dedicated Supabase project, or use the separate project already provisioned for IET Grid.
-3. Apply the SQL files in **supabase/migrations/** in numeric order on a fresh database.
-4. Copy **.env.example** to **.env.local** and supply **VITE_SUPABASE_URL** and **VITE_SUPABASE_ANON_KEY** (only a public publishable key).
-5. Run **npm run dev**; build with **npm run build**.
-6. Register an account, then have a trusted administrator verify and provision faculty/coordinator/admin roles before testing privileged operations.
-7. On Vercel, set the same two public environment variables and redeploy.
-
-**Do not commit passwords, secret/service-role keys, authentication tokens or private university student data.**
-
-## Current implementation and limitations
-
-- React/Vite client with dashboard, schematic room map, calendar, reservations, announcements and transparent guest/demo mode.
-- Dedicated Supabase Postgres schema, verified/role-based mutation functions, six RLS-enabled tables and 30 seeded blueprint-derived rooms.
-- **Not yet verified end-to-end:** real faculty booking, student-profile access checks, admin approval UI, official student dataset import.
-- **Spatial accuracy:** current floor view is schematic, not an accurate tracing of the organizer's architecture diagrams.
-- **Timetable model:** regular recurring lecture imports and automatic semester optimization are not implemented.
-- Demo bookings are intentionally nonpersistent and must never be represented as official university data.
-
-The hackathon cutoff and all requirements are detailed in [docs/README.md](docs/README.md).
+See [docs/README.md](docs/README.md) for current status and the hackathon deadline.
