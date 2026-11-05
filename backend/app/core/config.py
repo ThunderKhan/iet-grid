@@ -18,7 +18,7 @@ class Settings:
 def get_settings() -> Settings:
     origins = os.getenv(
         "CORS_ORIGINS",
-        "https://iet-grid.vercel.app,http://localhost:5173,http://127.0.0.1:5173",
+        "https://iet-grid.vercel.app,http://localhost:5123,http://127.0.0.1:5123",
     )
     return Settings(
         supabase_url=(
