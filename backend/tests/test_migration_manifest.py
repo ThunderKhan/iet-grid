@@ -15,6 +15,7 @@ EXPECTED = {
     "010_confirmed_identity_provisioning.sql",
     "011_room_eligibility_and_scoped_audit.sql",
     "012_persist_equipment_booking_requirements.sql",
+    "013_profile_settings_and_avatars.sql",
 }
 
 
@@ -33,3 +34,12 @@ def test_room_allocation_and_security_triggers_are_versioned():
     assert "room_allocations" in (ROOT / "003_canonical_occupancy_and_academics.sql").read_text()
     assert "request_room_booking" in (ROOT / "004_transactional_booking_engine.sql").read_text()
     assert "sync_iet_grid_people" in (ROOT / "007_fix_allocation_trigger_dispatch.sql").read_text()
+
+
+def test_profiles_cannot_self_elevate_via_settings():
+    sql = (ROOT / "013_profile_settings_and_avatars.sql").read_text()
+    assert "grant update (full_name, avatar_path)" in sql.lower()
+    assert "with check (id = (select auth.uid()))" in sql.lower()
+    assert "for insert to authenticated" in sql.lower()
+    assert "bucket_id='iet-profile-avatars'" in sql.lower()
+    assert "grant update (full_name, role" not in sql.lower()
