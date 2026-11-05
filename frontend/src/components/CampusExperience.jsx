@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import * as Dialog from '@radix-ui/react-dialog';
-import {ArrowRight, BookOpenText, Building2, CalendarDays, CheckCircle2, ChevronDown, Clock3, DoorOpen, Info, Layers3, Settings2, SlidersHorizontal, Users, X} from 'lucide-react';
+import {ArrowRight, BookOpenText, CalendarDays, CheckCircle2, ChevronDown, Clock3, DoorOpen, Info, Layers3, Settings2, SlidersHorizontal, Users, X} from 'lucide-react';
 import BlueprintSitePlan from './BlueprintSitePlan';
 import {sessionTimeIST} from '../currentSessions';
 import './CampusExperience.css';
@@ -110,20 +110,13 @@ export default function CampusExperience({
       <BlueprintSitePlan rooms={rooms} building={building} floor={floor} selected={selected}
         onSelect={selectRoom} getStatus={getStatus} mode={mode}
         floorOptions={floorOptions} onNavigateFloor={goToFloor} onModeChange={setMode}
+        buildings={buildings} onBuildingChange={chooseBuilding}
         activeSessions={activeSessions} nowScheduleState={nowScheduleState}/>
     </section>
     <div className="cx-lower-workspace">
       <div className="cx-tools-column">
-    <section className="cx-nav" aria-label="Campus floor and schedule">
-      <div className="cx-nav-main">
-        <div className="cx-building-tabs" role="group" aria-label="Select building">
-          {buildings.map(b=><button type="button" key={b.id} aria-pressed={building===b.id}
-            aria-label={b.id==='DEEK'?'Select Deeksha Bhawan building':'Select Institute of Engineering & Technology building'}
-            className={building===b.id?'active':''} onClick={()=>chooseBuilding(b.id)}>
-            <Building2 size={16}/>{b.id==='DEEK'?'Deeksha':b.short}</button>)}
-        </div>
-
-      </div>
+    <section className="cx-nav" aria-label="Reservation time and requirements">
+      <span className="cx-nav-heading">Reservation time</span>
       <Popover.Root>
         <Popover.Trigger asChild><button type="button" className="cx-schedule-trigger" aria-label="Edit selected date, time and room requirements">
           <CalendarDays size={17}/>

@@ -97,6 +97,13 @@ try {
       'Floor plan must render full-width first, with selector and booking details below');
     assert.ok(html.includes('cx-nav'), 'Building selector must remain after removing hero');
     assert.ok(html.includes('bp-view-toggle'),'Map/List switch must sit inside the floor plan card');
+    assert.ok(html.includes('bp-building-tabs'),'Building picker must be in floor-plan header');
+    assert.ok(html.indexOf('bp-heading-line')<html.indexOf('bp-building-tabs')
+      && html.indexOf('bp-building-tabs')<html.indexOf('bp-navigation-stage'),
+      'Building selector must appear beside Classroom layout, above the map');
+    assert.ok(!html.includes('cx-building-tabs'),'Old building switch below map must be absent');
+    assert.ok(html.includes('aria-label="Select building"'),
+      'Moved building switch must retain an accessible group label');
     assert.ok(html.indexOf('bp-head')<html.indexOf('bp-view-toggle') &&
       html.indexOf('bp-view-toggle')<html.indexOf('bp-navigation-stage'),
       'Map/List switch must be in the blueprint header, before the drawing');

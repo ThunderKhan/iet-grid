@@ -120,3 +120,21 @@
  .bp-live-count{font-size:10px}
  .bp-room-ongoing-title{font-size:10px}
 }
+
+
+/* Campus selection belongs to the floor-plan header, beside its title. */
+.bp-heading-line{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.bp-building-tabs{display:flex;align-items:center;gap:4px;padding:2px;background:#F4F7FB;border:1px solid #E0E7F0;border-radius:9px}
+.bp-building-tabs button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:7px 11px;min-height:36px;border:1px solid transparent;border-radius:7px;background:transparent;color:#61728A;font-size:12px;font-weight:690;white-space:nowrap;cursor:pointer}
+.bp-building-tabs button.active{background:#EDF2FF;color:#315CE5;border-color:#C8D5FF}
+.bp-building-tabs button:hover:not(.active){background:#fff;color:#253C5B}
+.bp-building-tabs button:focus-visible{outline:3px solid #A5BBFF;outline-offset:2px}
+@media(max-width:960px){
+  .bp-head{flex-wrap:wrap}
+  .bp-head-copy{flex:1 1 100%}
+  .bp-head-actions{flex:1 1 100%;justify-content:space-between}
+}
+@media(max-width:720px){
+  .bp-heading-line{gap:8px 12px}
+  .bp-building-tabs button{padding:7px 10px;font-size:11px;min-height:36px}
+}

@@ -1,5 +1,5 @@
 import React, {useMemo, useState} from 'react';
-import {ChevronLeft, ChevronRight, DoorOpen, List, Map as MapIcon} from 'lucide-react';
+import {Building2, ChevronLeft, ChevronRight, DoorOpen, List, Map as MapIcon} from 'lucide-react';
 import './BlueprintSitePlan.css';
 
 /* Source: DDUGU Build With AI brief, page 1, IET & Deeksha floor blueprint.
@@ -107,7 +107,7 @@ function Room({item,room,availability,selected,onSelect,activeSession}){
       +(hasLive?' · Currently running: '+activeTitle:'')}</title>
   </g>;
 }
-export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSelect,getStatus,mode='plan',onModeChange=()=>{},floorOptions=[],onNavigateFloor=()=>{},activeSessions={},nowScheduleState='loading'}){
+export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSelect,getStatus,mode='plan',onModeChange=()=>{},floorOptions=[],onNavigateFloor=()=>{},buildings=[],onBuildingChange=()=>{},activeSessions={},nowScheduleState='loading'}){
   const layout=(layouts[building+':'+floor]||[]).filter(item=>Boolean(item.id));
   const filtered=rooms.filter(r=>r.building===building&&r.floor===floor);
   const byId=useMemo(()=>new Map(filtered.map(r=>[r.id,r])),[filtered]);
@@ -125,8 +125,19 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
     liveCount+' class'+(liveCount===1?'':'es')+' running now';
   return <section className="bp-board" aria-label={(isDeek?'Deeksha Bhawan':'IET')+' '+floor+' floor'}>
     <header className="bp-head">
-      <div className="bp-head-copy"><h2>Classroom layout</h2>
-        <p>Select a room to see availability and make a reservation.</p></div>
+      <div className="bp-head-copy">
+        <div className="bp-heading-line">
+          <h2>Classroom layout</h2>
+          {buildings.length>0&&<div className="bp-building-tabs" role="group" aria-label="Select building">
+            {buildings.map(b=><button type="button" key={b.id} aria-pressed={building===b.id}
+              aria-label={b.id==='DEEK'?'Select Deeksha Bhawan building':'Select Institute of Engineering & Technology building'}
+              className={building===b.id?'active':''} onClick={()=>onBuildingChange(b.id)}>
+              <Building2 size={16}/>{b.id==='DEEK'?'Deeksha':b.short}
+            </button>)}
+          </div>}
+        </div>
+        <p>Select a room to see availability and make a reservation.</p>
+      </div>
       <div className="bp-head-actions">
         <span role="status" className={'bp-live-count '+(liveCount?'has-live':'')}>
           {liveCount>0&&<i aria-hidden="true"/>}{liveLabel}
