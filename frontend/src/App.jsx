@@ -141,7 +141,7 @@ useEffect(()=>{
      setApiRecommendations(recs.recommendations||[]);
    })
    .catch(e=>{if(disposed)return;setApiAvailability(null);setApiRecommendations([]);
-     setApiWarning('Live availability could not be verified: '+e.message)});
+     setApiWarning('The availability check failed: '+e.message)});
  return()=>{disposed=true};
 },[session?.access_token,start,end,capacity,building,bookingKind,requiredEquipment,refreshTick]);
 const [liveCalendar,setLiveCalendar]=useState([]);
@@ -400,6 +400,7 @@ return <div className="app-shell">
     requiredEquipment={requiredEquipment} setRequiredEquipment={setRequiredEquipment}
     apiAvailability={apiAvailability} apiWarning={apiWarning} isAvailable={isAvailable}
     matching={matching} current={current} canBook={canBook} inventoryLoading={inventoryLoading}
+    onRetry={()=>{setInventoryRetry(n=>n+1);setRefreshTick(n=>n+1)}}
     setShowBooking={setShowBooking} setView={setView}
     activeSessions={activeSessions} nowScheduleState={nowScheduleState} currentTimeMs={currentTimeMs}/>}
   {view==='Calendar'&&<CalendarPage date={date} setDate={setDate} initialDate={initialDate}

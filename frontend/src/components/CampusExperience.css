@@ -134,3 +134,13 @@
 @keyframes cx-loading-spin{to{transform:rotate(360deg)}}
 @media(max-width:720px){.cx-popover-fields :is(select,input){font-size:16px}.cx-mobile-sheet .cx-room-name h2{display:none}.cx-map-hero .bp-viewport{min-height:0}.cx-map-hero .bp-svg{width:730px}}
 @media(prefers-reduced-motion:reduce){.cx-loading-indicator{animation:none;border-top-color:#405875}}
+
+/* Clear recovery actions for empty inventory and failed availability; no fake room states. */
+.cx-warning,.cx-no-inventory{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.cx-warning>svg,.cx-no-inventory>svg{flex:0 0 17px}
+.cx-warning>span,.cx-no-inventory>span{flex:1;min-width:230px;line-height:1.5}
+.cx-warning strong,.cx-no-inventory strong{display:block;font-size:13px;line-height:1.4;margin-bottom:2px}
+.cx-warning button,.cx-no-inventory button{min-height:42px;padding:9px 13px;border:1px solid #C8D5E6;border-radius:8px;background:#fff;color:#304D74;font-size:13px;font-weight:700}
+.cx-warning button:hover,.cx-no-inventory button:hover{background:#F2F5FB;border-color:#A8BDE1}
+.cx-no-inventory{border:1px solid #DCE4EF;background:#F6F8FB;border-radius:9px;padding:12px 14px;color:#52637B;font-size:13px}
+@media(max-width:560px){.cx-warning button,.cx-no-inventory button{width:100%}}
