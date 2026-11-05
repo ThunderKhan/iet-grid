@@ -45,7 +45,6 @@ Use **IET Grid** in UI, documentation, screenshots and submission. Do not rename
 | T-10 | Defer semester optimizer, full role designer, 3D, native mobile, detailed issue tracker | Preserve end-to-end MVP quality and submission deadline |
 | T-11 | Keep the project license MIT | Repository currently MIT; external code/assets need separate license review |
 | T-12 | Store developer docs under docs/ and link from root README | Single readable, versioned source of product decisions |
-
 | T-13 | Separate frontend and backend in the repository | User explicitly requested directory-level separation. `frontend/` contains React/Vite; `backend/` contains Supabase SQL and server-side functions. Vercel builds from `frontend/`; Supabase remains the managed backend. No new Express/FastAPI service was introduced. |
 
 ## 4. Important distinction: decided vs shipped
