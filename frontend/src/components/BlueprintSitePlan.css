@@ -100,3 +100,23 @@
   .bp-floor-position{padding:12px 12px 15px}
 }
 @media(prefers-reduced-motion:reduce){.bp-floor-arrow{transition:none}}
+
+
+/* A room's availability refers to the selected booking interval. The blue
+   "LIVE NOW" label independently shows an authorized current allocation. */
+.bp-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:13px;min-width:0}
+.bp-live-count{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:11px;font-weight:680;color:#6F8199}
+.bp-live-count.has-live{color:#245F91}
+.bp-live-count i{width:8px;height:8px;border-radius:50%;background:#1976B5}
+.bp-now-chip{fill:#256DA7}
+.bp-now-chip-label{font-size:8px;letter-spacing:.035em;font-weight:800;fill:#fff;pointer-events:none}
+.bp-room-ongoing-title{font-size:10.8px;letter-spacing:-.01em;font-weight:700;fill:#245F91;pointer-events:none}
+.bp-list-live{display:block;color:#245F91;font-size:10px;font-weight:760}
+.bp-list-live-title{display:block;font-size:10px;font-weight:580;color:#5F7998;white-space:normal;max-width:180px;overflow-wrap:anywhere;margin-top:3px}
+.bp-dot-live{background:#1976B5}
+@media(max-width:720px){
+ .bp-head{flex-wrap:wrap}
+ .bp-head-actions{width:100%;justify-content:space-between}
+ .bp-live-count{font-size:10px}
+ .bp-room-ongoing-title{font-size:10px}
+}
