@@ -16,7 +16,9 @@ export const demoBookings=[
 {id:'demo-1',room_id:'IET18',title:'CSE · Data Structures',starts_at:nextSlot(0,10),ends_at:nextSlot(0,11),status:'confirmed',kind:'lecture'},
 {id:'demo-2',room_id:'IET20',title:'AI/ML · Machine Learning',starts_at:nextSlot(0,11),ends_at:nextSlot(0,12),status:'confirmed',kind:'lecture'},
 {id:'demo-3',room_id:'LH04',title:'ECE · Circuit Theory',starts_at:nextSlot(0,12),ends_at:nextSlot(0,13),status:'confirmed',kind:'lecture'},
-{id:'demo-4',room_id:'IET32',title:'Guest Lecture · Seminar',starts_at:nextSlot(1,11),ends_at:nextSlot(1,13),status:'confirmed',kind:'event'}
+{id:'demo-4',room_id:'IET32',title:'Guest Lecture · Seminar',starts_at:nextSlot(1,11),ends_at:nextSlot(1,13),status:'confirmed',kind:'event'},
+// Explicitly demonstration-only class in progress; never persisted.
+{id:'demo-running',room_id:'IET17',title:'AI/ML · Neural Networks',starts_at:new Date(Date.now()-15*60000).toISOString(),ends_at:new Date(Date.now()+45*60000).toISOString(),status:'confirmed',kind:'lecture'}
 ];
 export const demoNotices=[
 {id:'n1',title:'Minor examination seating update',body:'Please confirm your exam room against the official timetable before attending.',priority:'high',created_at:new Date().toISOString()},

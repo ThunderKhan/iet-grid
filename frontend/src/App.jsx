@@ -7,6 +7,7 @@ import {CalendarPage,BookingsPage,AnnouncementsPage,AdminPage} from './component
 import CampusExperience from './components/CampusExperience';
 import ReservationDialog from './components/ReservationDialog';
 import {previewCohorts,formatCohort,branchLabel} from './academicCohorts';
+import {getActiveRoomSessions} from './currentSessions';
 import {buildings,sampleRooms,demoBookings,demoNotices,localDate,occupancy,recommend,dateTimes} from './data';
 const initialDate=localDate();
 const menu=[['Explore rooms',MapIcon],['Calendar',CalendarDays],['My bookings',BookOpen],['Announcements',Bell],['Admin',Shield]];
@@ -113,6 +114,9 @@ useEffect(()=>{
  return()=>{disposed=true};
 },[demo,session?.access_token,start,end,capacity,building,bookingKind,requiredEquipment,refreshTick]);
 const [liveCalendar,setLiveCalendar]=useState([]);
+const [currentTimeMs,setCurrentTimeMs]=useState(()=>Date.now());
+const [runningAllocations,setRunningAllocations]=useState([]);
+const [runningScheduleStatus,setRunningScheduleStatus]=useState('loading');
 useEffect(()=>{
  if(demo||!session?.access_token)return;
  let disposed=false;setLiveCalendar([]);
@@ -127,6 +131,56 @@ useEffect(()=>{
  .catch(()=>{if(!disposed)setLiveCalendar([])});
  return()=>{disposed=true};
 },[demo,session?.access_token,date,refreshTick]);
+// Running sessions are independent of the reservation time being browsed.
+// The calendar API already applies RLS and redacts inaccessible titles.
+useEffect(()=>{
+  if(demo){setRunningAllocations([]);setRunningScheduleStatus('demo');return;}
+  if(!session?.access_token||view!=='Explore rooms'){
+    setRunningAllocations([]);setRunningScheduleStatus('unavailable');return;
+  }
+  let cancelled=false;
+  let busy=false;
+  setRunningAllocations([]);
+  setRunningScheduleStatus('loading');
+  const reload=async()=>{
+    if(cancelled||busy||document.hidden)return;
+    busy=true;
+    const now=Date.now();
+    const startTime=new Date(now-8*3600000).toISOString();
+    const endTime=new Date(now+8*3600000).toISOString();
+    try{
+      const response=await apiFetch('/api/v1/calendar?start='+encodeURIComponent(startTime)
+        +'&end='+encodeURIComponent(endTime));
+      if(!cancelled){
+        setRunningAllocations((response.events||[]).map(event=>({
+          id:event.id,room_id:event.room_id,title:event.title,
+          starts_at:event.start,ends_at:event.end,
+          details_visible:event.details_visible,kind:event.source_type,
+          status:'confirmed',
+        })));
+        setRunningScheduleStatus('ready');
+        setCurrentTimeMs(Date.now());
+      }
+    }catch{
+      if(!cancelled){setRunningAllocations([]);setRunningScheduleStatus('unavailable');}
+    }finally{busy=false;}
+  };
+  const tick=()=>setCurrentTimeMs(Date.now());
+  const onVisible=()=>{if(!document.hidden){tick();reload();}};
+  reload();
+  const polling=window.setInterval(()=>{tick();reload();},60000);
+  document.addEventListener('visibilitychange',onVisible);
+  return()=>{cancelled=true;window.clearInterval(polling);
+    document.removeEventListener('visibilitychange',onVisible);};
+},[demo,session?.access_token,view,refreshTick]);
+useEffect(()=>{
+  if(!demo)return;
+  const timer=window.setInterval(()=>setCurrentTimeMs(Date.now()),30000);
+  return()=>window.clearInterval(timer);
+},[demo]);
+const activeSessions=useMemo(()=>getActiveRoomSessions(demo?bookings:runningAllocations,currentTimeMs),
+  [demo,bookings,runningAllocations,currentTimeMs]);
+const nowScheduleState=demo?'demo':runningScheduleStatus;
 const calendarBookings=demo?bookings:liveCalendar;
 const current=rooms.find(r=>r.id===selected);
 const isAvailable=r=>demo?!occupancy(r.id,start,end,bookings):
@@ -331,7 +385,8 @@ return <div className="app-shell"><aside className={'sidebar '+(mobile?'mobile-o
     requiredEquipment={requiredEquipment} setRequiredEquipment={setRequiredEquipment}
     apiAvailability={apiAvailability} apiWarning={apiWarning} isAvailable={isAvailable}
     matching={matching} current={current} canBook={canBook}
-    setShowBooking={setShowBooking} setView={setView} demo={demo}/>}
+    setShowBooking={setShowBooking} setView={setView} demo={demo}
+    activeSessions={activeSessions} nowScheduleState={nowScheduleState} currentTimeMs={currentTimeMs}/>}
   {view==='Calendar'&&<CalendarPage date={date} setDate={setDate} initialDate={initialDate}
     calendarBookings={calendarBookings} rooms={rooms} onOpenRoom={openRoomAt}/>}
   {view==='My bookings'&&<BookingsPage bookings={bookings} rooms={rooms}
