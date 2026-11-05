@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@paper-design/shaders-react": "0.0.82",
     "@supabase/supabase-js": "2.57.0",
     "lucide-react": "0.468.0",
     "react": "19.1.1",
