@@ -10,6 +10,34 @@ const server=await createServer({server:{middlewareMode:true},appType:'custom',l
 try {
   const pages=await server.ssrLoadModule('/src/components/WorkspacePages.jsx');
   const {default: CampusExperience}=await server.ssrLoadModule('/src/components/CampusExperience.jsx');
+  const {default: ProfilePage,validateProfileImage,profileFormFrom}=await server.ssrLoadModule('/src/components/ProfilePage.jsx');
+  const fileOK={type:'image/png',size:120000};
+  assert.equal(validateProfileImage(fileOK),'');
+  assert.match(validateProfileImage({type:'image/svg+xml',size:300}),/JPEG, PNG or WebP/,
+    'SVG avatars must not be accepted');
+  assert.match(validateProfileImage({type:'image/jpeg',size:4*1024*1024}),/2 MB/,
+    'Oversized files must be rejected');
+  const selfReported=profileFormFrom({full_name:'Example Student'},{
+    user_metadata:{campus_branch:'AI/ML',campus_year:2,campus_section:'B'}
+  });
+  assert.deepEqual([selfReported.branch,selfReported.academicYear,selfReported.section],
+    ['AI/ML','2','B']);
+  const studentProfileMarkup=renderToString(React.createElement(ProfilePage,{
+    profile:{full_name:'Example Student',role:'student',verified:true,branch:'CSE',academic_year:1,section:'A'},
+    session:{user:{email:'student@example.com',user_metadata:{}}},role:'student',demo:true,
+    onProfileChanged:()=>{}
+  }));
+  for(const label of ['My profile','Profile photo','Full name','Branch / programme','Academic year','Section','Save changes'])
+    assert.ok(studentProfileMarkup.includes(label),'Profile page missing '+label);
+  assert.ok(studentProfileMarkup.includes('University-managed details'),'Profile must distinguish institutional record');
+  assert.ok(studentProfileMarkup.includes('Demo changes')===false);
+  const facultyProfileMarkup=renderToString(React.createElement(ProfilePage,{
+    profile:{full_name:'Example Faculty',role:'faculty',verified:true},
+    session:{user:{email:'faculty@example.com',user_metadata:{}}},role:'faculty',demo:true,
+    onProfileChanged:()=>{}
+  }));
+  assert.ok(facultyProfileMarkup.includes('Department / teaching area'),'Faculty fields must be role-aware');
+  assert.ok(!facultyProfileMarkup.includes('Academic year'),'Faculty form should not ask for student academic year');
   const {default: TopNavigation}=await server.ssrLoadModule('/src/components/TopNavigation.jsx');
   const {SlideTabs}=await server.ssrLoadModule('/src/components/TopNavigation.jsx');
   const navigationItems=[['Explore rooms',()=>null],['Calendar',()=>null],['My bookings',()=>null],
@@ -23,6 +51,7 @@ try {
   assert.ok(navHtml.includes('aria-current="page"'),'Selected navigation item must be accessible');
   assert.ok(navHtml.includes('Campus map')&&navHtml.includes('Calendar')&&navHtml.includes('My bookings'),
     'Existing workspace destinations must remain available');
+  assert.ok(navHtml.includes('My profile'),'Account menu must expose the profile page');
   assert.ok(navHtml.includes('DEMO')&&navHtml.includes('Announcements'),
     'Demo and announcement context must remain available');
   assert.ok(navHtml.includes('aria-haspopup="menu"')&&navHtml.includes('ig-profile-trigger'),
