@@ -19,6 +19,17 @@ return <div className="floorboard"><div className="floorboard-head"><span classN
 }
 export default function App(){
 const [session,setSession]=useState(null);const [recovering,setRecovering]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='reset');const [guest,setGuest]=useState(false);const [profile,setProfile]=useState(null);const [rooms,setRooms]=useState(configured?[]:sampleRooms);const [bookings,setBookings]=useState(configured?[]:demoBookings);const [notices,setNotices]=useState(configured?[]:demoNotices);const [view,setView]=useState('Overview');const [building,setBuilding]=useState('IET');const [floor,setFloor]=useState('First');const [date,setDate]=useState(initialDate);const [hour,setHour]=useState('11');const [duration,setDuration]=useState(1);const [capacity,setCapacity]=useState(75);const [selected,setSelected]=useState('IET19');const [toast,setToast]=useState('');const [loading,setLoading]=useState(false);const [mobile,setMobile]=useState(false);const [showBooking,setShowBooking]=useState(false);const [bookingTitle,setBookingTitle]=useState('Extra lecture');const [bookingKind,setBookingKind]=useState('lecture');const [report,setReport]=useState(false);const [noticeTitle,setNoticeTitle]=useState('');const [noticeBody,setNoticeBody]=useState('');
+const [noticePriority,setNoticePriority]=useState('normal');
+const [noticeBusy,setNoticeBusy]=useState(false);
+const [pendingQueue,setPendingQueue]=useState([]);
+const [pendingLoading,setPendingLoading]=useState(false);
+const [pendingError,setPendingError]=useState('');
+const [reviewBusy,setReviewBusy]=useState('');
+const [accountUuid,setAccountUuid]=useState('');
+const [accountRole,setAccountRole]=useState('faculty');
+const [accountBusy,setAccountBusy]=useState(false);
+const [noticeReadBusy,setNoticeReadBusy]=useState('');
+
 const demo=!configured||guest;
 const [liveDataError,setLiveDataError]=useState('');
 const API_BASE=import.meta.env.VITE_API_BASE_URL||'';
@@ -104,6 +115,72 @@ const filtered=rooms.filter(r=>r.building===building&&r.floor===floor);
 const userRole=demo?'faculty':profile?.role||'student';
 const canBook=demo||(['faculty','coordinator','admin'].includes(userRole)&&profile?.verified);
 const canAdmin=demo||(['coordinator','admin'].includes(userRole)&&profile?.verified);
+
+useEffect(()=>{
+ if(demo||!session?.access_token||view!=='Admin'||!canAdmin){setPendingQueue([]);setPendingError('');return;}
+ let disposed=false;
+ setPendingLoading(true);setPendingError('');
+ apiFetch('/api/v1/bookings/pending').then(data=>{if(!disposed)setPendingQueue(data.bookings||[]);})
+  .catch(err=>{if(!disposed){setPendingQueue([]);setPendingError('Unable to load pending requests: '+err.message);}})
+  .finally(()=>{if(!disposed)setPendingLoading(false);});
+ return()=>{disposed=true;};
+},[demo,view,canAdmin,session?.access_token,refreshTick]);
+useEffect(()=>{
+ if(demo||!session?.access_token)return;
+ let disposed=false;
+ apiFetch('/api/v1/announcements').then(data=>{if(!disposed)setNotices(data.announcements||[]);})
+ .catch(()=>{});
+ return()=>{disposed=true;};
+},[demo,session?.access_token,refreshTick]);
+async function reviewPendingBooking(booking,approve){
+ if(demo)return alert('Approval actions require a signed-in administrator.');
+ if(reviewBusy)return;
+ setReviewBusy(booking.id);
+ try{
+   await apiFetch('/api/v1/admin/bookings/'+encodeURIComponent(booking.id)+'/review',{
+     method:'POST',body:JSON.stringify({approve})});
+   setPendingQueue(current=>current.filter(item=>item.id!==booking.id));
+   const [bookingsResponse,noticeResponse]=await Promise.all([
+     supabase.from('bookings').select('*').order('starts_at'),
+     apiFetch('/api/v1/announcements')
+   ]);
+   if(bookingsResponse.error)throw bookingsResponse.error;
+   setBookings(bookingsResponse.data||[]);
+   setNotices(noticeResponse.announcements||[]);
+   setRefreshTick(n=>n+1);
+   alert(approve?'Request approved. Exam/event notices are published automatically.':'Request rejected; no room was reserved.');
+ }catch(err){
+   setRefreshTick(n=>n+1);
+   alert('Review could not be fully refreshed: '+(err.message||String(err)));
+ }finally{setReviewBusy('');}
+}
+async function grantTestRole(){
+ if(demo)return alert('Role provisioning requires a live administrator.');
+ if(accountBusy)return;
+ const id=accountUuid.trim();
+ if(!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(id))
+   return alert('Enter a valid existing Supabase Auth user UUID.');
+ if(!['faculty','student'].includes(accountRole))return alert('Only faculty or student test roles are supported.');
+ if(session?.user?.id?.toLowerCase()===id.toLowerCase())return alert('Use a separate registered account, not your administrator identity.');
+ setAccountBusy(true);
+ try{
+  await apiFetch('/api/v1/admin/users/'+encodeURIComponent(id)+'/role',{
+    method:'POST',body:JSON.stringify({role:accountRole,verified:true})});
+  setAccountUuid('');
+  alert('Existing confirmed user provisioned as '+accountRole+'. The user can now sign in to test role restrictions.');
+ }catch(err){alert('Unable to provision account: '+(err.message||String(err)));}
+ finally{setAccountBusy(false);}
+}
+async function markNoticeRead(noticeId){
+ if(demo||noticeReadBusy)return;
+ setNoticeReadBusy(noticeId);
+ try{
+  await apiFetch('/api/v1/announcements/'+encodeURIComponent(noticeId)+'/read',{method:'POST'});
+  setNotices(items=>items.map(n=>n.id===noticeId?{...n,read_at:new Date().toISOString()}:n));
+ }catch(err){alert('Could not mark notice as read: '+(err.message||String(err)));}
+ finally{setNoticeReadBusy('');}
+}
+
 async function doBook(){
  if(!current)return;
  if(!isAvailable(current))return alert('This room is not verified as available at that time.');
@@ -139,22 +216,29 @@ async function submitReport(){
  }catch(e){alert(e.message||'Could not submit report')}
 }
 async function addNotice(){
- if(!noticeTitle.trim())return;
+ if(noticeBusy)return;
+ if(!canAdmin)return alert('Verified administrator access is required.');
+ if(noticeTitle.trim().length<3)return alert('Announcement title must be at least 3 characters.');
+ setNoticeBusy(true);
  try{
   if(demo){
-   setNotices(prev=>[{id:'local-'+Date.now(),title:noticeTitle,body:noticeBody,
-    priority:'normal',created_at:new Date().toISOString()},...prev]);
-   alert('Demo notice published locally.');
+   setNotices(prev=>[{id:'local-'+Date.now(),title:noticeTitle.trim(),body:noticeBody,
+    priority:noticePriority,created_at:new Date().toISOString()},...prev]);
+   alert('Preview only: announcement was not persisted.');
   }else{
    await apiFetch('/api/v1/admin/announcements',{method:'POST',body:JSON.stringify({
-    title:noticeTitle,body:noticeBody,priority:'normal'
+    title:noticeTitle.trim(),body:noticeBody,priority:noticePriority
    })});
-   const n=await supabase.from('announcements').select('*').order('created_at',{ascending:false});
-   if(n.data)setNotices(n.data);
-   alert('Announcement published to the live campus feed.');
+   alert('Official announcement published to the campus feed.');
+   try{
+     const response=await apiFetch('/api/v1/announcements');
+     setNotices(response.announcements||[]);
+   }catch(err){alert('Notice published, but feed refresh failed: '+err.message);}
+   setRefreshTick(n=>n+1);
   }
-  setNoticeTitle('');setNoticeBody('');
- }catch(e){alert(e.message||'Could not publish announcement')}
+  setNoticeTitle('');setNoticeBody('');setNoticePriority('normal');
+ }catch(err){alert('Announcement could not be published: '+(err.message||String(err)));}
+ finally{setNoticeBusy(false);}
 }
 function finishRecovery(){const u=new URL(window.location.href);u.searchParams.delete('auth');u.hash='';window.history.replaceState({},'',u.pathname+u.search);setRecovering(false)}
 if(recovering||(!session&&!guest))return <AuthScreen recovery={recovering} onRecoveryComplete={finishRecovery} onRecoveryCancel={finishRecovery}/>;
@@ -167,8 +251,27 @@ return <div className="app-shell"><aside className={'sidebar '+(mobile?'mobile-o
 <aside className="details-stack"><section className="panel detail-panel"><div className="detail-top"><span className="eyebrow">ROOM INSPECTOR</span><DoorOpen size={19}/></div>{current?<><div className="room-title"><h2>{current.id}</h2><span className={'status-chip '+(isAvailable(current)?'ok':'busy')}><i/>{isAvailable(current)?'Available':!demo&&!apiAvailability?'Not verified':'Occupied'}</span></div><p className="muted">{current.building==='IET'?'Institute of Engineering & Technology':'Deeksha Bhawan'} · {current.floor} floor</p><div className="detail-specs"><div><Users size={17}/><span>Capacity</span><b>{current.capacity}{current.verified?'':'*'} seats</b></div><div><Layers size={17}/><span>Room type</span><b>{current.type}</b></div><div><Clock size={17}/><span>Selected slot</span><b>{hour.padStart(2,'0')}:00 · {duration}h</b></div></div><button className="button-primary" disabled={!isAvailable(current)||current.capacity<capacity||!canBook} onClick={()=>setShowBooking(true)}>Reserve this room <ArrowRight size={17}/></button>{!canBook&&<p className="tiny">Your verified faculty account is required to reserve rooms.</p>}<button className="button-outline" onClick={()=>setView('Calendar')}><CalendarDays size={16}/> View in calendar</button></>:<p className="muted">Select a classroom from the floor plan to inspect its availability and details.</p>}</section><section className="panel recommendation-panel"><div className="section-head"><div><h3><Sparkles size={17}/> Smart alternatives</h3><p>Capacity, location and schedule-aware</p></div></div>{matching.slice(0,4).map((r,i)=><button className="recommend-row" key={r.id} onClick={()=>{setBuilding(r.building);setFloor(r.floor);setSelected(r.id)}}><div className="recommend-rank">{String(i+1).padStart(2,'0')}</div><div><b>{r.id}</b><span>{r.building} · {r.floor} floor · {r.capacity} seats</span></div><div className="score">{r.score}%</div><ArrowUpRight size={16}/></button>)}{!matching.length&&<p className="muted">No suitable rooms found. Try another time, capacity or building.</p>}<p className="tiny">Deterministic constraint-based recommendations; scores express relative fit, not AI confidence.</p></section></aside></div>}
 {view==='Calendar'&&<section className="panel calendar-panel"><div className="section-head"><div><h3>Campus timetable</h3><p>Weekly room activity · {date}</p></div><div className="calendar-controls"><input type="date" value={date} onChange={e=>setDate(e.target.value)}/><button className="button-outline compact" onClick={()=>setDate(initialDate)}>Today</button></div></div><div className="calendar-scroll"><div className="calendar-grid"><div className="cal-corner">TIME</div>{Array.from({length:5},(_,i)=>{const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+i);return <div className="cal-day" key={i}><b>{d.toLocaleDateString('en-IN',{weekday:'short'})}</b><span>{d.getDate()}</span></div>})}{Array.from({length:10},(_,i)=>i+8).flatMap(h=>[<div className="cal-hour" key={'h'+h}>{h}:00</div>,...Array.from({length:5},(_,day)=>{const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+day);const dateKey=d.toISOString().slice(0,10);const events=calendarBookings.filter(b=>new Date(b.starts_at).toLocaleDateString('en-CA')===dateKey&&new Date(b.starts_at).getHours()===h);return <div className="cal-cell" key={h+'-'+day}>{events.map(b=><button key={b.id} onClick={()=>{const r=rooms.find(x=>x.id===b.room_id);if(r){setBuilding(r.building);setFloor(r.floor);setSelected(r.id);setView('Explore rooms')}}} className="cal-event"><strong>{b.room_id}</strong><span>{b.title}</span></button>)}</div>})])}</div></div><p className="tiny calendar-foot">Select an event to locate its classroom in the spatial view. Scheduled times display in your device timezone.</p></section>}
 {view==='My bookings'&&<section className="panel"><div className="section-head"><div><h3>Booking registry</h3><p>Confirmed reservations and academic events</p></div><button className="button-primary compact" onClick={()=>setView('Explore rooms')}><Plus size={16}/> New reservation</button></div><div className="table-wrap"><table><thead><tr><th>Reservation</th><th>Room</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody>{bookings.map(b=><tr key={b.id}><td><b>{b.title}</b><span className="table-sub">{b.kind||'lecture'}</span></td><td>{b.room_id}</td><td>{new Date(b.starts_at).toLocaleDateString('en-IN')}</td><td>{fmt(b.starts_at,{hour:'numeric',minute:'2-digit'})} – {fmt(b.ends_at,{hour:'numeric',minute:'2-digit'})}</td><td><span className="status-chip ok"><i/>{b.status}</span></td></tr>)}</tbody></table></div></section>}
-{view==='Announcements'&&<section className="panel"><div className="section-head"><div><h3>Academic announcements</h3><p>Official updates and critical schedule information</p></div></div><div className="announcements">{notices.map(n=><article className="announcement" key={n.id}><div className={'notice-ico '+(n.priority==='high'?'urgent':'')}><Bell size={18}/></div><div><div className="announcement-title"><h3>{n.title}</h3>{n.priority==='high'&&<span className="priority-badge">IMPORTANT</span>}</div><p>{n.body}</p><small>{new Date(n.created_at).toLocaleString('en-IN')}</small></div></article>)}</div><div className="report-bar"><div><b>Something incorrect in your schedule?</b><p>Students can flag outdated information for review.</p></div><button className="button-outline compact" onClick={()=>setReport(true)}>Report an issue</button></div></section>}
-{view==='Admin'&&<div className="admin-layout"><section className="panel"><div className="section-head"><div><h3>Operational controls</h3><p>Scoped campus administration</p></div><IconTag>{canAdmin?'Admin preview':'Restricted access'}</IconTag></div>{canAdmin?<><div className="admin-stats"><div><b>{rooms.length}</b><span>Rooms inventoried</span></div><div><b>{bookings.length}</b><span>Bookings on record</span></div><div><b>{notices.length}</b><span>Announcements</span></div></div><h4>Publish an announcement</h4><label className="field-label">Announcement title<input value={noticeTitle} onChange={e=>setNoticeTitle(e.target.value)} placeholder="e.g. Examination room change"/></label><label className="field-label">Message<textarea rows="3" value={noticeBody} onChange={e=>setNoticeBody(e.target.value)} placeholder="Provide the corrected schedule or important update"/></label><button className="button-primary compact" onClick={addNotice}><Send size={16}/> Publish announcement</button></>:<div className="empty-state"><Lock size={26}/><h3>Administrator access required</h3><p>Only verified coordinators and university administrators can publish official notices.</p></div>}</section><section className="panel"><div className="section-head"><div><h3>System health</h3><p>Deployment and integration status</p></div></div><div className="health-list"><div><span>Application</span><b className="health-good"><Check size={16}/> Online</b></div><div><span>Database connection</span><b className={demo?'health-warn':'health-good'}>{demo?'Demo / not connected':'Supabase configured'}</b></div><div><span>Availability rules</span><b className="health-good"><Check size={16}/> Active</b></div><div><span>Institutional dataset</span><b className="health-warn">Awaiting verified import</b></div></div></section></div>}
+{view==='Announcements'&&<section className="panel"><div className="section-head"><div><h3>Academic announcements</h3><p>Official updates and critical schedule information</p></div></div><div className="announcements">{!notices.length&&<p className="muted">No official academic notices have been published yet.</p>}{notices.map(n=><article className="announcement" key={n.id}><div className={'notice-ico '+(n.priority==='high'?'urgent':'')}><Bell size={18}/></div><div><div className="announcement-title"><h3>{n.title}</h3>{n.priority==='high'&&<span className="priority-badge">IMPORTANT</span>}</div><p>{n.body}</p><small>{new Date(n.created_at).toLocaleString('en-IN')}</small>{!demo&&<div className="notice-read-actions">{n.read_at?<span className="tiny"><Check size={13}/> Read</span>:<button className="button-outline compact" disabled={noticeReadBusy===n.id} onClick={()=>markNoticeRead(n.id)}>{noticeReadBusy===n.id?'Saving…':'Mark as read'}</button>}</div>}</div></article>)}</div><div className="report-bar"><div><b>Something incorrect in your schedule?</b><p>Students can flag outdated information for review.</p></div><button className="button-outline compact" onClick={()=>setReport(true)}>Report an issue</button></div></section>}
+{view==='Admin'&&<div className="admin-layout"><section className="panel"><div className="section-head"><div><h3>Operational controls</h3><p>Scoped campus administration</p></div><IconTag>{canAdmin?(demo?'Demo controls':'Verified campus operator'):'Restricted access'}</IconTag></div>{canAdmin?<><div className="admin-stats"><div><b>{rooms.length}</b><span>Rooms inventoried</span></div><div><b>{bookings.length}</b><span>Bookings on record</span></div><div><b>{notices.length}</b><span>Announcements</span></div></div><h4>Publish an announcement</h4>
+<label className="field-label">Priority<select value={noticePriority} onChange={e=>setNoticePriority(e.target.value)}><option value="normal">Normal campus update</option><option value="high">Important / exam change</option></select></label><label className="field-label">Announcement title<input value={noticeTitle} onChange={e=>setNoticeTitle(e.target.value)} placeholder="e.g. Examination room change"/></label><label className="field-label">Message<textarea rows="3" value={noticeBody} onChange={e=>setNoticeBody(e.target.value)} placeholder="Provide the corrected schedule or important update"/></label><button className="button-primary compact" onClick={addNotice} disabled={noticeBusy||noticeTitle.trim().length<3}><Send size={16}/> {noticeBusy?"Publishing…":"Publish announcement"}</button></>:<div className="empty-state"><Lock size={26}/><h3>Administrator access required</h3><p>Only verified coordinators and university administrators can publish official notices.</p></div>}</section>{canAdmin&&<section className="panel approval-panel">
+<div className="section-head"><div><h3><Shield size={18}/> Booking approvals</h3><p>Review examination and event requests before rooms are reserved.</p></div><button className="button-outline compact" disabled={pendingLoading} onClick={()=>setRefreshTick(n=>n+1)}><RefreshCcw size={15}/> Refresh</button></div>
+{demo?<p className="muted">Sign in as a verified administrator to process real requests. Demo mode never approves bookings.</p>:
+pendingLoading?<p className="muted">Loading pending requests…</p>:
+pendingError?<p className="form-error" role="alert">{pendingError}</p>:
+pendingQueue.length===0?<div className="empty-state"><CheckCircle2 size={22}/><b>All requests reviewed</b><p>New exam/event requests will appear here automatically.</p></div>:
+<div className="admin-approval-list">{pendingQueue.map(b=><div key={b.id} className="admin-approval-card"><div className="admin-approval-main"><b>{b.title}</b><span className="table-sub">{b.kind==='exam'?'Examination':b.kind==='event'?'Academic event':b.kind} · {b.room_id}</span><small>{fmt(b.starts_at,{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit'})} – {fmt(b.ends_at,{hour:'numeric',minute:'2-digit'})}</small></div><div className="admin-approval-actions"><span className="priority-badge">PENDING</span><button className="button-primary compact" disabled={!!reviewBusy} onClick={()=>reviewPendingBooking(b,true)}><Check size={15}/>{reviewBusy===b.id?'Working…':'Approve'}</button><button className="button-outline compact" disabled={!!reviewBusy} onClick={()=>reviewPendingBooking(b,false)}><X size={15}/> Reject</button></div></div>)}</div>}
+<p className="tiny">Database authorization and conflict constraints are rechecked on approval. Approved examinations/events publish an in-app notice atomically.</p>
+</section>}
+{canAdmin&&userRole==='admin'&&<section className="panel">
+<div className="section-head"><div><h3><Users size={18}/> Faculty & student test accounts</h3><p>Provision only accounts whose owners have registered and confirmed their email.</p></div></div>
+{demo?<p className="muted">Sign in as university administrator to provision real accounts.</p>:<>
+<label className="field-label">Registered user UUID<input value={accountUuid} onChange={e=>setAccountUuid(e.target.value)} placeholder="Paste UUID from Supabase Authentication → Users"/></label>
+<label className="field-label">Test role<select value={accountRole} onChange={e=>setAccountRole(e.target.value)}><option value="faculty">Faculty — can request bookings</option><option value="student">Student — view-only, can report issues</option></select></label>
+<button className="button-primary compact" disabled={accountBusy||!accountUuid.trim()} onClick={grantTestRole}><Shield size={15}/>{accountBusy?'Provisioning…':'Grant verified role'}</button>
+<p className="tiny">This does not create an account or verify ownership. Confirm the email and UUID in Supabase Auth before granting access. Never reuse the administrator account as a test user.</p>
+</>}
+</section>}
+<section className="panel"><div className="section-head"><div><h3>System health</h3><p>Deployment and integration status</p></div></div><div className="health-list"><div><span>Application</span><b className="health-good"><Check size={16}/> Online</b></div><div><span>Database connection</span><b className={demo?'health-warn':'health-good'}>{demo?'Demo / not connected':'Supabase configured'}</b></div><div><span>Availability rules</span><b className="health-good"><Check size={16}/> Active</b></div><div><span>Institutional dataset</span><b className="health-warn">Awaiting verified import</b></div></div></section></div>}
 </main></div>{mobile&&<div className="mobile-backdrop" onClick={()=>setMobile(false)}/>}
 {showBooking&&<div className="modal-overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setShowBooking(false)}}><section className="modal"><div className="modal-head"><div><div className="eyebrow">CAMPUS RESERVATION</div><h2>Reserve a classroom</h2></div><button onClick={()=>setShowBooking(false)}><X size={20}/></button></div><p className="muted">Bookings are validated against existing room reservations before confirmation.</p><div className="booking-summary"><div><small>ROOM</small><b>{selected||'No room selected'}</b></div><div><small>DATE</small><b>{date}</b></div><div><small>TIME</small><b>{hour.padStart(2,'0')}:00 · {duration}h</b></div></div><label className="field-label">Session title<input value={bookingTitle} onChange={e=>setBookingTitle(e.target.value)}/></label><label className="field-label">Booking type<select value={bookingKind} onChange={e=>setBookingKind(e.target.value)}><option value="lecture">Extra lecture</option><option value="exam">Examination</option><option value="practical">Practical session</option><option value="event">Academic event</option></select></label><div className="modal-actions"><button className="button-outline compact" onClick={()=>setShowBooking(false)}>Cancel</button><button className="button-primary compact" disabled={loading||!current||!canBook} onClick={doBook}>{loading?'Saving…':'Confirm reservation'} <ArrowRight size={16}/></button></div><p className="tiny">Exam and event requests may be queued for administrator approval in connected mode.</p></section></div>}
 {report&&<div className="modal-overlay"><section className="modal"><div className="modal-head"><h2>Report an issue</h2><button onClick={()=>setReport(false)}><X/></button></div><p className="muted">Flag incorrect or outdated schedule information. This will not modify official bookings.</p><button className="button-primary" onClick={submitReport}>Submit schedule report</button></section></div>}
