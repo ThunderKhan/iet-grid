@@ -1,0 +1,108 @@
+/* Authenticated app shell. Token values match repository-root DESIGN.md.
+   Imported after legacy styles while the workspace is migrated to independent pages. */
+.app-shell{
+  --ig-primary:#315CE5;--ig-primary-hover:#254ECC;--ig-navy:#101B2C;
+  --ig-canvas:#F6F8FB;--ig-surface:#FFFFFF;--ig-border:#DCE4EF;
+  --ig-text:#17243B;--ig-muted:#52637B;--ig-available:#187A55;
+  --ig-occupied:#B42332;--ig-pending:#8D5B12;--ig-unknown:#58677D;
+  display:flex;min-height:100dvh;background:var(--ig-canvas);color:var(--ig-text);
+}
+.app-shell .sidebar{
+  width:248px;flex:0 0 248px;height:100dvh;position:sticky;top:0;z-index:50;
+  display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;
+  padding:24px 15px 16px;background:#101B2C;color:#D3DCEA;border-right:1px solid #26384F;
+}
+.app-shell .side-brand{display:flex;align-items:center;gap:11px;padding:2px 10px 29px}
+.app-shell .side-brand .logo-mark{width:42px;height:42px;border-radius:11px;background:#315CE5;box-shadow:0 6px 18px #315CE53D}
+.app-shell .side-brand strong{font-size:17px;letter-spacing:-.035em;color:#fff}
+.app-shell .side-brand span{color:#9FB0C7;font-size:11px;letter-spacing:.01em}
+.app-shell .side-label{margin:16px 0 9px;padding:0 12px;font-size:10px;font-weight:800;color:#8297B2;letter-spacing:.13em}
+.app-shell .sidebar nav{display:grid;gap:4px}
+.app-shell .nav-item{display:flex;align-items:center;gap:12px;width:100%;min-height:43px;padding:11px 12px;background:transparent;color:#ACBDD4;border-radius:9px;text-align:left;font-size:13px;font-weight:650}
+.app-shell .nav-item svg{flex-shrink:0}
+.app-shell .nav-item:hover{background:#1B2A42;color:#FFF}
+.app-shell .nav-item.active{background:#263E66;color:#fff}
+.app-shell .nav-item.active:before{content:"";position:absolute;left:9px;width:3px;height:20px;border-radius:4px;background:#A5BBFF}
+.app-shell .nav-item.active svg{color:#C3D3FF}
+.app-shell .nav-count{margin-left:auto;border-radius:6px;color:#B8D0F5;background:#334D74}
+.app-shell .side-bottom{margin-top:auto;padding-top:24px}
+.app-shell .campus-card{background:linear-gradient(150deg,#1D314F,#17253B);border:1px solid #344966;border-radius:12px;box-shadow:none;padding:16px}
+.app-shell .campus-card b{font-size:12px;color:#F0F5FF}.app-shell .campus-card span{font-size:11px;color:#9EB0C9}
+.app-shell .campus-status{border-color:#334C6A;color:#A6BCDB;margin-top:7px;padding-top:11px;font-size:10px}
+.app-shell .campus-status i{background:#89A8E8}
+.app-shell .side-profile{display:flex;align-items:center;gap:10px;padding:15px 2px 0}
+.app-shell .side-profile .avatar{width:38px;height:38px;border-radius:10px}
+.app-shell .side-profile b{font-size:12px}.app-shell .side-profile span{font-size:11px;color:#9EB2CC}
+.app-shell .side-profile button{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;background:#FFFFFF10;color:#BBC8D7}
+.app-shell .side-profile button:hover{background:#FFFFFF20;color:#FFF}
+.app-shell .workarea{min-width:0;flex:1;display:flex;flex-direction:column}
+.app-shell .topbar{height:64px;min-height:64px;position:sticky;top:0;z-index:25;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 clamp(18px,2.7vw,38px);
+  background:#FFFFFFEF;border-bottom:1px solid #E2E8F1;backdrop-filter:blur(12px)}
+.app-shell .topbar-left,.app-shell .topbar-right{display:flex;align-items:center;gap:12px}
+.app-shell .topbar-left{color:#798BA2;font-size:12px;font-weight:550}
+.app-shell .topbar-left b{color:#243D5D;font-weight:750;font-size:12px}
+.app-shell .topbar-right .demo-label{font-size:10px;background:#FFF3D8;color:#8D5B12;padding:7px 10px;border-radius:6px;letter-spacing:.04em}
+.app-shell .today-pill{font-size:12px;color:#6D7C90}
+.app-shell .icon-button{display:grid;place-items:center;border-radius:8px;width:35px;height:35px;color:#637B9A}
+.app-shell .icon-button:hover{background:#EEF3FC;color:#315CE5}
+.app-shell .icon-button i{background:#315CE5}
+.app-shell .avatar.small{width:34px;height:34px;font-size:12px;border-radius:9px;background:#E3EBFF;color:#315CE5}
+.app-shell .main-content{flex:1;max-width:1540px;width:100%;margin:0 auto;padding:clamp(20px,2.7vw,36px) clamp(17px,2.7vw,38px) 65px}
+.app-shell .page-intro{display:flex;align-items:center;justify-content:space-between;gap:17px;margin-bottom:24px}
+.app-shell .page-intro .eyebrow{font-size:10px;color:#6680A8;letter-spacing:.12em;margin-bottom:7px}
+.app-shell .page-intro h1{font-size:clamp(24px,2.25vw,34px);font-weight:730;color:#182D49;letter-spacing:-.045em;line-height:1.16;margin-bottom:8px}
+.app-shell .page-intro p{font-size:13px;line-height:1.6;color:#667B94;max-width:650px}
+.app-shell .intro-actions .button-primary,.app-shell .intro-actions .button-outline{display:flex;align-items:center;justify-content:center;gap:8px;background:#315CE5;border-color:#315CE5;color:#fff;border-radius:9px;font-size:12px;font-weight:700;padding:12px 17px;min-height:42px}
+.app-shell .intro-actions .button-outline:hover{background:#254ECC;color:#fff}
+.app-shell .intro-actions .button-primary:hover{background:#254ECC}
+.app-shell button:focus-visible,.app-shell a:focus-visible,.app-shell input:focus-visible,.app-shell select:focus-visible,.app-shell textarea:focus-visible{outline:3px solid #A1B9FF;outline-offset:2px}
+.app-shell .form-error{background:#FDECEF;color:#9F2B3B;border:1px solid #F2CFD5;border-radius:9px;padding:13px 15px;margin-bottom:16px;font-size:13px;line-height:1.5}
+.app-shell .mobile-trigger{display:none;width:36px;height:36px;border:1px solid #DCE4EF;border-radius:8px;align-items:center;justify-content:center;color:#294363;background:#fff}
+.app-shell .mobile-close{display:none}
+.app-shell .modal-overlay{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:#0B1B32A8;padding:18px;backdrop-filter:blur(4px)}
+.app-shell .modal{width:min(100%,530px);max-height:min(91dvh,790px);overflow:auto;position:relative;background:#fff;border-radius:16px;padding:27px;box-shadow:0 25px 85px #071A33A0;border:1px solid #D4DFEA}
+.app-shell .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:16px}
+.app-shell .modal-head h2{font-size:23px;color:#1B3453;margin:4px 0;letter-spacing:-.03em}
+.app-shell .modal-head button{display:grid;place-items:center;width:36px;height:36px;border-radius:8px;background:#F0F4F9;color:#405C7B}
+.app-shell .modal .muted{font-size:13px;color:#667A91;line-height:1.6}
+.app-shell .booking-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:13px 0}
+.app-shell .booking-summary>div{display:flex;flex-direction:column;gap:6px;border:1px solid #DDE6F2;border-radius:9px;padding:12px;background:#F7F9FD;min-width:0}
+.app-shell .booking-summary small{font-size:9px;font-weight:800;color:#6B7C91;letter-spacing:.06em}
+.app-shell .booking-summary b{color:#223B58;font-size:12px;overflow-wrap:anywhere}
+.app-shell .field-label{display:grid;gap:7px;font-size:12px;font-weight:700;color:#405671;margin:14px 0}
+.app-shell .field-label input,.app-shell .field-label select,.app-shell .field-label textarea{width:100%;min-height:43px;border:1px solid #C8D6E7;border-radius:9px;padding:10px 11px;background:#fff;color:#203851;font-size:13px}
+.app-shell .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin:20px 0 0}
+.app-shell .modal-actions .button-primary,.app-shell .modal-actions .button-outline{width:auto;min-height:43px;border-radius:9px}
+.app-shell .modal-actions .button-primary{background:#315CE5;color:#fff}.app-shell .modal-actions .button-outline{background:#fff;border:1px solid #C9D7E7;color:#385170}
+.app-shell .tiny{font-size:11px;line-height:1.55;color:#75869B}
+.app-shell .toast{position:fixed;bottom:22px;right:22px;z-index:150;display:flex;gap:10px;align-items:center;background:#152A47;color:#fff;border:1px solid #31486B;border-radius:12px;box-shadow:0 10px 35px #10213C50;padding:14px 18px;max-width:min(430px,calc(100vw - 26px));font-size:13px;line-height:1.5}
+.app-shell .toast button{margin-left:auto;color:#C9D7EE}
+.app-shell .mobile-backdrop{display:none}
+@media(max-width:900px){
+  .app-shell .sidebar{position:fixed;left:0;top:0;bottom:0;height:100dvh;width:min(280px,85vw);transform:translateX(-110%);transition:transform .22s ease;box-shadow:none;z-index:75}
+  .app-shell .sidebar.mobile-open{left:0;transform:translateX(0);box-shadow:18px 0 65px #0E203C65}
+  .app-shell .mobile-trigger{display:flex}
+  .app-shell .mobile-close{display:grid;place-items:center;background:#FFFFFF14;color:#fff;border-radius:8px;width:33px;height:33px;margin-left:auto}
+  .app-shell .mobile-backdrop{display:block;position:fixed;inset:0;background:#081A34A3;z-index:70}
+  .app-shell .topbar{padding:0 18px}
+  .app-shell .main-content{padding:23px 17px 58px}
+}
+@media(max-width:600px){
+  .app-shell .main-content{padding:19px 12px 45px}
+  .app-shell .page-intro{align-items:flex-start;flex-direction:column;gap:14px;margin-bottom:18px}
+  .app-shell .page-intro h1{font-size:25px}
+  .app-shell .page-intro p{font-size:12px}
+  .app-shell .intro-actions{width:100%}
+  .app-shell .intro-actions button{width:100%}
+  .app-shell .today-pill{display:none!important}
+  .app-shell .topbar-right{gap:8px}
+  .app-shell .modal-overlay{padding:0;align-items:end}
+  .app-shell .modal{width:100%;max-height:91dvh;border-radius:19px 19px 0 0;padding:22px 19px max(20px,env(safe-area-inset-bottom))}
+  .app-shell .booking-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .app-shell .booking-summary>div{padding:9px}
+  .app-shell .modal-actions{flex-direction:column-reverse}
+  .app-shell .modal-actions>button{width:100%!important}
+  .app-shell .toast{bottom:15px;right:13px;left:13px;max-width:none}
+}
+@media(prefers-reduced-motion:reduce){.app-shell .sidebar{transition:none}}
