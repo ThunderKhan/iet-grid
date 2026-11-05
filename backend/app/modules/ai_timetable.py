@@ -174,13 +174,8 @@ def _parse_fixed_width_rows(text: str) -> list[TimetableRow]:
         if slot_starts:
             # The extracted line may have lost leading whitespace. Re-align
             # against the first slot start by padding only when necessary.
-            offset = 0
-            if len(line) < slot_starts[0] + 2:
-                offset = max(0, slot_starts[0] - len(line) + 2)
-                line_for_slice = (" " * offset) + line
-            else:
-                line_for_slice = line
-            starts = [s + offset for s in slot_starts]
+            line_for_slice = line
+            starts = slot_starts
             for i, start in enumerate(starts):
                 end = starts[i + 1] if i + 1 < len(starts) else len(line_for_slice)
                 cells.append(line_for_slice[start:end].strip())
@@ -352,7 +347,7 @@ async def _plan(request: Request, token: str, body: PreviewRequest) -> dict:
                         a["room_id"] == explicit and overlaps(start, end, parse_instant(a["starts_at"]), parse_instant(a["ends_at"]))
                         for a in allocations
                     )
-                    eligible = not room.get("restricted") and int(room.get("capacity", 0)) >= capacity
+                    eligible = room_is_eligible(room, capacity, row.kind, required)
                     if occupied:
                         status, reason = "conflict", f"{explicit} is already allocated during this period."
                     elif not eligible:
@@ -397,8 +392,8 @@ async def _plan(request: Request, token: str, body: PreviewRequest) -> dict:
 
 @router.post("/admin/ai/timetable/parse", response_model=ParseResponse)
 async def parse_timetable(
+    request: Request,
     file: UploadFile = File(...),
-    request: Request = None,
     me: Principal = Depends(require_admin),
 ):
     filename = (file.filename or "").lower()
