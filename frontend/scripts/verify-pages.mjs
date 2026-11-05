@@ -107,6 +107,11 @@ try {
     'Velaris must use the supplied simplex-noise blending shader');
   assert.equal(hexToUnitRGB('#315CE5').length,3,'Theme color conversion failed');
   // Architectural Minimalism must not revert to full-room status coloring.
+  const foundations=readFileSync('src/styles.css','utf8');
+  assert.ok(foundations.includes('--ig-primary:#315CE5')&&foundations.includes('--ig-text:#17243B'),
+    'Global design tokens must match the root DESIGN.md color system');
+  assert.ok(!foundations.includes('.sidebar{')&&!foundations.includes('.hero-panel{'),
+    'Obsolete sidebar and overview styling should stay removed from the active stylesheet');
   const planCSS=readFileSync('src/components/BlueprintSitePlan.css','utf8');
   assert.match(planCSS,/\.bp-room-surface\{fill:#FFFFFF;/,
     'Room surfaces should be neutral white');
@@ -114,11 +119,11 @@ try {
     'Room availability must be shown through indicators, not full-tile fills');
   assert.match(planCSS,/\.bp-circulation\{fill:#E8EDF4;/,
     'Corridors should use the updated architectural slate gray');
-  assert.match(planCSS,/\.bp-room\.is-selected \.bp-room-border\{stroke:#315CE5;stroke-width:2\.75\}/,
+  assert.match(planCSS,/\.bp-room\.is-selected \.bp-room-border\{stroke:var\(--ig-primary\);stroke-width:2\.75\}/,
     'Selected room must retain a precise cobalt outline');
-  assert.match(planCSS,/\.bp-room\.bp-available \.bp-room-indicator\{fill:#187A55\}/,
+  assert.match(planCSS,/\.bp-room\.bp-available \.bp-room-indicator\{fill:var\(--ig-available\)\}/,
     'Available status remains legible');
-  assert.match(planCSS,/\.bp-room\.bp-occupied \.bp-room-indicator\{fill:#B42332\}/,
+  assert.match(planCSS,/\.bp-room\.bp-occupied \.bp-room-indicator\{fill:var\(--ig-occupied\)\}/,
     'Occupied status remains legible');
   const {default: BlueprintSitePlan,findRoomMatches}=await server.ssrLoadModule('/src/components/BlueprintSitePlan.jsx');
   const campusRoomFixtures=(await server.ssrLoadModule('/scripts/test-fixtures.js')).sampleRooms;
