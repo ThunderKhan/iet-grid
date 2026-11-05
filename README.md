@@ -1,90 +1,67 @@
 # IET Grid
 
-**Intelligent campus classroom scheduling and room booking** for DDUGU's Institute of Engineering & Technology and Deeksha Bhawan.
+**Intelligent Campus Scheduling & Classroom Management** — Institute of Engineering & Technology, Deen Dayal Upadhyaya Gorakhpur University.
 
-- **Live app:** https://iet-grid.vercel.app/
-- **GitHub repository:** https://github.com/ThunderKhan/iet-grid
-- **Documentation hub:** [docs/README.md](docs/README.md)
+| Resource | Link |
+| --- | --- |
+| Live frontend | https://iet-grid.vercel.app |
+| Live backend | https://iet-grid-api.vercel.app |
+| Backend health | https://iet-grid-api.vercel.app/health |
+| Interactive API reference | https://iet-grid-api.vercel.app/api/docs |
+| Documentation hub | [docs/README.md](docs/README.md) |
+| Backend implementation record | [docs/BACKEND_IMPLEMENTATION.md](docs/BACKEND_IMPLEMENTATION.md) |
 
-## Repository layout
+## Architecture
 
-```text
+~~~text
 iet-grid/
-├── frontend/                     # React + Vite web application
-│   ├── src/                      # App UI, scheduling utilities, Supabase client
-│   ├── index.html
-│   ├── package.json
+├── frontend/       React + Vite dashboard, spatial map and calendar
+│   ├── src/
 │   ├── .env.example
-│   └── vercel.json
-├── backend/                      # Supabase/PostgreSQL backend
-│   ├── README.md
-│   └── supabase/
-│       └── migrations/
-│           ├── 001_iet_grid.sql
-│           └── 002_security_hardening.sql
-├── docs/                         # Product specs and implementation decisions
-│   ├── README.md
-│   ├── MVP.md
-│   ├── PRD.md
-│   ├── IMPLEMENTATION_PLAN.md
-│   └── ...                       # Architecture, design, decisions, testing
-├── LICENSE
-└── README.md
-```
+│   └── package.json
+├── backend/        Separately deployed FastAPI + Supabase/Postgres server logic
+│   ├── app/core/   Auth, security and Supabase gateway
+│   ├── app/modules/ Campus, academics, bookings, recommendations and notices
+│   ├── supabase/migrations/ 001–008 (all restored and versioned)
+│   ├── tests/      Pytest + SQL rollback test
+│   ├── main.py
+│   └── requirements.txt
+├── docs/           PRD, MVP, decisions, architecture and test plan
+└── .github/workflows/backend-tests.yml
+~~~
 
-**Backend note:** Supabase Auth, managed PostgreSQL, Row Level Security and server-side SQL functions are the backend. There is no separately deployed Node/FastAPI server in the MVP. Moving files does **not** create a second backend process; the live database was not modified during this reorganization.
+## Run the frontend
 
-## Local development
-
-Requires Node.js and a dedicated IET Grid Supabase project.
-
-```bash
-git clone https://github.com/ThunderKhan/iet-grid.git
-cd iet-grid/frontend
+~~~bash
+cd frontend
 npm install
 cp .env.example .env.local
 npm run dev
-```
+~~~
 
-Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `frontend/.env.local` using the Supabase project's **public publishable key** and URL. Never commit secrets or use a service-role key in the frontend.
+Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY for Supabase Auth; VITE_API_BASE_URL should point to http://localhost:8000 locally or https://iet-grid-api.vercel.app in production. Frontend environment variables are public—**never put secret/service-role keys in them**.
 
-```bash
-cd frontend
-npm run build
-npm run preview
-```
+## Run the backend
 
-### Backend schema
+~~~bash
+cd backend
+python -m venv .venv
+# Activate venv (PowerShell: .venv\Scripts\Activate.ps1)
+python -m pip install -r requirements.txt
+# Set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY in your shell
+uvicorn main:app --reload --port 8000
+~~~
 
-See [backend/README.md](backend/README.md). The schema is under [backend/supabase/migrations/](backend/supabase/migrations/). Run those files in order **only when provisioning a fresh dedicated database**; the migrations are already applied to the connected IET Grid project. Never blindly reapply schema creation to an existing database.
+Backend configuration is read from environment variables. Copying .env.example alone does not load values automatically. Database migrations reside in [backend/supabase/migrations](backend/supabase/migrations); they are **already applied** to the dedicated IET Grid Supabase project. Review carefully before using on a fresh project; do not re-run initial create-table SQL on an existing schema.
 
-### Deployment
+## Backend capabilities
 
-Vercel project settings:
-- **Root Directory:** `frontend`
-- **Framework:** Vite
-- **Build Command:** `npm run build`
-- **Output Directory:** `dist`
-- **Environment:** `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (public values only)
+Twenty RLS-protected public tables model buildings, floors, rooms, students/cohorts, regular sessions, bookings, notices and auditing. Room, faculty and cohort allocation constraints prohibit overlapping confirmed commitments. FastAPI provides authenticated endpoints for availability, alternative-room rankings, idempotent bookings, approvals, recurring sessions, validated cohort CSV imports, and in-app notifications.
 
-Pushing `main` triggers frontend deployment. SQL changes in `backend/` are **not automatically applied** and require reviewed migrations.
+**Current limitations:** Official student-level datasets and timetable records have not been imported; floor maps are schematic, not precise architectural drawings. Human end-to-end production Auth/role/booking tests remain outstanding. Guest demonstration data is nonpersistent. Full automatic semester timetable generation is a future milestone.
 
-## Product documentation
+## Documentation
 
-| File | Purpose |
-| --- | --- |
-| [MVP](docs/MVP.md) | Hackathon scope, critical flow, explicit cuts |
-| [PRD](docs/PRD.md) | Product requirements and acceptance criteria |
-| [Implementation Plan](docs/IMPLEMENTATION_PLAN.md) | Prioritized implementation and verification |
-| [Decision Log](docs/DECISIONS.md) | Product and technical decisions |
-| [Architecture](docs/ARCHITECTURE.md) | Application/backend interaction and data design |
-| [System](docs/SYSTEM.md) | Core constraints and backend invariants |
-| [Design](docs/DESIGN.md) | Unified design language and spatial/calendar UX |
-| [Requirements Traceability](docs/REQUIREMENTS_TRACEABILITY.md) | Organizer requirements and status |
-| [Test Plan](docs/TEST_PLAN.md) | Acceptance verification |
- 
-## Current limitations
+[MVP](docs/MVP.md) · [PRD](docs/PRD.md) · [Implementation Plan](docs/IMPLEMENTATION_PLAN.md) · [Decisions](docs/DECISIONS.md) · [Architecture](docs/ARCHITECTURE.md) · [Backend Implementation](docs/BACKEND_IMPLEMENTATION.md) · [System](docs/SYSTEM.md) · [Design](docs/DESIGN.md) · [Test Plan](docs/TEST_PLAN.md) · [Requirement Traceability](docs/REQUIREMENTS_TRACEABILITY.md)
 
-The room explorer uses **schematic**, not architecturally exact floor polygons. Some capacities and lab designations are unverified. The organizer's student/batch dataset and recurring lecture timetables have not yet been imported. Production role verification and real booking workflows need end-to-end user testing. Demo reservations are labeled and not persisted to Supabase.
-
-See [docs/README.md](docs/README.md) for current status and the hackathon deadline.
+**Submission:** 5 November 2026, 21:00 IST — public app, GitHub link, and Word written solution. Deployment READY does not by itself establish production correctness.

@@ -1,50 +1,41 @@
 # IET Grid — System Specification
 
-> Compact engineering reference. For detailed rationale see [ARCHITECTURE.md](ARCHITECTURE.md), for product scope see [PRD.md](PRD.md), and for current limitations see [MVP.md](MVP.md).
+## Product objective
 
-## Core responsibility
+An institution-specific academic scheduling platform for IET and Deeksha Bhawan, DDUGU, with credible faculty reservations, official timetable occupancy, student-facing schedules/announcements, conflict prevention and explainable alternatives.
 
-An institution-specific scheduling system that identifies suitable IET/Deeksha rooms, prevents confirmed collisions at the database layer, lets authorized faculty submit bookings and gives students academic schedule and notice access.
+## Runtime boundaries
 
-## Repository boundaries
+- **frontend/**: React/Vite application on https://iet-grid.vercel.app. Handles UX, sign-in and client demonstration data.
+- **backend/**: independently deployed FastAPI API on https://iet-grid-api.vercel.app, with modular routes for availability, bookings, academic operations, CSV imports, notices and administration.
+- **Supabase PostgreSQL/Auth**: 20 RLS-enabled application tables, identity verification, authoritative booking RPCs and overlap constraints.
+- **docs/**: PRD, MVP, architecture, design, decision log, test plan and [backend implementation record](BACKEND_IMPLEMENTATION.md).
 
-- `frontend/` — React + Vite SPA, client-side room discovery/calendar and public Supabase client.
-- `backend/` — Supabase SQL schema, RLS, booking/audit functions and migrations.
-- `docs/` — PRD, MVP, technical/design specifications and decisions.
-- Vercel builds exclusively from `frontend/`; Supabase database migrations are reviewed and applied separately. The backend folder is not a standalone web server.
+## Invariants
 
-## Running implementation
+1. Exactly one confirmed occupancy per room and overlapping interval across bookings, university academic sessions and maintenance blocks.
+2. Faculty and cohorts cannot be scheduled into overlapping confirmed sessions.
+3. Half-open intervals [start,end): back-to-back lectures are valid.
+4. An availability response is advisory. The database transaction is authoritative.
+5. Booking requests are idempotent; repeated equivalent requests may return their existing record.
+6. Pending exam/event requests do not hold confirmed inventory, and approval revalidates collisions.
+7. Verified roles come from trusted DB profiles. Students cannot modify official reservations; coordinators require delegated building scopes.
+8. User-specific record access is governed by RLS; in-app cohort notices have scoped visibility.
+9. Guest demonstration records are explicitly nonpersistent and never official university records.
+10. Source floor geometry, room capacity, and academic datasets must be verified before representing them as accurate.
 
-- Frontend: React 19 + Vite 6, hosted on Vercel.
-- Backend: dedicated Supabase Auth + PostgreSQL; six RLS-enabled public tables.
-- Database APIs: role-verified RPCs for booking creation, booking review and notice publication; secure triggers for profile creation and booking history.
-- UI: overview, schematic floor explorer, calendar, booking list, announcements, minimal report and administrator overview.
-- Room inventory: 30 seeded entries derived from organizer blueprint identifiers. Some capacities and lab classifications are unverified.
-- Demo mode: explicit sample data; local-only reservations are not persisted.
+## Database
 
-## Core invariants
+Versioned SQL migrations **001–008** are located under backend/supabase/migrations and have been applied to the dedicated project. The previously missing 003–005 files are restored in Git. Room/faculty/cohort allocation triggers, database exclusion constraints, and secure SQL RPCs provide one reservation authority.
 
-1. Two **confirmed** bookings cannot overlap for the same room over half-open time intervals.
-2. No browser-side check substitutes for database conflict validation.
-3. Role elevation never relies on user-editable metadata.
-4. Student or unverified user cannot create a privileged booking or official notice.
-5. Pending requests are not represented as confirmed.
-6. Demo data and unverified room attributes are labeled.
-7. Approved public timetables must eventually be versioned separately from editable drafts.
+## Verification status
 
-## Authorization target
+Live API health/OpenAPI endpoints returned HTTP 200. Automated unit and mocked API suites have passed; PostgreSQL rolled-back collision tests passed after a trigger fix. New calendar and pagination regressions are included in CI. Real administrator/faculty/student accounts and authenticated end-to-end booking tests are still required.
 
-University admin → coordinator with delegated building/department scope → verified faculty → student. The coarse roles exist; fine-grained delegated scopes and fully personalized cohort visibility are future work and must be implemented before institutional rollout.
+## Product roadmap beyond hackathon
 
-## Major known gaps
-
-No imported student/batch/section data, incomplete recurring official timetable model, schematic (not exact) architectural maps, incomplete approval UI and unverified real user end-to-end booking test. Full semester timetable optimization is intentionally deferred after the hackathon.
-
-## Data migrations
-
-- [Initial schema](../backend/supabase/migrations/001_iet_grid.sql)
-- [Security hardening](../backend/supabase/migrations/002_security_hardening.sql)
+Real student/branch/batch file import, exact blueprint polygons, deeper academic identity verification, versioned semester drafts and optimization with OR-Tools, full administrative UI and operational monitoring.
 
 ## Related
 
-[Design system](DESIGN.md) · [Decision log](DECISIONS.md) · [Test plan](TEST_PLAN.md) · [Implementation plan](IMPLEMENTATION_PLAN.md)
+[MVP](MVP.md) · [PRD](PRD.md) · [Architecture](ARCHITECTURE.md) · [Backend Implementation](BACKEND_IMPLEMENTATION.md) · [Test Plan](TEST_PLAN.md) · [Design](DESIGN.md)

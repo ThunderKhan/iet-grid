@@ -46,15 +46,22 @@ Use **IET Grid** in UI, documentation, screenshots and submission. Do not rename
 | T-11 | Keep the project license MIT | Repository currently MIT; external code/assets need separate license review |
 | T-12 | Store developer docs under docs/ and link from root README | Single readable, versioned source of product decisions |
 
-| T-13 | Separate frontend and backend in the repository | User explicitly requested directory-level separation. `frontend/` contains React/Vite; `backend/` contains Supabase SQL and server-side functions. Vercel builds from `frontend/`; Supabase remains the managed backend. No new Express/FastAPI service was introduced. |
+| T-13 | Separate frontend and backend in the repository | User explicitly requested directory-level separation. Initially backend contained only Supabase SQL; this was superseded by T-14. |
+
+| T-14 | Implement independently deployed FastAPI backend, modular monolith | User approved backend system-design research and four-phase implementation; FastAPI is now deployed separately at https://iet-grid-api.vercel.app, with Supabase PostgreSQL as the single transactional authority. |
+| T-15 | Canonical room/faculty/cohort occupancy and half-open time ranges | Avoid conflicting regular sessions, extra lectures, equipment blocks and staff/cohort assignments. Use SQL exclusion constraints and triggers. |
+| T-16 | Deterministic constraint filters and explainable ranking | No fabricated ML claims; hard capacity/type/equipment/time constraints, then preference score and adjacent time slots. |
+| T-17 | No Redis/Kafka or payment-based ticket holds | University scheduling has no checkout stage; atomic PostgreSQL reservations are adequate for this MVP. |
+| T-18 | Additive SQL migrations; preserve existing database | Migrations 003–008 applied to isolated IET Grid project; missing 003–005 restored from Git history to retain reproducibility. |
+| T-19 | Return only complete verified availability | Paginate PostgREST room allocations and fail closed at bounded maximum. |
 
 ## 4. Important distinction: decided vs shipped
 
 **Decided, not yet fully implemented:** Google sign-in; reliable official student identity matching; per-building/department coordinator scopes; real time-table import; generated semester draft workflow; precise SVG tracing; fully student-personalized schedules; full administrator approval interface.
 
-**Shipped in the repository:** Vite frontend, page navigation, basic map/calendar, Supabase Auth integration code, room booking RPC integration, announcement RPC integration, six Postgres tables and security migration.
+**Shipped in the repository:** Vite frontend, FastAPI backend with live API deployment, canonical room/faculty/cohort booking RPCs, academic recurrence and cohort import scaffolding, 20 Postgres RLS tables and migrations 001–008.
 
-**Independently verified in prior execution:** Supabase project active, 30 rooms inserted, RLS enabled, migrations applied, Vercel build READY. This does **not** prove user-level booking, login or UI acceptance tests.
+**Independently verified in prior execution:** Supabase project active, 30 rooms inserted, 20 public tables RLS enabled, migrations applied, frontend/API Vercel builds READY; API health/OpenAPI HTTP 200, SQL rollback conflicts and mocked/algorithmic CI tests passed. This does **not** prove user-level booking, login or UI acceptance tests.
 
 ## 5. Open decisions (do not assume answers)
 

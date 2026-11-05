@@ -2,6 +2,21 @@
 
 **Purpose:** Run tests on the actual deployed project and record proof. A code commit or READY deployment is not proof of feature correctness.
 
+## Backend evidence recorded on 5 November 2026
+
+| Test category | Evidence | Result |
+| --- | --- | --- |
+| SQL room overlap, cohort conflict, adjacent booking and pending-approval conflict | Supabase rollback transaction, with zero lasting test rows | **PASS** |
+| Live API deployment health | Vercel-served /health response HTTP 200 | **PASS** |
+| OpenAPI generated contract | Live /api/openapi.json response HTTP 200 | **PASS** |
+| Offline unit and mocked authorization tests | GitHub Actions Backend checks, including anonymous denial and faculty RPC forwarding | **PASS** |
+| Pagination and calendar-invalid-date regression tests | Automated tests plus pytest-asyncio-enabled workflow | **PASS** if latest green workflow confirmed |
+| Full production JWT→faculty booking→student read→admin approval | No verified test profiles at baseline | **NOT TESTED** |
+| Official student dataset/recurring timetable import | Required source files unavailable | **BLOCKED** |
+| High-load concurrent booking benchmark | No production benchmark run | **NOT TESTED** |
+
+Current live API: https://iet-grid-api.vercel.app. Source/test details: [BACKEND_IMPLEMENTATION.md](BACKEND_IMPLEMENTATION.md).
+
 ## 1. Core test matrix
 
 | ID | Scenario | Expected result | Baseline status |

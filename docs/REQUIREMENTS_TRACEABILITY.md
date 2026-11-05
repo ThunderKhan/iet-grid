@@ -9,12 +9,12 @@
 | --- | --- | --- | --- |
 | 1. Search by building, floor, room, date, time, duration, capacity | Explore rooms selectors and room inventory | Implemented / partial | Live browser test; improve exact room search |
 | 2. Faculty booking for extra class, minor exam, practical and events | Booking form and server create_room_booking RPC | Implemented / unverified end to end | Verified faculty test; final approval UI |
-| 3. Prevent overlapping bookings and suggest alternatives | DB exclusion constraint; JS recommendation algorithm | DB constraint deployed; UI partial | Two-user concurrency test; stale availability handling |
+| 3. Prevent overlapping bookings and suggest alternatives | Canonical room/faculty/cohort exclusions in Supabase + FastAPI constraint ranking | SQL rollback conflict checks verified; live user flow pending | Two real-user concurrency test and import actual timetable |
 | 4. Cancellations, rescheduling, exam notices and other updates | Announcements table and publish RPC, UI | Partial | Full cancellation/rescheduling event model, target cohorts |
 | 5. Student view and report conflicts/outdated information without booking edits | Role restrictions, announcements and minimal report action | Partial | Official student mapping, personalized views and report validation |
 | 6. Faculty/student/admin role-based access | Supabase profiles, RLS, privileged RPC | Partial | Test actual roles; enforce coordinator scopes |
 | 7. History of important booking changes | booking_history trigger/table | Implemented / verification incomplete | Readable admin history UI and retrieval controls |
-| 8. Intelligent assistance using AI or algorithms validated against bookings | Deterministic capacity/availability scoring | Partial | Validate all constraints against official recurring classes; benchmark scenarios |
+| 8. Intelligent assistance using AI or algorithms validated against bookings | FastAPI hard-constraint availability, pagination and deterministic ranked alternatives | Algorithm tests passed; campus data incomplete | Validate with imported real recurring classes and benchmarks |
 
 ## Mandatory assets and deliverables
 

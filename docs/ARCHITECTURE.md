@@ -1,108 +1,101 @@
-# IET Grid — Architecture & Data Design
+# IET Grid — Implemented System Architecture
 
-**Architecture state:** implementation snapshot as of 5 November 2026, not a claim of production readiness.
+**As of:** 5 November 2026. This describes code and provisioned services, not full institutional production readiness.
 
-## 1. Context diagram
+## Architecture diagram
 
 ~~~text
-Faculty / Student / Coordinator / Admin
-               |
-      React 19 / Vite 6
-    Vercel hosted web client
-        |              |
-   Supabase Auth    Supabase Data API
-        |              |
-      auth.users    RLS-protected tables
-                       |
-          server-side privileged RPCs
-                       |
-            PostgreSQL constraints
-                       |
-           bookings + audit records
+IET Grid React + Vite (frontend/; Vercel)
+          |                         |
+          | Supabase Auth           | HTTPS + user bearer token
+          v                         v
+   Supabase Identity          FastAPI modular monolith
+   (auth.users)               (backend/; Vercel Mumbai)
+                                   |
+                  token validated against Supabase Auth
+                                   |
+                        user's JWT forwarded to
+                         PostgREST + guarded RPCs
+                                   |
+                       Supabase PostgreSQL (Mumbai)
+                          + RLS (20 public tables)
+                          + canonical room allocations
+                          + faculty / cohort allocations
+                          + exclusion constraints
+                          + booking + audit triggers
 ~~~
 
-**Why this stack?** A single-page client and managed Postgres/Auth avoid building and hosting a separate API under a same-day deadline. No browser holds secret or service-role credentials. Long-term optimization can become a separate service without replacing the booking core.
+The API is independently hosted, but bookings are **not** a separate microservice. PostgreSQL remains the final authority, while FastAPI owns HTTP contracts, token verification, public read orchestration and deterministic ranking. No paid queue, cache, seat hold, payment service or ML model is required.
 
-## 2. Key application files
+## Code ownership
 
-The project is organized into `frontend/` for the browser application and `backend/` for Supabase-managed server-side schema and logic. `docs/` remains at the repository root. This is a directory separation, not a new HTTP microservice.
-
-| Repository location | Responsibility |
+| Location | Responsibility |
 | --- | --- |
-| ../frontend/src/App.jsx | App shell, navigation, login/guest flow, room and calendar UI, booking and notice actions |
-| ../frontend/src/data.js | Building/room seed data, sample schedules, overlap and recommendation utilities |
-| ../frontend/src/supabase.js | Browser Supabase client initialized from public environment variables |
-| ../frontend/src/styles.css | Shared design tokens and responsive application styling |
-| ../backend/supabase/migrations/001_iet_grid.sql | Tables, RLS policies, booking/approval/notice functions and seeded room inventory |
-| ../backend/supabase/migrations/002_security_hardening.sql | Restrict trigger-function execution, move extension out of public |
-| ../frontend/vercel.json | SPA route rewriting |
+| frontend/src/App.jsx | Navigation, guest/login state, room explorer, booking and calendar interface |
+| frontend/src/data.js | Explicit demonstration data and client-side sample logic |
+| frontend/src/supabase.js | Browser Supabase Auth client |
+| backend/app/main.py + backend/main.py | FastAPI application and Vercel entrypoint |
+| backend/app/core/auth.py | Verify token with Supabase Auth and fetch RLS-protected verified role |
+| backend/app/core/gateway.py | User-JWT-backed PostgREST/RPC gateway and standardized errors |
+| backend/app/modules/campus.py | Availability, pagination and room recommendations |
+| backend/app/modules/bookings.py | Booking creation, status, cancellation and approvals |
+| backend/app/modules/academics.py | Calendar, one-off classes, recurrence and maintenance |
+| backend/app/modules/administration.py | Cohorts, privileged provisioning and CSV import |
+| backend/app/modules/notices.py | Announcements, read receipts and schedule reports |
+| backend/app/modules/scheduling.py | Pure hard-constraint and deterministic ranking algorithms |
+| backend/supabase/migrations/001–008 | Database design, RLS and transaction-safe operations |
+| backend/tests/ | Unit, mock API, regression and rollback integration checks |
 
-## 3. Current tables
+## Data model
 
-| Table | Purpose | Notable fields/rules |
-| --- | --- | --- |
-| profiles | Role assignment and eventual university-identity mapping | ID references auth.users, role, verified, branch, academic_year, section |
-| rooms | Campus inventory | ID, building, floor, capacity, type, verified, active |
-| bookings | One-time classes, exams and events | Room, creator, interval, status, kind, capacity; exclusion constraint |
-| announcements | Campus academic updates | Title, body, priority, author, created timestamp |
-| schedule_reports | Minimal student-submitted issues | Submitter, optional booking, details, status |
-| booking_history | Change auditing | Booking ID, actor, action, timestamp |
+Twenty tables grouped by domain:
 
-**Not yet modeled fully:** regular recurring timetable series/occurrences, cohorts/batches/sections as normalized entities, subject-to-faculty teaching assignments, institutional approval scopes, notification read/acknowledgement state, timetable drafts, hard locks, optimized versions.
+**Identity:** profiles; Supabase auth.users.  
+**Campus:** buildings, floors, rooms.  
+**Academic:** academic_cohorts, student_memberships, courses, teaching_assignments, academic_series, academic_sessions.  
+**Reservations:** bookings, room_blocks, room_allocations, faculty_allocations, cohort_allocations.  
+**Administration and communication:** coordinator_scopes, announcements, announcement_reads, schedule_reports, booking_history.
 
-## 4. Core reservation transaction
+### Canonical occupancy
 
-1. User signs in through Supabase Auth.
-2. Browser requests room inventory and bookings visible under RLS.
-3. Browser computes and renders advisory eligible rooms using interval overlap and capacity checks.
-4. User submits a booking through **create_room_booking** RPC.
-5. The database reads verified role from server-controlled profiles, validates capacity, future time window and booking kind, and chooses confirmation or pending status.
-6. Postgres GiST exclusion constraint rejects overlapping **confirmed** time ranges for the same room. The RPC handles an exclusion conflict with a user-facing failure.
-7. Booking trigger writes an audit record; client refreshes booking data.
+Confirmed booking, scheduled lecture and active room block each create an active room allocation through PostgreSQL triggers. A GiST exclusion constraint rejects overlapping [start,end) ranges in the same room, including concurrent requests. Confirmed faculty and cohort commitments have separate exclusion constraints. Adjacent time ranges sharing only an endpoint do not overlap.
 
-**Interval rule:** two reservations conflict only when A.start < B.end and B.start < A.end (half-open [start,end) intervals). Adjacent classes sharing a boundary do not overlap.
+The authoritative booking RPC checks: signed-in verified role, room existence/type, capacity, timing, cohort teaching assignment, coordinator building scope, existing allocations, and idempotency key. It chooses confirmed or pending status. Approval repeats the database conflict guarantee. Cancellation releases allocations. Recurring series draft publication inserts all occurrences in one transaction; collisions abort publication.
 
-**Important limitation:** current site data includes only one-time booking rows and demonstration examples; it does not yet correctly reserve all recurring official lectures. The future unified timetable must block slots derived from recurring sessions as well.
+**Limit:** Existing actual student cohorts and real recurring lectures have not yet been imported, so inventory does not yet represent all official university commitments.
 
-## 5. Recommendation logic
+## Recommendation engine
 
-**Hard filters:** active room, sufficient capacity, acceptable room type, available interval, and any imposed resource permission constraints.
+1. Fetch room inventory and **paginated** canonical allocations for selected interval.
+2. Eliminate rooms violating capacity, room type, equipment, active status or occupied interval.
+3. Rank remaining rooms by excess capacity, preferred building, and verification quality.
+4. Search nearby working hours if no suitable room exists.
+5. Clearly label estimates and provisional capacities; relative scores are **not probabilities**.
+6. Regardless of recommendation, the SQL booking RPC always revalidates before persisting.
 
-**Current preference score (heuristic):** 100 minus penalties for excess capacity, use of a nonpreferred building and selecting a lab for a generic request. Sort highest first; use stable room ID as tie-breaker.
+Supabase PostgREST responses may be capped. The read path pages allocations in batches of 500 with a bounded maximum and fails closed rather than falsely marking incomplete inventory free.
 
-This is deterministic constraint-based scheduling, **not** a trained AI model. Scores reflect relative suitability, not probability or confidence. A recommendation may become stale; always revalidate on booking.
+## Security
 
-**Future:** consider weighted walking distance, accessibility, equipment, instructor preferences, recurring timetable commitments and OR-Tools CP-SAT for semester drafts.
+- Supabase Auth verifies JWT via the authoritative /auth/v1/user endpoint. No homemade signature validation.
+- Profiles verified state and role are controlled by trusted administrative operations; never by editable user metadata.
+- RLS enabled on all 20 public tables; scoped reads for bookings and targeted notices.
+- Coordinator mutations verify building scope inside SQL. More granular departmental roles and identity proofing remain future work.
+- No service-role key is present in the React frontend or required to invoke protected booking RPCs.
+- SQL functions with SECURITY DEFINER are deliberately granted to authenticated users only where they explicitly validate privileges internally; review those permissions at every migration.
 
-## 6. Authentication and roles
+## Deployment
 
-- Supabase email/password flows are present in the frontend. Google sign-in was discussed as a target but is not currently implemented.
-- New user profile defaults to **student**, **verified=false**. Admin promotion must be performed by a trusted provisioning operation.
-- Faculty role may book only if verified; coordinators/admins may additionally review pending requests and publish notices using server-checked functions.
-- All exposed application tables have RLS enabled. Booking direct mutations are denied; sensitive changes go through permission-aware RPC.
-- **Production gap:** coordinator scopes by department/building and cohort-restricted student visibility remain to be enforced.
-- **Security warning:** functions designed for authenticated access may still be flagged by generalized security advisors because they use SECURITY DEFINER. Review and test every authorization path; internal trigger functions have had their public execute privilege removed.
+| App | URL | Root | Framework |
+| --- | --- | --- | --- |
+| Frontend | https://iet-grid.vercel.app | frontend/ | Vite |
+| Backend | https://iet-grid-api.vercel.app | backend/ | FastAPI |
+| Database | Dedicated IET Grid Supabase project, Mumbai | n/a | PostgreSQL/Auth |
 
-## 7. Data mapping for spatial view
+Public browser environment variables: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_API_BASE_URL. Backend: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, CORS_ORIGINS, APP_ENV. Never commit secrets or authentic university student data.
 
-The source PDF visual contains IET: ground/first/second floors and Deeksha: ground/first. The current app shows simplified room-grid geometry; only the identifiers, broad arrangement and availability interaction are derived from the blueprint. Exact room polygons, corridor widths, stair/entry geometry and accessibility routes are **not** yet represented accurately.
+## Unfinished requirements
 
-Official campus data and lab designations take precedence over code sample defaults.
+Student dataset import, authentic room geometry/capacity verification, provisioned staff/student test users, full end-to-end role checks, complete administrative approval interface, and automated semester-wide timetable optimization. The current spatial interface is schematic, not precise blueprint tracing.
 
-## 8. Deployment and configuration
-
-- Repo: https://github.com/ThunderKhan/iet-grid
-- Site: https://iet-grid.vercel.app/
-- Isolated database: dedicated IET Grid Supabase project in Mumbai.
-- Public frontend variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (publishable key).
-- Never add service-role keys, database passwords or user passwords to committed files.
-- Apply migrations in numeric order on a new database. They are not safe to blindly replay against partially configured unrelated projects.
-
-## 9. Next architecture milestones
-
-1. Normalize student/branch/batch/cohort tables and import official data.
-2. Normalize recurring timetable event series and generate actual occurrence conflicts.
-3. Enforce coordinator building/department scopes for reads and writes.
-4. Add server-side exact notifications and acknowledgement records.
-5. Introduce timetable draft/version/approval tables before semester generation.
-6. Upgrade the spatial interface from schematic cards to verified SVG polygons.
+See [BACKEND_IMPLEMENTATION.md](BACKEND_IMPLEMENTATION.md) for implementation evidence and [TEST_PLAN.md](TEST_PLAN.md) for remaining verification.

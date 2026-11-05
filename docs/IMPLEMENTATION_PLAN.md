@@ -7,9 +7,22 @@
 ## Monorepo organization
 
 - `frontend/`: independently buildable web app, Vercel root `frontend`.
-- `backend/`: database schema/migrations and server-side booking authorization in Supabase.
+- `backend/`: independently hosted FastAPI application **plus** versioned Supabase SQL migrations; database remains authoritative.
 - `docs/`: product and architecture artifacts, separate from both runtime folders.
-- Relocating migrations has **not** changed the live database. Future SQL migrations require a distinct reviewed deployment step.
+- The dedicated Supabase project has migrations 001–008 applied. SQL migrations require reviewed deployment, independently of FastAPI/Vercel Git builds.
+
+## Four-phase backend sprint — implementation status
+
+| Sprint phase | Result | Remaining acceptance |
+| --- | --- | --- |
+| Phase 1: database redesign | **Implemented and migrated**: 20 RLS tables; room/faculty/cohort allocations; idempotent booking, cancellation, approvals; migrations 001–008 restored | Authenticated user-level transaction tests and security review |
+| Phase 2: API authorization + academic import | **Implemented**: FastAPI with Supabase Auth verification; secured RPC forwarding; CSV dry-run and atomic import; recurring academic scheduling APIs | Trusted test account provisioning and real organizer dataset |
+| Phase 3: scheduling/recommendations | **Implemented**: hard eligibility, capacity/type/equipment, interval/ranking, alternate slots, paginated allocations | Real student/timetable data and live user acceptance |
+| Phase 4: tests + integration | **Partially verified**: GitHub Actions unit/mock tests; SQL rollback conflicts; frontend and API deployed independently; live API health/OpenAPI HTTP 200 | Real faculty/admin/student sessions, 100-request load test, screenshots |
+
+**Important:** The database is usable but has no real registered campus profiles or imported academic timetables at the recorded baseline. The MVP is **not fully verified** until these live account/data dependencies are exercised.
+
+See [BACKEND_IMPLEMENTATION.md](BACKEND_IMPLEMENTATION.md) for exact files, API, migrations and test evidence.
 
 ## 1. Strategy
 
@@ -38,11 +51,11 @@ Status meanings: **DONE** = repository/infrastructure confirmed; **PARTIAL** = s
 | INF-04 | P0 | Apply schema, seed rooms and enable RLS | DONE | Six RLS tables, 30 rooms |
 | INF-05 | P0 | Run security scan and restrict trigger functions | DONE | Internal trigger EXECUTE revoked |
 | INF-06 | P0 | Link Vercel env and redeploy | DONE | Latest deployment reported READY |
-| INF-07 | P0 | Split runtime source into `frontend/` and `backend/`; update Vercel root | DONE | Reorganized frontend build verified on Vercel |
+| INF-07 | P0 | Separate frontend and backend; deploy dedicated FastAPI API | DONE | Two Vercel projects; API health/OpenAPI 200 |
 | AUTH-01 | P0 | Create first administrator and verified faculty through trusted provisioning | TODO | Independent faculty/admin/student sessions |
 | AUTH-02 | P0 | Verify login/logout, sessions and RLS denials | TODO | Test evidence with roles |
-| BOOK-01 | P0 | Book free classroom from authenticated UI and persist | PARTIAL | Refresh retains confirmed booking |
-| BOOK-02 | P0 | Reproduce collision with real sessions, verify database rejects | PARTIAL | One succeeds, second fails |
+| BOOK-01 | P0 | Book free classroom from authenticated UI and persist | PARTIAL | API/UI implemented; verified faculty test needed |
+| BOOK-02 | P0 | Reproduce collision with real sessions, verify database rejects | PARTIAL | Rolled-back SQL checks passed; two real authenticated users still needed |
 | BOOK-03 | P0 | Make alternative recommendation consistent with actual official commitments | PARTIAL | Eligible options only |
 | DATA-01 | P0 | Import official student/branch/batch/year/section files | BLOCKED: organizer data needed | Accurate cohort records |
 | DATA-02 | P0 | Confirm exact capacities and lab/room mapping | BLOCKED: official data needed | Verified room inventory |

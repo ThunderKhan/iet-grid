@@ -90,12 +90,12 @@ Use a real integration for the judged version. If demonstrating nonpersistent sa
 | Week-style calendar | Present; basic UI rather than Full Calendar package | Implemented with limitation |
 | Transparent demo data + local demo reservations | Present | Implemented |
 | Auth screens / Supabase client | Present, Vercel env configured | Connected in code; end-to-end unverified |
-| Supabase tables / constraints / RLS / RPC | Migrations applied to dedicated project | Schema deployed |
+| FastAPI, Supabase tables / constraints / RLS / RPC | API deployed; migrations 001–008 and 20 RLS tables | Backend deployed; authenticated workflow unverified |
 | Verified faculty and admin logins | Not yet demonstrated end to end | Unverified |
-| Real booking and approval UI | Booking RPC wired; approval RPC exists but no UI | Partial |
+| Real booking and approval UI | Booking API wired and admin review RPC/route exists; approval UI incomplete | Partial |
 | Student-specific timetable mapping | Official dataset not imported | Missing |
 | Original blueprint geometry digitization | Only schematic layout | Missing |
-| In-app announcements | List and privileged publish RPC in code | Partial / unverified |
+| In-app announcements | API routes, targeted SQL RPC, read receipts and basic UI present | Partial / unverified |
 
 ## 7. Definition of done
 
