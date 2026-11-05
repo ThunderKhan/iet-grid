@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import * as Dialog from '@radix-ui/react-dialog';
-import VelarisGradient from './VelarisGradient';
 import {ArrowRight, BookOpenText, Building2, CalendarDays, CheckCircle2, ChevronDown, Clock3, DoorOpen, Info, Layers3, Settings2, SlidersHorizontal, Users, X} from 'lucide-react';
 import BlueprintSitePlan from './BlueprintSitePlan';
 import './CampusExperience.css';
@@ -11,8 +10,6 @@ const monthDay=d=>new Date(d+'T12:00:00Z').toLocaleDateString('en-IN',{day:'nume
 const clock=h=>String(h).padStart(2,'0')+':00';
 const statuses={available:'Available',occupied:'Occupied',restricted:'Not eligible',unknown:'Not verified',pending:'Approval pending'};
 function Badge({value}){const s=statuses[value]?value:'unknown';return <span className={'cx-status cx-status-'+s}><span className="cx-status-dot"/>{statuses[s]}</span>}
-// DESIGN.md: use navy/cobalt only. This is decorative, not a status indicator.
-const HERO_COLORS=['#315CE5','#10213B','#6C8FF7','#CFDDFC'];
 export default function CampusExperience({
   buildings,rooms,building,setBuilding,floor,setFloor,selected,setSelected,
   date,setDate,hour,setHour,duration,setDuration,capacity,setCapacity,
@@ -85,17 +82,6 @@ export default function CampusExperience({
     setSheetOpen(false);
   };
   return <div className="cx-page">
-    <header className="cx-hero">
-      <VelarisGradient className="cx-gradient" colors={HERO_COLORS}
-        background="#07162C" speed={2.4} grain={0.16}/>
-      <div className="cx-gradient-overlay" aria-hidden="true"/>
-      <div className="cx-hero-copy">
-        <span className="cx-hero-overline">IET GRID · CAMPUS BOOKING</span>
-        <h1>Find space for the next class.</h1>
-        <p>Choose a classroom on the campus map. Check its schedule and reserve in a few steps.</p>
-      </div>
-      <div className="cx-hero-mark" aria-hidden="true"><span>02</span><small>BUILDINGS</small></div>
-    </header>
     <section className="cx-nav" aria-label="Campus floor and schedule">
       <div className="cx-nav-main">
         <div className="cx-building-tabs" role="group" aria-label="Select building">

@@ -54,6 +54,9 @@ try {
     assert.ok(!html.includes('cx-floor-stepper'),'Old toolbar stepper must be removed');
     assert.ok(html.includes('bp-navigation-stage'),'Floor navigation must be attached to the map');
     assert.ok(!html.includes('cx-floor-label'),'Redundant building heading row must be removed');
+    assert.ok(!html.includes('cx-hero')&&!html.includes('Find space for the next class.'),
+      'Removed hero banner must not render in Campus map');
+    assert.ok(html.includes('cx-nav'), 'Building selector must remain after removing hero');
     assert.ok(html.includes('bp-view-toggle'),'Map/List switch must sit inside the floor plan card');
     assert.ok(html.indexOf('bp-head')<html.indexOf('bp-view-toggle') &&
       html.indexOf('bp-view-toggle')<html.indexOf('bp-navigation-stage'),

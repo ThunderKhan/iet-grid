@@ -3,20 +3,6 @@
    Uses DESIGN.md navy/cobalt status semantics. */
 .cx-page{display:grid;gap:12px;min-width:0;color:#17243B}
 .cx-page :is(button,input,select):focus-visible{outline:3px solid #9DBAFF;outline-offset:2px}
-.cx-hero{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:space-between;gap:30px;min-height:160px;padding:27px 34px;border-radius:16px;background:#101B2C;overflow:hidden;color:white}
-.cx-hero-copy{position:relative;z-index:2;max-width:690px}.cx-hero-overline{font-size:10px;font-weight:780;letter-spacing:.15em;color:#B2C9FF}
-.cx-hero-copy h1{font-size:clamp(24px,2.65vw,35px);font-weight:730;line-height:1.17;letter-spacing:-.042em;margin:11px 0 8px;color:#fff}
-.cx-hero-copy p{font-size:13px;line-height:1.58;color:#D2DBEF;max-width:510px;margin:0}
-.cx-hero-mark{position:relative;z-index:2;display:flex;flex-direction:column;align-items:flex-end;min-width:85px}
-.cx-hero-mark span{font-size:42px;color:#F1F5FF;letter-spacing:-.065em;font-weight:680;line-height:1}
-.cx-hero-mark small{font-size:10px;font-weight:760;letter-spacing:.13em;color:#C2D1F1;margin-top:5px}
-.cx-gradient{position:absolute;inset:0;z-index:0;pointer-events:none;
-  background:radial-gradient(ellipse at 80% 35%,#315CE5 0%,#203F78 35%,transparent 75%),linear-gradient(105deg,var(--ig-navy,#101B2C),#162C52 72%,#345DA2)}
-.cx-velaris-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;pointer-events:none;
-  transition:opacity .4s ease}
-.cx-gradient-overlay{position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(90deg,rgba(16,27,44,.95) 0%,rgba(16,27,44,.84) 38%,rgba(16,27,44,.35) 78%,rgba(16,27,44,.18) 100%)}
-@media(prefers-reduced-motion:reduce){.cx-velaris-canvas{display:none;transition:none}}
 .cx-nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:9px 12px;background:#fff;border:1px solid #DCE4EF;border-radius:12px;min-height:66px}
 .cx-nav-main{display:flex;align-items:center;gap:11px;min-width:0;flex-wrap:wrap}
 .cx-building-tabs{display:flex;align-items:center;gap:4px}
@@ -84,12 +70,10 @@
 .cx-mobile-sheet .cx-room-info{padding:15px 0 3px}
 @media(max-width:1180px){.cx-content{grid-template-columns:minmax(0,1fr) minmax(245px,275px)}.cx-nav-main{gap:6px}.cx-building-tabs button{padding-inline:8px}}
 @media(max-width:1050px){.cx-nav{flex-wrap:wrap}.cx-nav-main{width:100%;justify-content:space-between}.cx-schedule-trigger{margin-left:auto}.cx-content{grid-template-columns:1fr}.cx-aside{margin-top:0}.cx-room-details{grid-template-columns:repeat(3,minmax(0,1fr))}.cx-room-details>span{display:flex;flex-direction:column;gap:6px;align-items:flex-start;border:0!important}.cx-room-details>span+span{padding-left:11px;border-left:1px solid #E9EEF4!important}.cx-cta{grid-template-columns:1fr 1fr}}
-@media(max-width:720px){.cx-page{gap:12px}.cx-hero{padding:23px 19px;min-height:138px;border-radius:12px}
- .cx-hero-copy h1{font-size:25px;max-width:280px}.cx-hero-copy p{font-size:12px;max-width:310px}
- .cx-hero-mark{display:none}.cx-nav{padding:10px}.cx-nav-main{flex-direction:column;align-items:stretch;gap:8px}
+@media(max-width:720px){.cx-page{gap:12px}.cx-nav{padding:10px}.cx-nav-main{flex-direction:column;align-items:stretch;gap:8px}
  .cx-building-tabs{width:100%;overflow:auto;scrollbar-width:none} .cx-building-tabs button{flex:1}.cx-nav .cx-schedule-trigger{margin-left:0;width:100%;justify-content:flex-start}
  .cx-content{gap:10px}
  .cx-aside{display:none}.cx-status{font-size:11px}
 }
-@media(max-width:380px){.cx-hero-copy h1{font-size:23px}.cx-popover-fields{grid-template-columns:1fr}.cx-building-tabs button{font-size:11px}}
-@media(prefers-reduced-motion:reduce){.cx-hero *, .cx-page *{animation:none!important;transition:none!important}}
+@media(max-width:380px){.cx-popover-fields{grid-template-columns:1fr}.cx-building-tabs button{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.cx-page *{animation:none!important;transition:none!important}}
