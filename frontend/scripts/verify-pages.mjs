@@ -12,9 +12,9 @@ try {
   const appSource=readFileSync('src/App.jsx','utf8');
   // A removed demo-cohort variable caused the whole authenticated workspace
   // to throw ReferenceError despite the Vite build passing.
-  assert.match(appSource,/cohorts=\\{cohorts\\}/,
+  assert.match(appSource,/cohorts=\{cohorts\}/,
     'Reservation dialog must receive the real registered cohorts');
-  assert.doesNotMatch(appSource,/\\bavailableCohorts\\b/,
+  assert.doesNotMatch(appSource,/\bavailableCohorts\b/,
     'Removed demo-cohort alias must never reappear in the authenticated page');
   const entrySource=readFileSync('src/main.jsx','utf8');
   assert.ok(entrySource.includes('<AppErrorBoundary><App/></AppErrorBoundary>'),
