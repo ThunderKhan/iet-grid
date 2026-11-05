@@ -27,3 +27,22 @@ export const previewCohorts=[
     })))
   )
 ];
+
+
+// Option sets are derived from registered cohort rows, not invented by the UI.
+// A selection only resolves to an actual cohort UUID if every field matches.
+const dedupe = values => [...new Set(values)];
+export const SECTION_NONE = '__NO_SECTION__';
+export const cohortBranchOptions = cohorts =>
+  dedupe(cohorts.map(c=>branchLabel(c.branch)).filter(Boolean))
+    .sort((a,b)=>a.localeCompare(b,undefined,{sensitivity:'base'}));
+export const cohortYearOptions = (cohorts,branch) =>
+  dedupe(cohorts.filter(c=>branchLabel(c.branch)===branch).map(c=>String(c.academic_year)))
+    .sort((a,b)=>Number(a)-Number(b));
+export const cohortSectionOptions = (cohorts,branch,year) =>
+  dedupe(cohorts.filter(c=>branchLabel(c.branch)===branch&&String(c.academic_year)===year)
+    .map(c=>c.section?String(c.section):SECTION_NONE))
+    .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+export const cohortMatches = (cohorts,branch,year,section) =>
+  cohorts.filter(c=>branchLabel(c.branch)===branch&&String(c.academic_year)===year
+    &&(c.section?String(c.section):SECTION_NONE)===section);

@@ -11,8 +11,8 @@ try {
   const pages=await server.ssrLoadModule('/src/components/WorkspacePages.jsx');
   const {default: CampusExperience}=await server.ssrLoadModule('/src/components/CampusExperience.jsx');
   const {default: BlueprintSitePlan}=await server.ssrLoadModule('/src/components/BlueprintSitePlan.jsx');
-  const {default: ReservationDialog}=await server.ssrLoadModule('/src/components/ReservationDialog.jsx');
-  const {previewCohorts,formatCohort}=await server.ssrLoadModule('/src/academicCohorts.js');
+  const {default: ReservationDialog,AcademicGroupFields}=await server.ssrLoadModule('/src/components/ReservationDialog.jsx');
+  const {previewCohorts,formatCohort,cohortBranchOptions,cohortYearOptions,cohortSectionOptions,cohortMatches}=await server.ssrLoadModule('/src/academicCohorts.js');
   const {sampleRooms: allRooms}=await server.ssrLoadModule('/src/data.js');
   for(const [building,floor,roomId] of [
     ['IET','Ground','LIBRARY'],['IET','First','IET19'],
@@ -59,6 +59,20 @@ try {
   assert.ok(example,'Preview must include AI/ML year 2 section A');
   assert.equal(formatCohort(example),'AI/ML · Year 2 · Section A');
   assert.equal(typeof ReservationDialog,'function','Reservation dialog module must be importable');
+  const opts=cohortBranchOptions(previewCohorts);
+  assert.ok(opts.includes('AI/ML')&&opts.includes('CSE'),'Branch dropdown must offer registered branches');
+  assert.deepEqual(cohortYearOptions(previewCohorts,'AI/ML'),['1','2','3','4']);
+  assert.deepEqual(cohortSectionOptions(previewCohorts,'AI/ML','2'),['A','B']);
+  assert.equal(cohortMatches(previewCohorts,'AI/ML','2','A')[0].id,example.id);
+  assert.equal(cohortMatches(previewCohorts,'AI/ML','2','Z').length,0,'Invalid section must not resolve to a cohort');
+  const duplicate={...example,id:'another-batch',code:'AIML-2-A-ALT',batch_start:2026};
+  assert.equal(cohortMatches([...previewCohorts,duplicate],'AI/ML','2','A').length,2,
+    'Duplicate branch/year/section must require batch selection');
+  const groupHtml=renderToString(React.createElement(AcademicGroupFields,{
+    open:true,cohorts:previewCohorts,cohortId:'',setCohortId:()=>{},groupRequired:true
+  }));
+  for(const label of ['rc-branch','rc-year','rc-section'])assert.ok(groupHtml.includes(label),
+    'Missing dedicated dropdown '+label);
   for(const [name,Component,needle] of views){
     const html=renderToString(React.createElement(Component,shared));
     assert.ok(html.length>300,name+' rendered too little UI');

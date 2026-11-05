@@ -1,11 +1,74 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import {ArrowRight, BookOpenText, CalendarDays, Check, Clock3, Info, Users, X} from 'lucide-react';
-import {formatCohort} from '../academicCohorts';
+import {ArrowRight, CalendarDays, Check, Clock3, Info, Users, X} from 'lucide-react';
+import {branchLabel,formatCohort,SECTION_NONE,cohortBranchOptions,cohortYearOptions,cohortSectionOptions,cohortMatches} from '../academicCohorts';
 import './ReservationDialog.css';
 
 const SESSION_TYPES=[['lecture','Lecture'],['practical','Practical'],['exam','Exam'],['event','Event']];
 const day=d=>d?new Date(d+'T12:00:00Z').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}):'No date';
+
+export function AcademicGroupFields({open,cohorts,cohortId,setCohortId,groupRequired}) {
+  const [branch,setBranch]=useState('');
+  const [year,setYear]=useState('');
+  const [section,setSection]=useState('');
+  useEffect(()=>{
+    if(!open)return;
+    const group=cohorts.find(c=>c.id===cohortId);
+    setBranch(group?branchLabel(group.branch):'');
+    setYear(group?String(group.academic_year):'');
+    setSection(group?(group.section?String(group.section):SECTION_NONE):'');
+  },[open,cohorts]);
+  const branches=cohortBranchOptions(cohorts);
+  const years=cohortYearOptions(cohorts,branch);
+  const sections=cohortSectionOptions(cohorts,branch,year);
+  const candidates=cohortMatches(cohorts,branch,year,section);
+  const needsBatch=!!section&&candidates.length>1;
+  const chooseBranch=value=>{
+    setBranch(value);setYear('');setSection('');setCohortId('');
+  };
+  const chooseYear=value=>{
+    setYear(value);setSection('');setCohortId('');
+  };
+  const chooseSection=value=>{
+    setSection(value);
+    const matches=cohortMatches(cohorts,branch,year,value);
+    setCohortId(matches.length===1?matches[0].id:'');
+  };
+  return <div className="rc-academic-fields" role="group" aria-label="Academic group">
+    <div className="rc-academic-grid">
+      <label className="rc-academic-field" htmlFor="rc-branch">
+        <span>Branch</span>
+        <select id="rc-branch" value={branch} onChange={e=>chooseBranch(e.target.value)} required={groupRequired}>
+          <option value="">Select branch</option>
+          {branches.map(value=><option key={value} value={value}>{value}</option>)}
+        </select>
+      </label>
+      <label className="rc-academic-field" htmlFor="rc-year">
+        <span>Year</span>
+        <select id="rc-year" value={year} disabled={!branch} onChange={e=>chooseYear(e.target.value)} required={groupRequired}>
+          <option value="">{branch?'Select year':'Choose branch first'}</option>
+          {years.map(value=><option key={value} value={value}>Year {value}</option>)}
+        </select>
+      </label>
+      <label className="rc-academic-field" htmlFor="rc-section">
+        <span>Section</span>
+        <select id="rc-section" value={section} disabled={!year} onChange={e=>chooseSection(e.target.value)} required={groupRequired}>
+          <option value="">{year?'Select section':'Choose year first'}</option>
+          {sections.map(value=><option key={value} value={value}>{value===SECTION_NONE?'No section':'Section '+value}</option>)}
+        </select>
+      </label>
+      {needsBatch&&<label className="rc-academic-field rc-academic-batch" htmlFor="rc-batch">
+        <span>Batch</span>
+        <select id="rc-batch" value={candidates.some(c=>c.id===cohortId)?cohortId:''}
+          onChange={e=>setCohortId(e.target.value)} required={groupRequired}>
+          <option value="">Select batch</option>
+          {candidates.map(c=><option key={c.id} value={c.id}>{c.batch_start||'Batch not specified'} · {c.code}</option>)}
+        </select>
+      </label>}
+    </div>
+  </div>;
+}
+
 export default function ReservationDialog({
   open,onOpenChange,room,date,hour,duration,bookingTitle,setBookingTitle,
   bookingKind,setBookingKind,cohorts,cohortId,setCohortId,
@@ -37,14 +100,9 @@ export default function ReservationDialog({
           </div>
         </div>
         <div className="rc-section">
-          <label className="rc-label" htmlFor="rc-cohort">Academic group {groupRequired?'(required)':'(optional)'}</label>
-          <div className="rc-select-wrap"><BookOpenText size={17}/>
-            <select id="rc-cohort" value={cohortId} onChange={e=>setCohortId(e.target.value)}
-              required={groupRequired} aria-invalid={groupRequired&&!group}>
-              <option value="">Choose a branch, year and section</option>
-              {cohorts.map(c=><option key={c.id} value={c.id}>{formatCohort(c)}</option>)}
-            </select>
-          </div>
+          <span className="rc-label">Academic group {groupRequired?'(required)':'(optional)'}</span>
+          <AcademicGroupFields open={open} cohorts={cohorts} cohortId={cohortId}
+            setCohortId={setCohortId} groupRequired={groupRequired}/>
           <p className="rc-helper">{demo?'Preview groups only; no official data is changed.':
             group?'This booking will be linked to the registered cohort.':
             cohortError||(!cohorts.length?'No registered academic cohorts were returned. Contact a coordinator.':'Select the class this booking is for.')}</p>
