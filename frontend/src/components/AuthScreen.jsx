@@ -22,13 +22,16 @@ function AppleIcon() {
   </svg>;
 }
 function Field({id,label,type='text',value,onChange,placeholder,autoComplete,minLength,maxLength,right}) {
-  return <label className="ig-auth-field" htmlFor={id}><span>{label}</span>
-    <span className="ig-auth-input-wrap">
+  return <div className="ig-auth-field">
+    <label htmlFor={id}>{label}</label>
+    <div className="ig-auth-input-wrap">
       <input id={id} name={id} type={type} value={value} onChange={e => onChange(e.target.value)}
-        placeholder={placeholder} autoComplete={autoComplete} required minLength={minLength} maxLength={maxLength}/>
+        placeholder={placeholder} autoComplete={autoComplete} required minLength={minLength} maxLength={maxLength}
+        autoCapitalize={type === 'email' ? 'none' : undefined}
+        spellCheck={type === 'email' ? false : undefined}/>
       {right}
-    </span>
-  </label>;
+    </div>
+  </div>;
 }
 export default function AuthScreen({recovery=false, onRecoveryComplete, onRecoveryCancel}) {
   const [mode,setMode] = useState(recovery ? 'reset' : 'signin');
