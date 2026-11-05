@@ -23,13 +23,25 @@ async def get_rooms(gateway: Gateway, building: str | None = None,
 
 
 async def get_allocations(gateway: Gateway, start: datetime, end: datetime) -> list[dict]:
-    return await gateway.select("room_allocations", {
-        "select": "room_id,starts_at,ends_at,source_type,source_id",
-        "starts_at": "lt." + end.isoformat(),
-        "ends_at": "gt." + start.isoformat(),
-        "order": "starts_at.asc",
-        "limit": "3000",
-    })
+    # Supabase often caps PostgREST responses at 1,000 rows. A truncated result
+    # must NEVER allow a classroom to appear free. Page through every allocation.
+    page_size = 500
+    max_pages = 20
+    entries = []
+    for page in range(max_pages):
+        batch = await gateway.select("room_allocations", {
+            "select": "id,room_id,starts_at,ends_at,source_type,source_id",
+            "starts_at": "lt." + end.isoformat(),
+            "ends_at": "gt." + start.isoformat(),
+            "order": "starts_at.asc,id.asc",
+            "limit": str(page_size),
+            "offset": str(page * page_size),
+        })
+        entries.extend(batch)
+        if len(batch) < page_size:
+            return entries
+    # Fail closed if occupancy exceeds the bounded read. Never guess availability.
+    raise HTTPException(503, "Availability is too large to verify safely")
 
 
 def checked_interval(start: datetime, end: datetime) -> None:
