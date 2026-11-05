@@ -180,3 +180,6 @@
   .ig-auth-page[data-auth-mode="signup"] .ig-auth-form-panel{height:auto;min-height:calc(100dvh - 28px)}
   .ig-auth-page[data-auth-mode="signup"] .ig-auth-art-panel{height:auto;min-height:calc(100dvh - 28px)}
 }
+
+/* Two enabled OAuth providers also stay full-width and touch-friendly on phones. */
+@media (max-width:480px){.ig-auth-socials:has(>button:nth-child(2)){grid-template-columns:minmax(0,1fr)}}
