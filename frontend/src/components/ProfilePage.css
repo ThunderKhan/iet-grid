@@ -115,3 +115,8 @@
   .igp-outline-button,.igp-text-button{padding:9px 10px;font-size:11px}
 }
 @media(prefers-reduced-motion:reduce){.igp-page *{transition:none!important;animation:none!important}}
+
+.igp-cohort-list{display:grid;gap:10px}
+.igp-cohort-row{display:grid;gap:4px;padding:9px 10px;border:1px solid #E5EBF4;background:#F8FAFC;border-radius:8px}
+.igp-cohort-row strong{font-size:12px}
+.igp-cohort-row small{font-size:10px;color:#71829A}
