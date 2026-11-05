@@ -71,11 +71,33 @@
 .cx-mobile-top h2{font-size:21px;color:#203755;margin:0}.cx-mobile-top button{display:grid;place-items:center;width:35px;height:35px;border-radius:8px;background:#F2F5F9}
 .cx-mobile-sheet>p{font-size:12px;line-height:1.5;color:#74869D;margin:6px 0 0}
 .cx-mobile-sheet .cx-room-info{padding:15px 0 3px}
-@media(max-width:1180px){.cx-lower-workspace{grid-template-columns:minmax(0,1fr) minmax(285px,.8fr)}@media(max-width:1050px){.cx-nav{flex-wrap:wrap}@media(max-width:720px){.cx-page{gap:12px}.cx-nav{padding:10px}  .cx-lower-workspace{gap:10px}
- .cx-aside{display:none}.cx-status{font-size:11px}
+@media(max-width:1180px){
+  .cx-lower-workspace{grid-template-columns:minmax(0,1fr) minmax(285px,.8fr)}
 }
-@media(max-width:380px){.cx-popover-fields{grid-template-columns:1fr}@media(prefers-reduced-motion:reduce){.cx-page *{animation:none!important;transition:none!important}}
-
+@media(max-width:1050px){
+  .cx-nav{flex-wrap:wrap}
+  .cx-schedule-trigger{margin-left:auto}
+  .cx-lower-workspace{grid-template-columns:1fr}
+  .cx-aside{margin-top:0}
+  .cx-room-details{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .cx-room-details>span{display:flex;flex-direction:column;gap:6px;align-items:flex-start;border:0!important}
+  .cx-room-details>span+span{padding-left:11px;border-left:1px solid #E9EEF4!important}
+  .cx-cta{grid-template-columns:1fr 1fr}
+}
+@media(max-width:720px){
+  .cx-page{gap:12px}
+  .cx-nav{padding:10px}
+  .cx-nav .cx-schedule-trigger{margin-left:0;width:100%;justify-content:flex-start}
+  .cx-lower-workspace{gap:10px}
+  .cx-aside{display:none}
+  .cx-status{font-size:11px}
+}
+@media(max-width:380px){
+  .cx-popover-fields{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  .cx-page *{animation:none!important;transition:none!important}
+}
 
 /* Current session information is separate from availability for a selected
    future slot. Never imply that the search filter is live current occupancy. */

@@ -25,7 +25,10 @@ try {
     'Existing workspace destinations must remain available');
   assert.ok(navHtml.includes('DEMO')&&navHtml.includes('Announcements'),
     'Demo and announcement context must remain available');
-  assert.ok(navHtml.includes('Sign out'),'Sign-out action must remain available in navigation');
+  assert.ok(navHtml.includes('aria-haspopup="menu"')&&navHtml.includes('ig-profile-trigger'),
+    'Desktop profile menu must remain accessible and expose account controls');
+  assert.ok(navHtml.includes('aria-controls="ig-mobile-nav"'),
+    'Mobile navigation must retain its toggle control');
   assert.ok(!navHtml.includes('sidebar')&&!navHtml.includes('side-profile'),'Old sidebar must not render');
   assert.equal(typeof SlideTabs,'function');
 
