@@ -23,7 +23,12 @@ export function SlideTabs({items,active,onNavigate}) {
   const measure = name => {
     const tab=tabRefs.current.get(name);
     const track=trackRef.current;
-    if(!tab||!track)return;
+    if(!tab||!track){
+      // Profile is a utility destination outside the primary tab group.
+      // Hide the cursor instead of leaving a misleading selected tab behind.
+      setPosition(previous=>previous.opacity?{...previous,opacity:0}:previous);
+      return;
+    }
     const rect=tab.getBoundingClientRect();
     const parent=track.getBoundingClientRect();
     const next={left:rect.left-parent.left,width:rect.width,opacity:1};
