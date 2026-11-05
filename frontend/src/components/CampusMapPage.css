@@ -1,0 +1,86 @@
+/* Campus map: spatial-first interface. Reuses existing Radix Dialog for mobile room details.
+   Match DESIGN.md: restrained cobalt, 1px borders, no animated hero, one action per view. */
+.bp-home{display:grid;gap:17px;min-width:0}
+.bp-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
+.bp-heading h1{font-size:28px;line-height:1.2;color:#17243B;letter-spacing:-.035em;font-weight:730;margin:0}
+.bp-heading p{font-size:13px;color:#63758E;line-height:1.55;margin:6px 0 0}
+.bp-heading-source{display:flex;align-items:center;gap:7px;white-space:nowrap;font-size:11px;font-weight:650;color:#526780;padding:8px 11px;border:1px solid #DCE4EF;border-radius:8px;background:#fff}
+.bp-filters{background:#fff;border:1px solid #DCE4EF;border-radius:12px;padding:14px 18px;display:grid;gap:14px}
+.bp-primary-filters{display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:space-between}
+.bp-choice-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.bp-choice-group>span{font-size:12px;color:#5E718B;font-weight:650;margin-right:6px}
+.bp-choice-group button{border:1px solid transparent;border-radius:7px;padding:9px 13px;background:transparent;color:#586A83;font-size:12px;font-weight:650;display:inline-flex;align-items:center;gap:7px;min-height:38px}
+.bp-choice-group button:hover{color:#244DC5;background:#F3F6FC}
+.bp-choice-group button[aria-pressed=true]{background:#ECF1FF;border-color:#B8CBFF;color:#244DC5}
+.bp-secondary-filters{border-top:1px solid #ECF0F5;padding-top:13px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.bp-secondary-filters label{display:grid;gap:5px;min-width:0}
+.bp-secondary-filters label span{font-size:11px;font-weight:650;color:#596A82}
+.bp-secondary-filters select,.bp-secondary-filters input{height:41px;width:100%;min-width:0;border-radius:8px;border:1px solid #D2DBE8;color:#263E5C;background:#fff;font-size:13px;padding:0 10px}
+.bp-secondary-filters :is(select,input):focus-visible{outline:3px solid #B4C8FD;outline-offset:1px}
+.bp-layout{display:grid;grid-template-columns:minmax(0,1.85fr) minmax(280px,.72fr);align-items:start;gap:16px}
+.bp-main{min-width:0}.bp-aside{display:grid;gap:13px;min-width:0;position:sticky;top:82px}
+.bp-inspector,.bp-alternatives{border:1px solid #DCE4EF;border-radius:12px;background:#fff;min-width:0;overflow:hidden}
+.bp-inspector-head{padding:17px 18px;border-bottom:1px solid #ECF0F5;display:flex;align-items:center;justify-content:space-between}
+.bp-inspector-head strong{font-size:13px;color:#17243B;font-weight:700}
+.bp-inspector-head span{font-size:11px;color:#8090A4}
+.bp-inspector-content{padding:18px}
+.bp-inspector-title{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.bp-inspector-title h2{font-size:30px;letter-spacing:-.045em;font-weight:730;line-height:1.1;color:#17243B;margin:0}
+.bp-inspector-title p{font-size:12px;color:#75879A;margin:7px 0 0}
+.bp-inspector-separator{border:0;border-top:1px solid #EBF0F5;margin:17px 0}
+.bp-inspector-specs{display:grid;grid-template-columns:1fr 1fr;gap:16px 10px}
+.bp-inspector-specs div{display:grid;gap:4px;min-width:0}
+.bp-inspector-specs span{font-size:11px;color:#7A899D}
+.bp-inspector-specs b{font-size:12px;font-weight:650;color:#253B59;overflow-wrap:anywhere}
+.bp-inspector-actions{display:grid;gap:9px;margin-top:21px}
+.bp-inspector-actions button{width:100%;min-height:43px;border-radius:8px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px}
+.bp-inspector-primary{background:#315CE5;color:#fff}
+.bp-inspector-primary:hover:not(:disabled){background:#254ECC}
+.bp-inspector-primary:disabled{opacity:.5;cursor:not-allowed}
+.bp-inspector-secondary{border:1px solid #CED9E8;background:#fff;color:#314D72}
+.bp-inspector-secondary:hover{background:#F5F7FC}
+.bp-inspector-disclaimer{font-size:11px;line-height:1.6;color:#7B8B9D;margin:13px 0 0}
+.bp-no-selection{display:grid;place-items:center;text-align:center;padding:42px 20px;color:#657790}
+.bp-no-selection svg{margin-bottom:12px;color:#8395AE}
+.bp-no-selection h3{margin:0 0 6px;font-size:14px;color:#2D3F57}
+.bp-no-selection p{font-size:12px;line-height:1.6;max-width:260px;margin:0}
+.bp-alternatives summary{display:flex;align-items:center;justify-content:space-between;gap:9px;cursor:pointer;padding:16px 18px;font-size:13px;font-weight:700;color:#31435D;list-style:none}
+.bp-alternatives summary::-webkit-details-marker{display:none}
+.bp-alternatives summary small{font-size:11px;color:#7B8DA3;font-weight:550;margin-left:auto}
+.bp-alternatives summary svg{color:#7C8EA5}
+.bp-alternative-list{padding:0 17px 14px}
+.bp-alternative-list button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:11px 1px;border-bottom:1px solid #EEF1F6;background:transparent;text-align:left}
+.bp-alternative-list button:hover strong{color:#315CE5}
+.bp-alternative-list button:last-child{border:0}
+.bp-alternative-list strong{font-size:12px;font-weight:700;color:#2F4663}
+.bp-alternative-list small{font-size:10px;color:#7B8C9F}
+.bp-alternative-list p{font-size:12px;color:#718198;line-height:1.6}
+.bp-toast-inline{border:1px solid #F0D5DA;border-radius:9px;background:#FFF5F6;padding:12px;color:#A33445;font-size:12px}
+.bp-room-mobile-dialog{display:none}
+@media(max-width:1160px){.bp-layout{grid-template-columns:minmax(0,1.4fr) minmax(270px,.8fr)}}
+@media(max-width:950px){.bp-layout{grid-template-columns:1fr}.bp-aside{position:static;grid-template-columns:1fr}.bp-heading h1{font-size:25px}}
+@media(max-width:720px){
+ .bp-home{gap:12px}
+ .bp-heading{align-items:flex-start;flex-direction:column;gap:9px}
+ .bp-heading h1{font-size:24px}
+ .bp-heading p{font-size:12px}
+ .bp-heading-source{font-size:10px}
+ .bp-filters{padding:13px}
+ .bp-primary-filters{gap:12px}
+ .bp-choice-group{gap:3px}.bp-choice-group>span{width:100%;margin-bottom:3px}
+ .bp-choice-group button{padding:8px 9px;font-size:11px;min-height:38px}
+ .bp-secondary-filters{grid-template-columns:1fr 1fr;gap:10px}
+ .bp-aside .bp-inspector{display:none}
+ .bp-room-mobile-dialog{display:block}
+}
+@media(max-width:360px){.bp-secondary-filters{grid-template-columns:1fr}.bp-choice-group button{font-size:10px;padding:7px}}
+/* Radix Dialog primitive reused from the existing shadcn-style sheet. */
+.bp-sheet-overlay{position:fixed;inset:0;background:#081A35A3;z-index:100}
+.bp-sheet{position:fixed;z-index:101;inset:auto 0 0;max-height:88dvh;overflow:auto;background:#fff;border:1px solid #DCE4EF;border-radius:18px 18px 0 0;padding:21px 19px max(19px,env(safe-area-inset-bottom));box-shadow:0 -20px 50px #081A351F}
+.bp-sheet-handle{width:34px;height:4px;border-radius:99px;background:#D4DCE9;margin:-7px auto 19px}
+.bp-sheet-heading{display:flex;justify-content:space-between;align-items:start;gap:12px}
+.bp-sheet-heading h2{font-size:24px;line-height:1.2;letter-spacing:-.035em;color:#17243B;margin:0}
+.bp-sheet-heading button{display:grid;place-items:center;width:36px;height:36px;border:1px solid #DCE4EF;background:#fff;border-radius:8px;color:#4B607A}
+.bp-sheet-subtitle{font-size:12px;color:#64758E;margin:6px 0 17px}
+.bp-sheet .bp-inspector-separator{margin:14px 0}
+@media(min-width:721px){.bp-sheet-overlay,.bp-sheet{display:none}}
