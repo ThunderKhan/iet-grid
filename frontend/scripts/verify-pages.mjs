@@ -53,6 +53,13 @@ try {
     assert.ok(!html.includes('cx-floor-tabs'),'Old floor tabs must be removed');
     assert.ok(!html.includes('cx-floor-stepper'),'Old toolbar stepper must be removed');
     assert.ok(html.includes('bp-navigation-stage'),'Floor navigation must be attached to the map');
+    assert.ok(!html.includes('cx-floor-label'),'Redundant building heading row must be removed');
+    assert.ok(html.includes('bp-view-toggle'),'Map/List switch must sit inside the floor plan card');
+    assert.ok(html.indexOf('bp-head')<html.indexOf('bp-view-toggle') &&
+      html.indexOf('bp-view-toggle')<html.indexOf('bp-navigation-stage'),
+      'Map/List switch must be in the blueprint header, before the drawing');
+    assert.ok(html.includes('aria-label="Floor display mode"'),
+      'The relocated switch needs an accessible label');
     const mapStart=html.indexOf('bp-navigation-stage');
     const prevPosition=html.indexOf('aria-label="Previous floor"');
     const nextPosition=html.indexOf('aria-label="Next floor"');
@@ -68,7 +75,7 @@ try {
       const occurrences=(html.match(/Deeksha Bhawan/g)||[]).length;
       // The two exact strings in aria-label are accessible context, not duplicate visible text.
       assert.ok(occurrences<=5,'Unexpected repetition of the full building label');
-      assert.ok(html.includes('>Deeksha Bhawan</h2>'),'One prominent visible building heading required');
+      assert.ok(!html.includes('>Deeksha Bhawan</h2>'),'Crossed-out building heading must be absent');
     }
   }
   assert.ok(previewCohorts.some(c=>formatCohort(c).includes('AI/ML')&&c.academic_year===2&&c.section==='A'),'Missing example academic cohort');

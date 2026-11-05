@@ -1,5 +1,5 @@
 import React, {useMemo, useState} from 'react';
-import {ChevronLeft, ChevronRight, DoorOpen, Info} from 'lucide-react';
+import {ChevronLeft, ChevronRight, DoorOpen, List, Map as MapIcon} from 'lucide-react';
 import './BlueprintSitePlan.css';
 
 /* Source: DDUGU Build With AI brief, page 1, IET & Deeksha floor blueprint.
@@ -93,7 +93,7 @@ function Room({item,room,availability,selected,onSelect}){
     <title>{item.id+' — '+(room?statuses[s]:'Not in dataset')}</title>
   </g>;
 }
-export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSelect,getStatus,mode='plan',floorOptions=[],onNavigateFloor=()=>{}}){
+export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSelect,getStatus,mode='plan',onModeChange=()=>{},floorOptions=[],onNavigateFloor=()=>{}}){
   const layout=(layouts[building+':'+floor]||[]).filter(item=>Boolean(item.id));
   const filtered=rooms.filter(r=>r.building===building&&r.floor===floor);
   const byId=useMemo(()=>new Map(filtered.map(r=>[r.id,r])),[filtered]);
@@ -105,9 +105,16 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
   const availableFloors=floorOptions.length?floorOptions:[floor];
   const floorIndex=availableFloors.indexOf(floor);
   return <section className="bp-board" aria-label={(isDeek?'Deeksha Bhawan':'IET')+' '+floor+' floor'}>
-    <header className="bp-head"><div><h2>Classroom layout</h2>
-      <p>Select a room to see availability and make a reservation.</p></div>
-      <span className="bp-source"><Info size={14}/> Based on supplied campus floor plans</span></header>
+    <header className="bp-head">
+      <div className="bp-head-copy"><h2>Classroom layout</h2>
+        <p>Select a room to see availability and make a reservation.</p></div>
+      <div className="bp-view-toggle" role="group" aria-label="Floor display mode">
+        <button type="button" aria-pressed={mode==='plan'} className={mode==='plan'?'active':''}
+          onClick={()=>onModeChange('plan')}><MapIcon size={15}/> Map</button>
+        <button type="button" aria-pressed={mode==='list'} className={mode==='list'?'active':''}
+          onClick={()=>onModeChange('list')}><List size={15}/> List</button>
+      </div>
+    </header>
     <div className="bp-navigation-stage" role="group" aria-label="Floor plan and navigation">
       <button type="button" className="bp-floor-arrow bp-floor-previous"
         aria-label="Previous floor"

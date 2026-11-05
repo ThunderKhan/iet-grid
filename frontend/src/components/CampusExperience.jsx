@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import * as Dialog from '@radix-ui/react-dialog';
 import VelarisGradient from './VelarisGradient';
-import {ArrowRight, BookOpenText, Building2, CalendarDays, CheckCircle2, ChevronDown, Clock3, DoorOpen, Info, Layers3, List, Map as MapIcon, Settings2, SlidersHorizontal, Users, X} from 'lucide-react';
+import {ArrowRight, BookOpenText, Building2, CalendarDays, CheckCircle2, ChevronDown, Clock3, DoorOpen, Info, Layers3, Settings2, SlidersHorizontal, Users, X} from 'lucide-react';
 import BlueprintSitePlan from './BlueprintSitePlan';
 import './CampusExperience.css';
 
@@ -75,7 +75,6 @@ export default function CampusExperience({
     {!current.verified&&<p className="cx-assist">* Capacity is provisional until verified by the institute.</p>}
   </div>:<div className="cx-no-room"><DoorOpen size={27}/><h3>Choose a classroom</h3>
     <p>Select a room from the floor map to see its status and reserve it for your class.</p></div>;
-  const buildingName=building==='IET'?'Institute of Engineering & Technology':'Deeksha Bhawan';
   const floorOptions=buildings.find(b=>b.id===building)?.floors||[];
   const goToFloor=offset=>{
     const index=floorOptions.indexOf(floor);
@@ -130,16 +129,10 @@ export default function CampusExperience({
     {apiWarning&&<div className="cx-warning" role="alert"><Info size={17}/>{apiWarning}</div>}
     <div className="cx-content">
       <div className="cx-floor-column">
-        <div className="cx-floor-label">
-          <div><h2>{buildingName}</h2></div>
-          <div className="cx-view-toggle" role="group" aria-label="Floor display mode">
-            <button type="button" aria-pressed={mode==='plan'} className={mode==='plan'?'active':''} onClick={()=>setMode('plan')}><MapIcon size={15}/> Map</button>
-            <button type="button" aria-pressed={mode==='list'} className={mode==='list'?'active':''} onClick={()=>setMode('list')}><List size={15}/> List</button>
-          </div>
-        </div>
+
         <BlueprintSitePlan rooms={rooms} building={building} floor={floor} selected={selected}
           onSelect={selectRoom} getStatus={getStatus} mode={mode}
-          floorOptions={floorOptions} onNavigateFloor={goToFloor}/>
+          floorOptions={floorOptions} onNavigateFloor={goToFloor} onModeChange={setMode}/>
       </div>
       <aside className="cx-aside">
         <div className="cx-side-head"><span className="cx-overline">BOOKING DETAILS</span><small>Step 1 of 2 · Select room</small></div>

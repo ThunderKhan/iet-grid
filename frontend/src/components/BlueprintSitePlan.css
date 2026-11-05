@@ -1,11 +1,14 @@
 /* Modern room-first vector board, based on the approved IET Grid DESIGN.md.
    Shared bp-* classes intentionally scoped under .bp-board or .bp-svg. */
 .bp-board{min-width:0;background:#fff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(16,27,44,.035)}
-.bp-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:21px 25px 17px;border-bottom:1px solid #EDF1F6}
+.bp-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid #EDF1F6}
 .bp-head h2{font-size:17px;color:#17243B;letter-spacing:-.025em;font-weight:700;line-height:1.35;margin:0}
 .bp-head p{font-size:12px;color:#687993;margin:5px 0 0;line-height:1.5}
-.bp-source{display:flex;align-items:center;gap:7px;font-size:11px;color:#637C96;line-height:1.4;white-space:nowrap}
-.bp-source svg{flex-shrink:0}
+.bp-head-copy{min-width:0}
+.bp-view-toggle{display:flex;align-items:center;flex-shrink:0;gap:3px;background:#EDF1F7;border:1px solid #DDE5F0;border-radius:8px;padding:3px}
+.bp-view-toggle button{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:6px;background:transparent;color:#657791;font-size:12px;font-weight:680;min-height:34px}
+.bp-view-toggle button.active{background:#fff;color:#315CE5;box-shadow:0 1px 4px #1D31571A}
+.bp-view-toggle button:hover:not(.active){color:#315CE5;background:#F8FAFF}
 .bp-viewport{position:relative;width:100%;min-width:0;padding:15px 12px 18px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#BFCDE2 #F4F7FC;background:#F8FAFE}
 .bp-svg{display:block;width:100%;height:auto;max-width:1100px;margin:0 auto;shape-rendering:geometricPrecision;font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif}
 .bp-page-outline{fill:#F8FAFE;stroke:#E7EDF5;stroke-width:1}
@@ -57,10 +60,13 @@
 .bp-list-available{color:#187A55}.bp-list-occupied{color:#B42332}.bp-list-restricted{color:#6941C6}.bp-list-pending{color:#8D5B12}
 .bp-list-empty{font-size:12px;color:#72849A;padding:16px 0}
 .bp-mobile-cue{display:none}
-@media(max-width:1000px){.bp-source{max-width:190px;font-size:10px}.bp-list-rooms{grid-template-columns:1fr}}
+@media(max-width:1000px){.bp-list-rooms{grid-template-columns:1fr}}
 @media(max-width:700px){
- .bp-head{padding:16px;align-items:flex-start;flex-direction:column;gap:6px}
- .bp-source{max-width:none}
+ .bp-head{padding:12px 13px;align-items:center;flex-direction:row;gap:8px}
+ .bp-head p{font-size:11px;line-height:1.4}
+ .bp-head h2{font-size:15px}
+ .bp-view-toggle button{padding:7px 9px;font-size:11px}
+ .bp-view-toggle button svg{width:14px;height:14px}
  .bp-viewport{padding:8px 0 10px}
  .bp-svg{width:730px;max-width:none}
  .bp-mobile-cue{display:block;text-align:center;padding:7px;color:#73859B;font-size:11px;background:#F7F9FC}
