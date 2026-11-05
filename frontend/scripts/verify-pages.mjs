@@ -51,7 +51,9 @@ try {
   assert.ok(navHtml.includes('aria-current="page"'),'Selected navigation item must be accessible');
   assert.ok(navHtml.includes('Campus map')&&navHtml.includes('Calendar')&&navHtml.includes('My bookings'),
     'Existing workspace destinations must remain available');
-  assert.ok(navHtml.includes('My profile'),'Account menu must expose the profile page');
+  const navSource=readFileSync('src/components/TopNavigation.jsx','utf8');
+  assert.ok(navSource.includes("navigate('My profile')"),
+    'Profile dropdown must navigate to My profile');
   assert.ok(navHtml.includes('DEMO')&&navHtml.includes('Announcements'),
     'Demo and announcement context must remain available');
   assert.ok(navHtml.includes('aria-haspopup="menu"')&&navHtml.includes('ig-profile-trigger'),
