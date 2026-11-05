@@ -58,47 +58,21 @@ const layouts={
 const statuses={available:'Available',occupied:'Occupied',restricted:'Ineligible',unknown:'Not verified',pending:'Pending approval'};
 const status=s=>Object.prototype.hasOwnProperty.call(statuses,s)?s:'unknown';
 
-function Stairs({x,y,w,h}){
-  return <g aria-hidden="true">
-    <rect x={x} y={y} width={w} height={h} className="bp-stairs-box"/>
-    {Array.from({length:7},(_,i)=><line key={i} x1={x+10} x2={x+w-10} y1={y+12+i*(h-23)/7} y2={y+12+i*(h-23)/7} className="bp-stairs-line"/>)}
-    <text x={x+w/2} y={y+h+17} textAnchor="middle" className="bp-utility-text">STAIRS</text>
-  </g>;
-}
-function Shell({building,floor}){
-  if(building==='IET'){
-    return <g aria-hidden="true">
-      <rect x="54" y="102" width="832" height="285" className="bp-outer"/>
-      {floor==='Ground'?<>
-        <line x1="408" y1="104" x2="408" y2="382" className="bp-innerwall"/>
-        <line x1="538" y1="104" x2="538" y2="382" className="bp-innerwall"/>
-        <Stairs x={424} y={108} w={98} h={110}/>
-        <text x="473" y="348" textAnchor="middle" className="bp-utility-text">ENTRY HALL</text>
-        <text x="473" y="425" textAnchor="middle" className="bp-entry">ENTRANCE GATE</text>
-      </>:<>
-        <rect x="60" y="221" width="820" height="57" className="bp-corridor"/>
-        <Stairs x={424} y={108} w={98} h={111}/>
-        <text x="473" y="252" textAnchor="middle" className="bp-utility-text">CORRIDOR</text>
-        {[165,320,617,798].map((x,i)=><path key={'a'+i} d={'M'+(x-15)+' 220 h30 m-15 0 q-19 4 -19 24'} className="bp-door"/>)}
-        {[155,353,552,755].map((x,i)=><path key={'b'+i} d={'M'+(x-15)+' 279 h30 m-15 0 q-19 -4 -19 -24'} className="bp-door"/>)}
+function Shell({building,floor}) {
+  const isIET=building==='IET';
+  return <g aria-hidden="true" className="bp-shell">
+    {isIET?<>
+      <rect x="53" y="101" width="834" height="286" rx="10" className="bp-floor-foundation"/>
+      {floor!=='Ground'&&<>
+        <rect x="60" y="223" width="820" height="51" rx="2" className="bp-circulation"/>
+        <rect x="411" y="108" width="123" height="111" rx="3" className="bp-circulation-vertical"/>
+        <text x="470" y="255" className="bp-corridor-label" textAnchor="middle">CORRIDOR</text>
       </>}
-      {[100,210,325,576,690,816].map((x,i)=><g key={i}><line x1={x} y1="102" x2={x+29} y2="102" className="bp-window"/><line x1={x} y1="387" x2={x+29} y2="387" className="bp-window"/></g>)}
-    </g>;
-  }
-  return <g aria-hidden="true">
-    <path d="M236 94 H870 V495 H649 V392 H587 V508 H435 V392 H346 V495 H67 V247 H115 V193 H236 Z" className="bp-outer"/>
-    <path d="M236 196 H870 M236 257 H870 M346 392 V494 M649 392 V494" className="bp-lightwall"/>
-    <Stairs x={450} y={391} w={119} h={105}/>
-    <text x="510" y="529" textAnchor="middle" className="bp-entry">ENTRANCE GATE</text>
-    <text x="511" y="379" textAnchor="middle" className="bp-utility-text">CORRIDOR</text>
-    {[285,420,611,758].map((x,i)=><line key={i} x1={x} y1="94" x2={x+32} y2="94" className="bp-window"/>)}
-  </g>;
-}
-function Facility({item}){
-  return <g aria-hidden="true" className="bp-facility">
-    {item.diamond?<path d={'M'+(item.x+item.w/2)+' '+item.y+' L'+(item.x+item.w)+' '+(item.y+item.h/2)+' L'+(item.x+item.w/2)+' '+(item.y+item.h)+' L'+item.x+' '+(item.y+item.h/2)+' Z'} className="bp-facility-shape"/>:
-      <rect x={item.x} y={item.y} width={item.w} height={item.h} rx={item.round?49:0} className="bp-facility-shape"/>}
-    <text x={item.x+item.w/2} y={item.y+item.h/2+4} textAnchor="middle" className="bp-facility-label">{item.facility}</text>
+    </>:<>
+      <path d="M235 94 H873 V497 H645 V390 H584 V502 H430 V390 H340 V496 H64 V247 H113 V194 H235 Z"
+        className="bp-floor-foundation"/>
+      <rect x="340" y="371" width="303" height="23" rx="4" className="bp-circulation"/>
+    </>}
   </g>;
 }
 function Room({item,room,availability,selected,onSelect}){
@@ -108,17 +82,19 @@ function Room({item,room,availability,selected,onSelect}){
     aria-label={item.id+', '+(room?statuses[s]:'Not in dataset')+(room?', '+room.capacity+' seats':'')}
     onClick={()=>room&&onSelect(room)}
     onKeyDown={e=>{if(room&&(e.key==='Enter'||e.key===' ')){e.preventDefault();onSelect(room)}}}>
-    <rect x={item.x} y={item.y} width={item.w} height={item.h} className="bp-room-surface"/>
-    <rect x={item.x} y={item.y} width={item.w} height={item.h} className="bp-room-border"/>
-    <text x={item.x+item.w/2} y={item.y+item.h/2+(item.sub?-8:5)} textAnchor="middle" className="bp-room-title" style={{fontSize:short?15:item.sub?17:21}}>{item.name||item.id}</text>
-    {item.sub&&<text x={item.x+item.w/2} y={item.y+item.h/2+16} textAnchor="middle" className="bp-room-subtitle">{item.sub}</text>}
-    <circle cx={item.x+item.w-14} cy={item.y+13} r="6" className="bp-room-indicator"/>
-    {active&&<rect x={item.x+5} y={item.y+5} width={item.w-10} height={item.h-10} className="bp-room-selection"/>}
+    <rect x={item.x} y={item.y} width={item.w} height={item.h} rx="9" className="bp-room-surface"/>
+    <rect x={item.x} y={item.y} width={item.w} height={item.h} rx="9" className="bp-room-border"/>
+    <text x={item.x+item.w/2} y={item.y+item.h/2+(item.sub?-9:short?5:2)} textAnchor="middle"
+      className="bp-room-title" style={{fontSize:short?16:item.sub?18:22}}>{item.name||item.id}</text>
+    {item.sub&&<text x={item.x+item.w/2} y={item.y+item.h/2+17} textAnchor="middle" className="bp-room-subtitle">{item.sub}</text>}
+    {!item.sub&&!short&&<text x={item.x+item.w/2} y={item.y+item.h/2+25} textAnchor="middle" className="bp-room-subtitle">{room?(room.type==='lab'?'LABORATORY':room.type==='seminar'?'SEMINAR SPACE':room.type==='library'?'LIBRARY':'CLASSROOM'):'ROOM'}</text>}
+    <circle cx={item.x+item.w-16} cy={item.y+16} r="5.5" className="bp-room-indicator"/>
+    {active&&<path d={`M${item.x+11} ${item.y+15} l5 5 l9 -11`} className="bp-room-selected-check"/>}
     <title>{item.id+' — '+(room?statuses[s]:'Not in dataset')}</title>
   </g>;
 }
 export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSelect,getStatus,mode='plan'}){
-  const layout=layouts[building+':'+floor]||[];
+  const layout=(layouts[building+':'+floor]||[]).filter(item=>Boolean(item.id));
   const filtered=rooms.filter(r=>r.building===building&&r.floor===floor);
   const byId=useMemo(()=>new Map(filtered.map(r=>[r.id,r])),[filtered]);
   const missing=filtered.filter(r=>!layout.some(l=>l.id===r.id));
@@ -128,8 +104,8 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
   const isDeek=building==='DEEK';
   return <section className="bp-board" aria-label={(isDeek?'Deeksha Bhawan':'IET')+' '+floor+' floor'}>
     <header className="bp-head"><div><h2>{isDeek?'Deeksha Bhawan':'Institute of Engineering & Technology'}</h2>
-      <p>{floor} floor · Interactive architectural layout</p></div>
-      <span className="bp-source"><Info size={14}/> Reconstructed from the supplied drawing</span></header>
+      <p>{floor} floor · Interactive classroom layout</p></div>
+      <span className="bp-source"><Info size={14}/> Room arrangement from university blueprint</span></header>
     {mode==='list'?<div className="bp-list">
       <div className="bp-list-top"><span>{filtered.length} mapped spaces</span><label>Sort <select value={sortBy} onChange={e=>setSortBy(e.target.value)}><option value="id">Room number</option><option value="capacity">Capacity</option></select></label></div>
       <div className="bp-list-rooms">{sorted.map(r=><button type="button" key={r.id} className={'bp-list-row'+(selected===r.id?' is-selected':'')} onClick={()=>onSelect(r)}>
@@ -138,12 +114,12 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
       </button>)}{!sorted.length&&<p className="bp-list-empty">No rooms loaded for this floor.</p>}</div>
     </div>:<div className="bp-viewport">
       <svg viewBox={isDeek?'0 0 940 568':'0 0 940 470'} className="bp-svg" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Interactive floor plan. Use Tab then Enter to select rooms.">
-        <rect x="8" y="8" width="924" height={isDeek?551:453} className="bp-page-outline"/>
-        <text x="36" y="52" className="bp-drawing-title">{isDeek?'DEEKSHA BHAWAN':'IET'}  /  {floor.toUpperCase()} FLOOR</text>
+        <rect x="8" y="8" width="924" height={isDeek?551:453} rx="12" className="bp-page-outline"/>
+        <text x="40" y="50" className="bp-drawing-title">{isDeek?'DEEKSHA BHAWAN':'IET'} · {floor.toUpperCase()} FLOOR</text>
         <Shell building={building} floor={floor}/>
-        {layout.map(item=>item.facility?<Facility key={item.facility} item={item}/>:<Room key={item.id} item={item} room={byId.get(item.id)} availability={stateOf(byId.get(item.id))}
+        {layout.map(item=><Room key={item.id} item={item} room={byId.get(item.id)} availability={stateOf(byId.get(item.id))}
           selected={selected} onSelect={onSelect}/>)}
-        <text x="472" y={isDeek?550:447} textAnchor="middle" className="bp-disclaimer">SOURCE-REFERENCED RECONSTRUCTION · NOT TO SCALE</text>
+        <text x="472" y={isDeek?548:447} textAnchor="middle" className="bp-disclaimer">ROOM ARRANGEMENT BASED ON SUPPLIED PLAN · SIMPLIFIED NOT TO SCALE</text>
       </svg><div className="bp-mobile-cue">← Scroll sideways for the full floor plan →</div>
     </div>}
     <footer className="bp-footer"><div className="bp-legend">
