@@ -103,9 +103,9 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
   const stateOf=r=>status(r?getStatus(r):'unknown');
   const isDeek=building==='DEEK';
   return <section className="bp-board" aria-label={(isDeek?'Deeksha Bhawan':'IET')+' '+floor+' floor'}>
-    <header className="bp-head"><div><h2>{isDeek?'Deeksha Bhawan':'Institute of Engineering & Technology'}</h2>
-      <p>{floor} floor · Interactive classroom layout</p></div>
-      <span className="bp-source"><Info size={14}/> Room arrangement from university blueprint</span></header>
+    <header className="bp-head"><div><h2>Classroom layout</h2>
+      <p>Select a room to see availability and make a reservation.</p></div>
+      <span className="bp-source"><Info size={14}/> Based on supplied campus floor plans</span></header>
     {mode==='list'?<div className="bp-list">
       <div className="bp-list-top"><span>{filtered.length} mapped spaces</span><label>Sort <select value={sortBy} onChange={e=>setSortBy(e.target.value)}><option value="id">Room number</option><option value="capacity">Capacity</option></select></label></div>
       <div className="bp-list-rooms">{sorted.map(r=><button type="button" key={r.id} className={'bp-list-row'+(selected===r.id?' is-selected':'')} onClick={()=>onSelect(r)}>
@@ -115,7 +115,7 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
     </div>:<div className="bp-viewport">
       <svg viewBox={isDeek?'0 0 940 568':'0 0 940 470'} className="bp-svg" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Interactive floor plan. Use Tab then Enter to select rooms.">
         <rect x="8" y="8" width="924" height={isDeek?551:453} rx="12" className="bp-page-outline"/>
-        <text x="40" y="50" className="bp-drawing-title">{isDeek?'DEEKSHA BHAWAN':'IET'} · {floor.toUpperCase()} FLOOR</text>
+        <text x="40" y="50" className="bp-drawing-title">ROOM LAYOUT</text>
         <Shell building={building} floor={floor}/>
         {layout.map(item=><Room key={item.id} item={item} room={byId.get(item.id)} availability={stateOf(byId.get(item.id))}
           selected={selected} onSelect={onSelect}/>)}

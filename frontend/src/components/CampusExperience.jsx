@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import * as Dialog from '@radix-ui/react-dialog';
 import VelarisGradient from './VelarisGradient';
-import {ArrowRight, BookOpenText, Building2, CalendarDays, CheckCircle2, ChevronDown, Clock3, DoorOpen, Info, Layers3, List, Map as MapIcon, Settings2, SlidersHorizontal, Users, X} from 'lucide-react';
+import {ArrowRight, BookOpenText, Building2, CalendarDays, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Clock3, DoorOpen, Info, Layers3, List, Map as MapIcon, Settings2, SlidersHorizontal, Users, X} from 'lucide-react';
 import BlueprintSitePlan from './BlueprintSitePlan';
 import './CampusExperience.css';
 
@@ -58,7 +58,7 @@ export default function CampusExperience({
   };
   const roomInfo=current?<div className="cx-room-info">
     <div className="cx-room-name"><div><span className="cx-overline">SELECTED CLASSROOM</span><h2>{current.id}</h2>
-      <p>{current.building==='IET'?'IET':'Deeksha Bhawan'} · {current.floor} floor</p></div><Badge value={currentStatus}/></div>
+      <p>{current.floor} floor · {current.type}</p></div><Badge value={currentStatus}/></div>
     <div className="cx-room-details">
       <span><Users size={16}/> Capacity <b>{current.capacity}{current.verified?'':'*'} seats</b></span>
       <span><Layers3 size={16}/> Space <b className="cx-caps">{current.type}</b></span>
@@ -75,7 +75,16 @@ export default function CampusExperience({
     {!current.verified&&<p className="cx-assist">* Capacity is provisional until verified by the institute.</p>}
   </div>:<div className="cx-no-room"><DoorOpen size={27}/><h3>Choose a classroom</h3>
     <p>Select a room from the floor map to see its status and reserve it for your class.</p></div>;
-  const buildingName=building==='IET'?'IET':'Deeksha Bhawan';
+  const buildingName=building==='IET'?'Institute of Engineering & Technology':'Deeksha Bhawan';
+  const floorOptions=buildings.find(b=>b.id===building)?.floors||[];
+  const floorIndex=floorOptions.indexOf(floor);
+  const goToFloor=offset=>{
+    const nextFloor=floorOptions[floorIndex+offset];
+    if(!nextFloor)return;
+    setFloor(nextFloor);
+    setSelected('');
+    setSheetOpen(false);
+  };
   return <div className="cx-page">
     <header className="cx-hero">
       <VelarisGradient className="cx-gradient" colors={HERO_COLORS}
@@ -92,14 +101,25 @@ export default function CampusExperience({
       <div className="cx-nav-main">
         <div className="cx-building-tabs" role="group" aria-label="Select building">
           {buildings.map(b=><button type="button" key={b.id} aria-pressed={building===b.id}
+            aria-label={b.id==='DEEK'?'Select Deeksha Bhawan building':'Select Institute of Engineering & Technology building'}
             className={building===b.id?'active':''} onClick={()=>chooseBuilding(b.id)}>
-            <Building2 size={16}/>{b.short}</button>)}
+            <Building2 size={16}/>{b.id==='DEEK'?'Deeksha':b.short}</button>)}
         </div>
         <span className="cx-divider" aria-hidden="true"/>
-        <div className="cx-floor-tabs" role="group" aria-label="Select floor">
-          {buildings.find(b=>b.id===building)?.floors.map(f=><button type="button" key={f}
-            aria-pressed={f===floor} className={f===floor?'active':''}
-            onClick={()=>{setFloor(f);setSelected('');setSheetOpen(false)}}>{f}</button>)}
+        <div className="cx-floor-stepper" role="group" aria-label="Navigate floors">
+          <button type="button" className="cx-floor-arrow" aria-label="Previous floor"
+            title="Previous floor" disabled={floorIndex<=0} onClick={()=>goToFloor(-1)}>
+            <ChevronLeft size={18}/>
+          </button>
+          <div className="cx-floor-current" role="status" aria-live="polite" aria-atomic="true">
+            <span className="cx-floor-indicator" aria-hidden="true"/>
+            <strong>{floor} floor</strong>
+            <small>{floorIndex+1} of {floorOptions.length}</small>
+          </div>
+          <button type="button" className="cx-floor-arrow" aria-label="Next floor"
+            title="Next floor" disabled={floorIndex<0||floorIndex>=floorOptions.length-1} onClick={()=>goToFloor(1)}>
+            <ChevronRight size={18}/>
+          </button>
         </div>
       </div>
       <Popover.Root>
@@ -126,7 +146,7 @@ export default function CampusExperience({
     <div className="cx-content">
       <div className="cx-floor-column">
         <div className="cx-floor-label">
-          <div><span className="cx-overline">FLOOR OVERVIEW</span><h2>{buildingName} <span>/ {floor}</span></h2></div>
+          <div><h2>{buildingName}</h2></div>
           <div className="cx-view-toggle" role="group" aria-label="Floor display mode">
             <button type="button" aria-pressed={mode==='plan'} className={mode==='plan'?'active':''} onClick={()=>setMode('plan')}><MapIcon size={15}/> Map</button>
             <button type="button" aria-pressed={mode==='list'} className={mode==='list'?'active':''} onClick={()=>setMode('list')}><List size={15}/> List</button>

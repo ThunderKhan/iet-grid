@@ -33,6 +33,33 @@ try {
     assert.ok(!html.includes('WASHROOM')&&!html.includes('DRINKING WATER')&&!html.includes('STAIRS'), 'Non-bookable facilities leaked into SVG');
     console.log('PASS modern plan',building,floor,roomId);
   }
+  // Building name is a single visible heading; the floor arrows replace all tab buttons.
+  for(const [whichBuilding,currentFloor,floors] of [
+    ['IET','Ground',3],['IET','First',3],['IET','Second',3],
+    ['DEEK','Ground',2],['DEEK','First',2]
+  ]){
+    const html=renderToString(React.createElement(CampusExperience,{
+      buildings:[{id:'IET',short:'IET',floors:['Ground','First','Second']},
+        {id:'DEEK',short:'Deeksha Bhawan',floors:['Ground','First']}],
+      rooms:allRooms,building:whichBuilding,floor:currentFloor,selected:'',
+      date:'2026-11-05',hour:'11',duration:1,capacity:75,apiAvailability:null,
+      matching:[],demo:true,canBook:false,isAvailable:()=>false,
+      setBuilding:()=>{},setFloor:()=>{},setSelected:()=>{},setDate:()=>{},
+      setHour:()=>{},setDuration:()=>{},setCapacity:()=>{},setView:()=>{},
+      setShowBooking:()=>{}
+    }));
+    assert.ok(html.includes('aria-label="Previous floor"'),'Missing previous floor arrow');
+    assert.ok(html.includes('aria-label="Next floor"'),'Missing next floor arrow');
+    assert.ok(!html.includes('cx-floor-tabs'),'Old floor tabs must be removed');
+    assert.ok(html.includes(currentFloor+' floor'),'Current floor label must be visible');
+    assert.ok(html.includes((floors===2?'2':'3')+' floors')===false,'Floor counter must remain concise');
+    if(whichBuilding==='DEEK'){
+      const occurrences=(html.match(/Deeksha Bhawan/g)||[]).length;
+      // The two exact strings in aria-label are accessible context, not duplicate visible text.
+      assert.ok(occurrences<=5,'Unexpected repetition of the full building label');
+      assert.ok(html.includes('>Deeksha Bhawan</h2>'),'One prominent visible building heading required');
+    }
+  }
   assert.ok(previewCohorts.some(c=>formatCohort(c).includes('AI/ML')&&c.academic_year===2&&c.section==='A'),'Missing example academic cohort');
   const sampleRooms=[
     {id:'IET19',building:'IET',floor:'First',capacity:75,type:'classroom',verified:false,active:true},
