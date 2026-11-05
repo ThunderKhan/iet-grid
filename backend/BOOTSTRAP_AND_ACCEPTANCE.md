@@ -14,20 +14,31 @@
 
 Run only after verifying the exact intended UUID. Replace the placeholder with the confirmed UUID **inside the SQL Editor**, not in tracked source files.
 
-~~~sql
-BEGIN;
-SELECT id, full_name, role, verified
-FROM public.profiles
-WHERE id = 'PUT-VERIFIED-ADMIN-UUID-HERE'::uuid
-FOR UPDATE;
+**First run this read-only lookup and inspect the email and profile separately:**
 
--- Review the row above and stop if it is not the intended user.
-UPDATE public.profiles
-SET role = 'admin', verified = true
-WHERE id = 'PUT-VERIFIED-ADMIN-UUID-HERE'::uuid
-RETURNING id, full_name, role, verified;
-COMMIT;
+~~~sql
+SELECT u.id, u.email, u.email_confirmed_at, p.full_name, p.role, p.verified
+FROM auth.users AS u
+JOIN public.profiles AS p ON p.id = u.id
+WHERE u.id = 'PUT-VERIFIED-ADMIN-UUID-HERE'::uuid;
 ~~~
+
+**Only after independent identity verification**, run a second, separately submitted SQL command. Replace both placeholders with the exact verified values. An incorrect email or unconfirmed email prevents the update.
+
+~~~sql
+UPDATE public.profiles AS p
+SET role = 'admin', verified = true
+FROM auth.users AS u
+WHERE p.id = u.id
+  AND p.id = 'PUT-VERIFIED-ADMIN-UUID-HERE'::uuid
+  AND lower(u.email) = lower('PUT-VERIFIED-ADMIN-EMAIL-HERE')
+  AND u.email_confirmed_at IS NOT NULL
+  AND p.role = 'student'
+  AND p.verified = false
+RETURNING p.id, p.full_name, p.role, p.verified;
+~~~
+
+The update must affect **exactly one** independently verified account. If it affects zero rows, investigate rather than weakening the conditions.
 
 This one-time bootstrap must be done by a trusted operator with privileged SQL access. Never expose a public self-upgrade route or elevate a new user based on user_metadata.
 
