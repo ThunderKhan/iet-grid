@@ -101,7 +101,7 @@ export function OverviewPage({rooms,bookings,notices,matching,buildings,selected
 }
 const TIME_OPTIONS=Array.from({length:11},(_,i)=>i+8);
 function FieldSelect({label,value,onChange,children}){return <label className="ig-control-field"><span>{label}</span><select value={value} onChange={onChange}>{children}</select></label>}
-export function ExplorePage({buildings,rooms,building,setBuilding,floor,setFloor,selected,setSelected,date,setDate,hour,setHour,duration,setDuration,capacity,setCapacity,apiAvailability,apiWarning,isAvailable,matching,current,canBook,setShowBooking,setView,demo}) {
+export function ExplorePage({buildings,rooms,building,setBuilding,floor,setFloor,selected,setSelected,date,setDate,hour,setHour,duration,setDuration,capacity,setCapacity,bookingKind,setBookingKind,requiredEquipment,setRequiredEquipment,apiAvailability,apiWarning,isAvailable,matching,current,canBook,setShowBooking,setView,demo}) {
   const [isMobile,setIsMobile]=useState(()=>typeof window!=='undefined' && window.matchMedia('(max-width:720px)').matches);
   const [sheetOpen,setSheetOpen]=useState(false);
   useEffect(()=>{
@@ -123,6 +123,9 @@ export function ExplorePage({buildings,rooms,building,setBuilding,floor,setFloor
     return isAvailable(r)?'available':'occupied';
   };
   const getCurrentStatus=current?getStatus(current):'unknown';
+  const selectedAvailability=current?apiAvailability?.find(r=>r.id===current.id):null;
+  const bookingNeedsApproval=bookingKind==='exam'||bookingKind==='event'||Boolean(current?.restricted);
+  const provisionalCount=rooms.filter(r=>r.verified!==true).length;
   const eligible=!!current&&getCurrentStatus==='available'&&canBook;
   const chooseBuilding=id=>{setBuilding(id);setFloor(buildings.find(b=>b.id===id)?.floors?.[0]||'Ground');setSelected('')};
   return <div className="ig-page-stack">
@@ -138,8 +141,11 @@ export function ExplorePage({buildings,rooms,building,setBuilding,floor,setFloor
           {TIME_OPTIONS.map(h=><option key={h} value={String(h)}>{String(h).padStart(2,'0')}:00</option>)}</FieldSelect>
         <FieldSelect label="Duration" value={duration} onChange={e=>setDuration(Number(e.target.value))}><option value={1}>1 hour</option><option value={2}>2 hours</option><option value={3}>3 hours</option></FieldSelect>
         <FieldSelect label="Seats required" value={capacity} onChange={e=>setCapacity(Number(e.target.value))}>{[30,75,150,200].map(n=><option key={n} value={n}>{n} seats</option>)}</FieldSelect>
+        <FieldSelect label="Session type" value={bookingKind} onChange={e=>setBookingKind(e.target.value)}><option value="lecture">Extra lecture</option><option value="practical">Practical</option><option value="exam">Examination</option><option value="event">Academic event</option></FieldSelect>
+        <FieldSelect label="Required equipment" value={requiredEquipment} onChange={e=>setRequiredEquipment(e.target.value)}><option value="">No requirement</option><option value="projector">Projector</option><option value="computer">Computer</option><option value="microphone">Microphone</option></FieldSelect>
       </div>
     </section>
+    <div className="ig-metadata-summary"><Info size={15}/>{rooms.filter(r=>r.verified===true).length} verified capacity records · {provisionalCount} provisional. Equipment and accessibility are not documented for current room inventory. No missing feature is assumed to exist.</div>
     {apiWarning&&<div className="ig-alert" role="alert"><Info size={18}/>{apiWarning}</div>}
     <div className="ig-explore-columns">
       <section className="ig-map-column"><FloorPlan rooms={rooms} building={building} floor={floor} selected={selected} onSelect={selectRoom} getStatus={getStatus}/></section>
@@ -148,25 +154,30 @@ export function ExplorePage({buildings,rooms,building,setBuilding,floor,setFloor
           <PanelHead eyebrow="ROOM INSPECTOR" title="Selected space" icon={DoorOpen}/>
           {current?<div className="ig-inspector-body">
             <div className="ig-inspector-title"><div><h3>{current.id}</h3><small>{current.building==='IET'?'IET':'Deeksha Bhawan'} · {current.floor} floor</small></div><StatePill status={getCurrentStatus}/></div>
+            <div className="ig-metadata-badges"><span className={current.verified?'ig-metadata-verified':'ig-metadata-provisional'}>{current.verified?'Verified capacity':'Provisional capacity'}</span>
+            {bookingNeedsApproval&&<span className="ig-metadata-review">Approval required for {bookingKind==='exam'?'examination':bookingKind==='event'?'event':'restricted room'}</span>}</div>
             <div className="ig-inspector-features">
               <div><Users size={18}/><span>Capacity</span><strong>{current.capacity}{current.verified?'':'*'} seats</strong></div>
               <div><Layers size={18}/><span>Room type</span><strong className="ig-capitalize">{current.type}</strong></div>
               <div><Clock3 size={18}/><span>Requested interval</span><strong>{String(hour).padStart(2,'0')}:00 · {duration}h</strong></div>
               <div><CalendarDays size={18}/><span>Date</span><strong>{dayLabel(date)}</strong></div>
             </div>
-            <button type="button" className="ig-btn ig-btn-primary ig-btn-block" disabled={!eligible} onClick={()=>setShowBooking(true)}>Reserve this room <ArrowRight size={17}/></button>
+            <button type="button" className="ig-btn ig-btn-primary ig-btn-block" disabled={!eligible} onClick={()=>setShowBooking(true)}>{bookingNeedsApproval?'Request this room':'Reserve this room'} <ArrowRight size={17}/></button>
             {!canBook&&<p className="ig-inspector-explain">Only verified faculty and approved staff can book rooms.</p>}
             {canBook&&!eligible&&<p className="ig-inspector-explain">This room is not confirmed eligible for the selected time and capacity. Choose a verified available alternative.</p>}
             {!current.verified&&<p className="ig-note"><Info size={14}/> Capacity is provisional until validated by the institute.</p>}
+            {current.accessible==null&&<p className="ig-note"><Info size={14}/> Accessibility information has not been documented.</p>}
+            {!current.equipment?.length&&<p className="ig-note"><Info size={14}/> Equipment is not recorded; do not assume a projector or computer is present.</p>}
+            {!!requiredEquipment&&selectedAvailability?.reason==='ineligible'&&<p className="ig-note"><Info size={14}/> Requested equipment must appear in verified room metadata before booking.</p>}
             <button type="button" className="ig-btn ig-btn-outline ig-btn-block" onClick={()=>setView('Calendar')}><CalendarDays size={16}/> View schedule</button>
           </div>:<Empty icon={DoorOpen} title="Choose a classroom" body="Select any room from the map or list to inspect its eligibility and reservation options."/>}
         </section>
         <section className="ig-card ig-alternative-card">
           <PanelHead eyebrow="ALTERNATIVE SPACES" title="Recommended rooms" icon={Sparkles} description="Constraint-checked suggestions, not AI confidence"/>
           <div className="ig-alternatives">{matching.slice(0,5).map((r,i)=><button key={r.id} className="ig-alternative" onClick={()=>{setBuilding(r.building);setFloor(r.floor);setSelected(r.id);if(isMobile)setSheetOpen(true)}}>
-            <span className="ig-alternative-rank">{String(i+1).padStart(2,'0')}</span><span className="ig-alternative-meta"><b>{r.id}</b><small>{r.building} · {r.floor} · {r.capacity} seats</small></span>
-            <span className="ig-fit">{typeof r.score==='number'?r.score+' fit':'Matched'}</span><ArrowUpRight size={16}/></button>)}
-            {!matching.length&&<Empty icon={Search} title="No matching rooms" body="Try another date, start time, or capacity."/>}</div>
+            <span className="ig-alternative-rank">{String(i+1).padStart(2,'0')}</span><span className="ig-alternative-meta"><b>{r.id}</b><small>{r.building} · {r.floor} · {r.capacity}{r.verified?'':'*'} seats</small><small>{r.verified?'Verified capacity':'Provisional capacity'}{r.requires_approval?' · Approval required':''}</small></span>
+            <span className="ig-fit">{typeof r.score==='number'?'Fit '+r.score+'/100':'Matched'}</span><ArrowUpRight size={16}/></button>)}
+            {!matching.length&&<Empty icon={Search} title="No matching rooms" body={requiredEquipment?'No rooms have verified records for that equipment. Remove the requirement or obtain confirmed metadata.':'Try another date, session type, start time, or capacity.'}/>}</div>
         </section>
       </aside>
     </div>
@@ -186,14 +197,17 @@ export function ExplorePage({buildings,rooms,building,setBuilding,floor,setFloor
           </Dialog.Description>
           {current&&<div className="ig-room-sheet-details">
             <StatePill status={getCurrentStatus}/>
+            {bookingNeedsApproval&&<p className="ig-note">Approval is required before this space is reserved.</p>}
             <div className="ig-room-sheet-stats">
               <div><Users size={17}/><span>Capacity</span><b>{current.capacity}{current.verified?'':'*'} seats</b></div>
               <div><Layers size={17}/><span>Room type</span><b className="ig-capitalize">{current.type}</b></div>
               <div><Clock3 size={17}/><span>Duration</span><b>{duration} hour{duration>1?'s':''}</b></div>
             </div>
             {!current.verified&&<p className="ig-note"><Info size={14}/> Capacity is provisional until university validation.</p>}
+            {current.accessible==null&&<p className="ig-note"><Info size={14}/> Accessibility is not documented.</p>}
+            {!current.equipment?.length&&<p className="ig-note"><Info size={14}/> Room equipment has not been documented.</p>}
             <button className="ig-btn ig-btn-primary ig-btn-block" disabled={!eligible}
-              onClick={()=>{setSheetOpen(false);setShowBooking(true)}}>Reserve this room <ArrowRight size={17}/></button>
+              onClick={()=>{setSheetOpen(false);setShowBooking(true)}}>{bookingNeedsApproval?'Request this room':'Reserve this room'} <ArrowRight size={17}/></button>
             {!eligible&&<p className="ig-inspector-explain">{!canBook?'A verified faculty or operator role is required.':'Availability or eligibility is not verified for this interval.'}</p>}
             <button className="ig-btn ig-btn-outline ig-btn-block" onClick={()=>{setSheetOpen(false);setView('Calendar')}}><CalendarDays size={16}/> View campus schedule</button>
           </div>}
@@ -277,7 +291,7 @@ export function AnnouncementsPage({notices,demo,markNoticeRead,noticeReadBusy,se
       <button className="ig-btn ig-btn-outline" type="button" onClick={()=>setReport(true)}>Report an issue <ArrowUpRight size={16}/></button></div>
   </section></div>;
 }
-export function AdminPage({canAdmin,demo,userRole,rooms,bookings,notices,noticeTitle,setNoticeTitle,noticeBody,setNoticeBody,noticePriority,setNoticePriority,noticeBusy,addNotice,pendingQueue,pendingLoading,pendingError,reviewBusy,reviewPendingBooking,setRefreshTick,accountUuid,setAccountUuid,accountRole,setAccountRole,accountBusy,grantTestRole,apiWarning,apiAvailability}) {
+export function AdminPage({canAdmin,demo,userRole,rooms,bookings,notices,noticeTitle,setNoticeTitle,noticeBody,setNoticeBody,noticePriority,setNoticePriority,noticeBusy,addNotice,pendingQueue,pendingLoading,pendingError,reviewBusy,reviewPendingBooking,setRefreshTick,accountUuid,setAccountUuid,accountRole,setAccountRole,accountBusy,grantTestRole,apiWarning,apiAvailability,auditRows,auditTotal,auditOffset,setAuditOffset,auditRoom,setAuditRoom,auditAction,setAuditAction,auditLoading,auditError}) {
   return <div className="ig-page-stack">
     <section className="ig-admin-intro"><div><span className="ig-overline">OPERATIONS CENTER</span><h2>Campus administration</h2><p>Review allocations, publish academic updates, and manage permitted access.</p></div><StatePill status={canAdmin?'available':'restricted'}>{canAdmin?(demo?'Demo view':'Verified operator'):'Restricted access'}</StatePill></section>
     {!canAdmin?<section className="ig-card"><Empty icon={LockKeyhole} title="Administrator access required" body="These controls are limited to verified university administrators and coordinators."/></section>:<>
@@ -326,6 +340,27 @@ export function AdminPage({canAdmin,demo,userRole,rooms,bookings,notices,noticeT
             <div><span>Floor geometry</span><StatePill status="unknown">Schematic / unverified</StatePill></div>
           </div>
         </section>
+      <section className="ig-card ig-audit-card">
+        <PanelHead eyebrow="ACCOUNTABILITY" title="Booking audit history" icon={BookOpen}
+          description="Real creation, approval, rejection and cancellation events, permission-scoped by building"
+          action={<button className="ig-icon-button" aria-label="Refresh audit history" onClick={()=>setRefreshTick(n=>n+1)}><RefreshCcw size={17}/></button>}/>
+        {demo?<Empty icon={Shield} title="Live history unavailable in preview" body="Sign in as a verified administrator to inspect real audit events."/>:<>
+          <div className="ig-audit-filters">
+            <label>Room ID<input value={auditRoom} onChange={e=>{setAuditRoom(e.target.value);setAuditOffset(0)}} placeholder="All rooms / IET19" maxLength={30}/></label>
+            <label>Event type<select value={auditAction} onChange={e=>{setAuditAction(e.target.value);setAuditOffset(0)}}><option value="">All events</option><option value="created">Created</option><option value="status">Status changes</option></select></label>
+          </div>
+          {auditLoading?<p className="ig-muted">Loading recorded booking changes…</p>:
+           auditError?<div className="ig-alert" role="alert">{auditError}</div>:
+           !auditRows.length?<Empty icon={BookOpen} title="No recorded changes" body="There are no audit events matching these filters and your building permissions."/>:
+           <div className="ig-audit-scroll"><table className="ig-audit-table"><thead><tr><th>When (IST)</th><th>Room / booking</th><th>Event</th><th>Actor</th><th>Current status</th></tr></thead>
+             <tbody>{auditRows.map(a=><tr key={a.event_id}><td>{strDate(a.happened_at)}<small>{strTime(a.happened_at)}</small></td><td><b>{a.room_id}</b><small>{a.booking_title}</small></td><td>{a.action}</td><td title="Truncated identifier for privacy">{a.actor_id?a.actor_id.slice(0,8)+'…':'System / not recorded'}</td><td><StatePill status={a.booking_status}/></td></tr>)}</tbody></table></div>}
+          <div className="ig-audit-footer"><span>{auditTotal} recorded event{auditTotal===1?'':'s'} · newest first</span><div>
+            <button className="ig-btn ig-btn-outline ig-btn-small" disabled={auditLoading||auditOffset===0} onClick={()=>setAuditOffset(n=>Math.max(0,n-20))}><ChevronLeft size={15}/> Previous</button>
+            <button className="ig-btn ig-btn-outline ig-btn-small" disabled={auditLoading||auditOffset+20>=auditTotal} onClick={()=>setAuditOffset(n=>n+20)}>Next <ChevronRight size={15}/></button>
+          </div></div>
+          <p className="ig-note"><Info size={14}/> These records are created by database triggers. Coordinators see only their delegated buildings; students and faculty cannot access this history.</p>
+        </>}
+      </section>
       </div>
     </>}
   </div>;
