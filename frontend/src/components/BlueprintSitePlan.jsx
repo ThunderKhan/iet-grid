@@ -91,7 +91,7 @@ function Room({item,room,availability,selected,onSelect,activeSession}){
     <rect x={item.x} y={item.y} width={item.w} height={item.h} rx="9" className="bp-room-surface"/>
     <rect x={item.x} y={item.y} width={item.w} height={item.h} rx="9" className="bp-room-border"/>
     <text x={item.x+item.w/2} y={item.y+item.h/2+(item.sub?-9:short?5:2)} textAnchor="middle"
-      className="bp-room-title" style={{fontSize:short?16:item.sub?18:22}}>{item.name||item.id}</text>
+      className="bp-room-title" style={{fontSize:short?15:item.sub?17:19}}>{item.name||item.id}</text>
     {hasLive&&item.h>=80&&<g className="bp-now-tag" aria-hidden="true">
       <rect x={item.x+9} y={item.y+8} width="55" height="18" rx="9" className="bp-now-chip"/>
       <text x={item.x+36.5} y={item.y+21} textAnchor="middle" className="bp-now-chip-label">LIVE NOW</text>
@@ -101,7 +101,7 @@ function Room({item,room,availability,selected,onSelect,activeSession}){
       {item.sub&&<text x={item.x+item.w/2} y={item.y+item.h/2+17} textAnchor="middle" className="bp-room-subtitle">{item.sub}</text>}
       {!item.sub&&!short&&<text x={item.x+item.w/2} y={item.y+item.h/2+25} textAnchor="middle" className="bp-room-subtitle">{room?(room.type==='lab'?'LABORATORY':room.type==='seminar'?'SEMINAR SPACE':room.type==='library'?'LIBRARY':'CLASSROOM'):'ROOM'}</text>}
     </>}
-    <circle cx={item.x+item.w-16} cy={item.y+16} r="5.5" className="bp-room-indicator"/>
+    <circle cx={item.x+item.w-16} cy={item.y+16} r="4.75" className="bp-room-indicator"/>
     {active&&<path d={`M${item.x+11} ${item.y+15} l5 5 l9 -11`} className="bp-room-selected-check"/>}
     <title>{item.id+' — '+(room?statuses[s]:'Not in dataset')
       +(hasLive?' · Currently running: '+activeTitle:'')}</title>
