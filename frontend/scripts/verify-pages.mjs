@@ -112,15 +112,24 @@ try {
     'Room surfaces should be neutral white');
   assert.doesNotMatch(planCSS,/\.bp-room\.bp-(available|occupied|restricted)\s+\.bp-room-surface\{/,
     'Room availability must be shown through indicators, not full-tile fills');
-  assert.match(planCSS,/\.bp-circulation\{fill:#EEF2F6;/,
-    'Corridors should use neutral gray');
+  assert.match(planCSS,/\.bp-circulation\{fill:#E8EDF4;/,
+    'Corridors should use the updated architectural slate gray');
   assert.match(planCSS,/\.bp-room\.is-selected \.bp-room-border\{stroke:#315CE5;stroke-width:2\.75\}/,
     'Selected room must retain a precise cobalt outline');
   assert.match(planCSS,/\.bp-room\.bp-available \.bp-room-indicator\{fill:#187A55\}/,
     'Available status remains legible');
   assert.match(planCSS,/\.bp-room\.bp-occupied \.bp-room-indicator\{fill:#B42332\}/,
     'Occupied status remains legible');
-  const {default: BlueprintSitePlan}=await server.ssrLoadModule('/src/components/BlueprintSitePlan.jsx');
+  const {default: BlueprintSitePlan,findRoomMatches}=await server.ssrLoadModule('/src/components/BlueprintSitePlan.jsx');
+  const campusRoomFixtures=(await server.ssrLoadModule('/scripts/test-fixtures.js')).sampleRooms;
+  assert.equal(findRoomMatches(campusRoomFixtures,'iet18')[0]?.id,'IET18',
+    'Room search must match a full ID regardless of case');
+  assert.equal(findRoomMatches(campusRoomFixtures,'  lh04  ')[0]?.id,'LH04',
+    'Room search should match Deeksha rooms and ignore surrounding whitespace');
+  assert.deepEqual(findRoomMatches(campusRoomFixtures,'no-such-room'),[],
+    'Room search must not fabricate matching classrooms');
+  assert.deepEqual(findRoomMatches(campusRoomFixtures,''),[],
+    'Room search should start empty rather than show arbitrary suggestions');
   const {default: ReservationDialog,AcademicGroupFields}=await server.ssrLoadModule('/src/components/ReservationDialog.jsx');
   const {formatCohort,cohortBranchOptions,cohortYearOptions,cohortSectionOptions,cohortMatches}=await server.ssrLoadModule('/src/academicCohorts.js');
   const {previewCohorts,sampleRooms:allRooms}=await server.ssrLoadModule('/scripts/test-fixtures.js');
@@ -140,6 +149,16 @@ try {
     onSelect:()=>{},getStatus:()=> 'available',
     activeSessions:running,nowScheduleState:'ready'
   }));
+  const styledRoomMap=renderToString(React.createElement(BlueprintSitePlan,{
+    rooms:allRooms,building:'IET',floor:'First',selected:'IET18',
+    onSelect:()=>{},onFindRoom:()=>{},getStatus:()=> 'available',
+    slotSummary:'5 Nov 2026 · 11:00–12:00 IST',requiredSeats:75
+  }));
+  assert.ok(styledRoomMap.includes('Find a room...')&&styledRoomMap.includes('aria-autocomplete="list"'),
+    'Map header should expose the accessible classroom finder');
+  assert.ok(styledRoomMap.includes('5 Nov 2026 · 11:00–12:00 IST')&&styledRoomMap.includes('75 seats minimum'),
+    'Map should provide clear, non-editable date and capacity context');
+  assert.ok(styledRoomMap.includes('bp-fine-grid'),'Floor map should retain restrained architectural guide lines');
   assert.ok(sampleLiveMap.includes('LIVE NOW'),'Room plan must visibly identify running classes');
   assert.ok(sampleLiveMap.includes('AI/ML · Computer Vision'),
     'Authorized current class should be visible to the viewer');
