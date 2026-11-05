@@ -124,3 +124,9 @@
 @keyframes ig-cal-spin{to{transform:rotate(360deg)}}
 @media(max-width:600px){.ig-card-head h1,.ig-calendar-top h1{font-size:22px}.ig-cal-feedback{flex-wrap:wrap;padding:19px}.ig-cal-feedback button{width:100%}}
 @media(prefers-reduced-motion:reduce){.ig-cal-progress{animation:none}}
+
+/* Prevent iOS form focus zoom without enlarging dense desktop data tables. */
+@media(max-width:720px){
+ .ig-calendar-actions input,.ig-admin-form input,.ig-admin-form select,.ig-admin-form textarea,
+ .ig-audit-filters input,.ig-audit-filters select{font-size:16px}
+}

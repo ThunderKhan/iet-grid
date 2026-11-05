@@ -240,3 +240,10 @@
 .bp-footnote{flex:1 1 100%;margin:0;font-size:12px;line-height:1.45;color:var(--ig-muted)}
 .bp-search-result-arrow{flex:0 0 auto}
 @media(max-width:720px){.bp-footer{padding:12px 14px;gap:8px}.bp-footnote{font-size:12px}}
+
+/* A visible selected room on horizontal floor maps is scrolled into view by the component. */
+@media(max-width:720px){
+ .bp-search-field input,.bp-list-top select{font-size:16px}
+ .bp-viewport{overscroll-behavior-inline:contain}
+ .bp-floor-position{font-variant-numeric:tabular-nums}
+}

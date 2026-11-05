@@ -39,3 +39,9 @@
 @media(max-width:430px){.rc-academic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 .rc-academic-field:first-child{grid-column:1/-1}
 .rc-academic-field select{font-size:13px;padding:0 9px}}
+
+/* iOS input zoom prevention and resilient two-column academic fields. */
+@media(max-width:720px){
+ .rc-title-input,.rc-select-wrap select,.rc-academic-field select{font-size:16px}
+ .rc-dialog{overflow-wrap:anywhere}
+}
