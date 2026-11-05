@@ -1,0 +1,117 @@
+/* IET Grid / Profile settings — adapted from the shadcn profile-settings
+   form pattern. Native React + CSS, DESIGN.md navy/cobalt/off-white tokens. */
+.igp-page{width:100%;max-width:1260px;margin:0 auto;display:grid;gap:22px;color:#17243B}
+.igp-page :is(button,input,textarea,select):focus-visible{outline:3px solid #AAC0FF;outline-offset:2px}
+.igp-intro{display:grid;gap:6px;padding:0 1px 4px}
+.igp-eyebrow{font-size:10px;color:#637EA3;letter-spacing:.13em;font-weight:810}
+.igp-intro h1{font-size:clamp(25px,3.1vw,32px);letter-spacing:-.04em;font-weight:745;color:#17243B;line-height:1.18;margin:0}
+.igp-intro p{color:#64748B;line-height:1.55;font-size:13px;margin:0;max-width:660px}
+.igp-layout{display:grid;grid-template-columns:minmax(0,1fr) 322px;gap:20px;align-items:start}
+.igp-main-column,.igp-form,.igp-side-column{min-width:0;display:grid;gap:17px}
+.igp-card{background:#fff;border:1px solid #DCE4EF;border-radius:14px;overflow:hidden;min-width:0}
+.igp-card-header{display:flex;align-items:start;justify-content:space-between;padding:19px 23px 0;gap:10px}
+.igp-card-header h2{font-size:15px;line-height:1.4;letter-spacing:-.02em;font-weight:730;color:#203451;margin:0}
+.igp-card-header p{font-size:12px;line-height:1.55;color:#71829A;margin:5px 0 0}
+.igp-avatar-edit{display:flex;align-items:center;gap:22px;padding:22px 23px 25px}
+.igp-avatar-frame{position:relative;width:92px;height:92px;flex:0 0 92px;border-radius:18px;background:#E7EEFF;display:grid;place-items:center}
+.igp-avatar-initial{display:grid;place-items:center;width:44px;height:44px;border-radius:11px;background:#E7EEFF;color:#315CE5;font-size:18px;font-weight:800}
+.igp-avatar-initial.large{width:92px;height:92px;border-radius:18px;font-size:32px}
+.igp-photo{width:44px;height:44px;border-radius:11px;object-fit:cover;display:block;background:#F1F4F9}
+.igp-photo.large{width:92px;height:92px;border-radius:18px}
+.igp-avatar-camera{position:absolute;bottom:-7px;right:-7px;width:30px;height:30px;display:grid;place-items:center;color:#315CE5;border-radius:50%;background:#fff;border:1px solid #DCE4EF;box-shadow:0 2px 7px #101B2C0A}
+.igp-avatar-actions{display:grid;justify-items:start;gap:8px;min-width:0}
+.igp-avatar-actions>strong{color:#223951;font-size:15px;font-weight:730;overflow-wrap:anywhere}
+.igp-avatar-actions>span{font-size:11px;color:#8292A8}
+.igp-avatar-buttons{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin-top:5px}
+.igp-hidden-input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.igp-outline-button,.igp-text-button{min-height:39px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;font-size:12px;font-weight:710;padding:9px 13px;white-space:nowrap}
+.igp-outline-button{color:#315CE5;background:#fff;border:1px solid #C9D6EB}
+.igp-outline-button:hover:not(:disabled){background:#F3F6FF;border-color:#92ACE5}
+.igp-text-button{color:#697B92;background:transparent;border:1px solid transparent}
+.igp-text-button:hover{color:#B42332;background:#FEF3F4}
+.igp-pending{color:#315CE5;font-size:11px;line-height:1.4}
+.igp-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 17px;padding:23px}
+.igp-field{display:grid;align-content:start;gap:8px;min-width:0;color:#334965}
+.igp-field>span{font-size:12px;font-weight:700;line-height:1.4}
+.igp-field b{color:#B42332}
+.igp-field span small{font-size:11px;font-weight:550;color:#8995A8}
+.igp-field>input,.igp-field>select,.igp-field>textarea,.igp-input-lock>input{
+  width:100%;min-width:0;border:1px solid #CBD7E6;border-radius:9px;padding:10px 12px;background:#fff;
+  color:#17243B;font-size:13px;line-height:1.45;min-height:43px;
+}
+.igp-field>textarea{min-height:85px;resize:vertical;max-height:210px}
+.igp-field>select{cursor:pointer}
+.igp-field>input::placeholder,.igp-field>textarea::placeholder{color:#91A1B5}
+.igp-field>small{font-size:10px;color:#7D8EA5;line-height:1.4}
+.igp-span-2{grid-column:1/-1}
+.igp-input-lock{position:relative}
+.igp-input-lock input{padding-right:38px;background:#F7F9FC;color:#5D708B}
+.igp-input-lock svg{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#8B9CB1}
+.igp-academic-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.igp-institution-note{display:flex;align-items:flex-start;gap:9px;margin:0 23px 22px;padding:12px 13px;background:#F5F7FA;border:1px solid #E5EBF4;color:#61738C;border-radius:9px;line-height:1.55;font-size:11px}
+.igp-institution-note svg{color:#607A9E;flex-shrink:0}
+.igp-save-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:4px 0 10px}
+.igp-save-row>span{display:flex;align-items:center;gap:8px;font-size:11px;color:#7D8DA1}
+.igp-save-row>span svg{flex-shrink:0}
+.igp-save-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:11px 21px;color:white;border-radius:9px;background:#315CE5;font-size:12px;font-weight:780}
+.igp-save-button:hover:not(:disabled){background:#254ECC}
+.igp-page button:disabled{opacity:.58;cursor:not-allowed}
+.igp-account-summary{padding:21px 20px 12px}
+.igp-summary-head{display:flex;align-items:center;gap:13px;margin-bottom:21px;min-width:0}
+.igp-summary-head>div{display:grid;gap:4px;min-width:0}
+.igp-summary-head strong{color:#203653;font-size:14px;font-weight:760;line-height:1.3;overflow-wrap:anywhere}
+.igp-summary-head small{color:#71839C;font-size:12px}
+.igp-account-row{display:flex;justify-content:space-between;align-items:start;gap:9px;padding:13px 0;border-top:1px solid #EDF1F6;min-width:0}
+.igp-account-row>span{display:inline-flex;align-items:center;gap:8px;font-size:11px;color:#78899E;flex-shrink:0}
+.igp-account-row>span svg{color:#8AA0BA;flex-shrink:0}
+.igp-account-row>b{font-size:11px;color:#293F5B;font-weight:700;text-align:right;line-height:1.45}
+.igp-account-row .igp-break{overflow-wrap:anywhere;min-width:0}
+.igp-status-verified{color:#187A55!important}
+.igp-status-unverified{color:#8D5B12!important}
+.igp-official-note{font-size:10px;line-height:1.55;color:#8995A8;margin:11px 0 3px}
+.igp-official-card .igp-card-header h2{display:flex;align-items:center;gap:8px}
+.igp-official-body{padding:12px 21px 21px;display:grid;gap:8px}
+.igp-official-body .igp-account-row{padding:4px 0 0;border:0}
+.igp-official-body strong{font-size:13px;color:#293F5B;line-height:1.45;overflow-wrap:anywhere}
+.igp-official-body>small{font-size:11px;line-height:1.6;color:#7D8CA1}
+.igp-account-security{padding-bottom:20px}
+.igp-account-security .igp-outline-button{margin:18px 20px 0}
+.igp-demo,.igp-feedback{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border:1px solid #E1E7EF;border-radius:9px;font-size:12px;line-height:1.55}
+.igp-demo{color:#8D5B12;background:#FFF8E9;border-color:#F5E3BE}
+.igp-demo svg,.igp-feedback svg{flex-shrink:0;margin-top:2px}
+.igp-feedback.is-error{color:#B42332;background:#FFF5F6;border-color:#F5D3D8}
+.igp-feedback.is-success{color:#187A55;background:#F0F8F3;border-color:#BBDCC9}
+@media(max-width:1080px){
+  .igp-layout{grid-template-columns:minmax(0,1fr) 280px;gap:14px}
+  .igp-form-grid{gap:15px}
+  .igp-academic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:820px){
+  .igp-layout{grid-template-columns:1fr}
+  .igp-side-column{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .igp-account-summary{grid-row:span 2}
+}
+@media(max-width:600px){
+  .igp-page{gap:16px}
+  .igp-side-column{grid-template-columns:1fr}
+  .igp-account-summary{grid-row:auto}
+  .igp-card-header{padding:17px 16px 0}
+  .igp-avatar-edit{padding:19px 16px 22px;gap:15px}
+  .igp-form-grid{padding:18px 16px;grid-template-columns:1fr;gap:16px}
+  .igp-academic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .igp-span-2{grid-column:1}
+  .igp-institution-note{margin:0 16px 17px}
+  .igp-save-row{flex-direction:column;align-items:stretch}
+  .igp-save-row>span{justify-content:center}
+  .igp-save-button{width:100%}
+  .igp-avatar-frame,.igp-avatar-initial.large,.igp-photo.large{width:76px;height:76px}
+  .igp-avatar-frame{flex-basis:76px}
+  .igp-avatar-initial.large{font-size:27px}
+}
+@media(max-width:390px){
+  .igp-academic-grid{grid-template-columns:1fr}
+  .igp-avatar-edit{align-items:flex-start}
+  .igp-avatar-buttons{gap:3px}
+  .igp-outline-button,.igp-text-button{padding:9px 10px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){.igp-page *{transition:none!important;animation:none!important}}
