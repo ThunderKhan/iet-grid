@@ -7,7 +7,7 @@
 .ig-overline{font-size:12px;letter-spacing:.12em;line-height:1.5;font-weight:800;color:var(--ig-muted);text-transform:uppercase}
 .ig-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px}
 .ig-card-head-text{min-width:0}.ig-card-head :is(h1,h2){display:flex;align-items:center;gap:10px;font-size:18px;line-height:1.35;font-weight:700;letter-spacing:-.02em;margin:5px 0 3px;color:var(--ig-text)}.ig-card-head :is(h1,h2) svg{color:#4266B6;flex-shrink:0}
-.ig-card-head p{font-size:12px;color:var(--ig-muted);line-height:1.6;margin:4px 0 0}.ig-card-head-action{flex-shrink:0}
+.ig-card-head p{font-size:14px;color:var(--ig-muted);line-height:1.55;margin:4px 0 0;max-width:65ch}.ig-card-head-action{flex-shrink:0}
 .ig-link{display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--ig-primary);font-size:12px;font-weight:750;padding:7px 2px}.ig-link:hover{color:#2149BE;text-decoration:underline;text-underline-offset:3px}.ig-link:disabled{opacity:.5}
 .ig-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:42px;border:1px solid transparent;border-radius:9px;padding:10px 16px;font-size:13px;line-height:1.4;font-weight:700;transition:background .15s,box-shadow .15s,transform .15s;white-space:normal;text-align:center}
 .ig-btn-primary{background:var(--ig-primary);color:#fff;border-color:var(--ig-primary)}.ig-btn-primary:hover:not(:disabled){background:var(--ig-primary-hover)}.ig-btn-outline{background:#fff;color:#354A68;border-color:#C9D5E5}.ig-btn-outline:hover:not(:disabled){background:#F4F7FD;border-color:#8FA5C2}
@@ -70,15 +70,15 @@
 .ig-alternative-meta{flex:1;min-width:0}.ig-alternative-meta b,.ig-alternative-meta small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ig-alternative-meta b{font-size:12px;color:#263F5D}.ig-alternative-meta small{font-size:12px;color:var(--ig-muted);margin-top:4px}
 .ig-fit{font-size:12px;font-weight:800;color:#47658B;white-space:nowrap}
 .ig-calendar-page{padding:23px}.ig-calendar-top{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;flex-wrap:wrap}
-.ig-calendar-top h1{display:flex;align-items:center;gap:10px;font-size:19px;color:#1E3553;margin:5px 0}.ig-calendar-top h1 svg{color:var(--ig-primary)}.ig-calendar-top p{font-size:12px;line-height:1.6;color:#61748B;margin:0}
+.ig-calendar-top h1{display:flex;align-items:center;gap:10px;font-size:24px;line-height:1.25;color:#1E3553;margin:0 0 6px}.ig-calendar-top h1 svg{color:var(--ig-primary)}.ig-calendar-top p{font-size:14px;line-height:1.6;color:#52637B;margin:0;max-width:65ch}
 .ig-calendar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ig-calendar-actions input{height:44px;max-width:175px;border:1px solid #CCD8E5;border-radius:9px;padding:0 9px;color:#263D59;background:#fff;font-size:13px}
-.ig-calendar-mode{display:flex;gap:5px;width:fit-content;border:1px solid #DFE5EE;background:#F4F7FB;padding:5px;border-radius:10px;margin:22px 0 16px}.ig-calendar-mode button{background:transparent;color:#65768E;padding:9px 17px;border-radius:7px;font-size:13px;font-weight:700}.ig-calendar-mode button.selected{background:#fff;color:var(--ig-primary);box-shadow:0 1px 5px #162D4918}
+.ig-calendar-mode{display:flex;gap:5px;width:fit-content;border:1px solid #DFE5EE;background:#F4F7FB;padding:5px;border-radius:10px;margin:22px 0 16px}.ig-calendar-mode button{background:transparent;color:#52637B;min-height:44px;padding:9px 17px;border-radius:7px;font-size:14px;font-weight:700}.ig-calendar-mode button.selected{background:#fff;color:var(--ig-primary);box-shadow:0 1px 5px #162D4918}
 .ig-cal-columns{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;min-height:360px;border:1px solid #DFE7F1;border-radius:12px;overflow:hidden}
 .ig-cal-columns.is-day{grid-template-columns:minmax(0,1fr)}.ig-cal-day-column{border-right:1px solid #E2EAF3;min-width:0;background:#FDFEFF}.ig-cal-day-column:last-child{border:0}
-.ig-cal-day-head{display:flex;align-items:center;gap:7px;padding:14px 12px;background:#F5F8FC;border-bottom:1px solid #E2EAF3;color:#405B7A}.ig-cal-day-head strong{font-size:12px}.ig-cal-day-head span{font-size:15px;font-weight:800;color:#233F65}.ig-cal-day-head small{margin-left:auto;font-size:12px;font-weight:800;color:var(--ig-primary);background:#E3ECFF;border-radius:5px;padding:3px 5px}
-.ig-cal-day-body{display:grid;align-content:start;gap:8px;padding:12px;min-height:292px}.ig-cal-booking{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;text-align:left;border:1px solid #B9CEE9;border-left:3px solid var(--ig-primary);border-radius:8px;background:#EEF3FF;padding:12px;color:#273E63}
-.ig-cal-booking:hover{background:#E2ECFF}.ig-cal-booking.pending{background:#FFF7E7;border-color:#E6C68E;border-left-color:#B98422}
-.ig-cal-booking small{display:flex;gap:5px;align-items:center;font-size:12px;line-height:1.4;color:#57719A}.ig-cal-booking strong{font-size:12px;line-height:1.35;overflow-wrap:anywhere}.ig-cal-booking>span:not(.ig-status){font-size:12px;color:var(--ig-muted)}
+.ig-cal-day-head{display:flex;align-items:center;gap:7px;padding:14px 12px;background:#F5F8FC;border-bottom:1px solid #E2EAF3;color:#405B7A}.ig-cal-day-head strong{font-size:13px}.ig-cal-day-head span{font-size:15px;font-weight:800;color:#233F65}.ig-cal-day-head small{margin-left:auto;font-size:12px;font-weight:800;color:var(--ig-primary);background:#E3ECFF;border-radius:5px;padding:3px 5px}
+.ig-cal-day-body{display:grid;align-content:start;gap:8px;padding:12px;min-height:292px}.ig-cal-booking{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;text-align:left;border:1px solid #B9CEE9;border-radius:8px;background:#EEF3FF;padding:12px;color:#273E63}
+.ig-cal-booking:hover{background:#E2ECFF}.ig-cal-booking.pending{background:#FFF7E7;border-color:#E6C68E}
+.ig-cal-booking small{display:flex;gap:5px;align-items:center;font-size:12px;line-height:1.4;color:#57719A}.ig-cal-booking strong{font-size:14px;line-height:1.35;overflow-wrap:anywhere}.ig-cal-booking>span:not(.ig-status){font-size:12px;color:var(--ig-muted)}
 .ig-cal-empty-day{display:grid;place-content:center;gap:4px;text-align:center;padding:38px 7px;color:var(--ig-muted);font-size:12px}.ig-cal-empty-day small{font-size:12px}
 .ig-agenda{border:1px solid #DFE7F1;border-radius:12px;overflow:hidden}.ig-agenda-event{display:flex;align-items:center;gap:16px;padding:17px 16px;width:100%;border-bottom:1px solid #EDF1F6;text-align:left;background:#fff;color:#40536C}.ig-agenda-event:hover{background:#F7F9FD}.ig-agenda-event:last-child{border:0}
 .ig-agenda-date{width:130px;flex-shrink:0}.ig-agenda-date b,.ig-agenda-date span,.ig-agenda-event>div:nth-child(2) b,.ig-agenda-event>div:nth-child(2) span{display:block}
@@ -93,7 +93,7 @@
 .ig-notice-text{flex:1;min-width:0}.ig-notice-heading{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.ig-notice-heading h3{font-size:15px;font-weight:700;color:#203852;line-height:1.4;margin:0}.ig-urgent{font-size:12px;background:#FDECEF;color:#A52B3E;padding:6px 8px;border-radius:6px;letter-spacing:.07em;font-weight:800}
 .ig-notice-text p{font-size:13px;color:#61728A;line-height:1.7;white-space:pre-wrap;margin:10px 0}.ig-notice-footer{display:flex;gap:18px;align-items:center;font-size:12px;color:var(--ig-muted)}.ig-read{display:flex;align-items:center;gap:5px;color:var(--ig-available);font-weight:700}
 .ig-report-callout{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#F3F6FC;border-radius:12px;border:1px solid #E0E9F4;padding:20px;margin-top:24px}.ig-report-callout h3{font-size:14px;color:#263B58;margin:0 0 5px}.ig-report-callout p{font-size:12px;color:#61758E;margin:0;line-height:1.5}
-.ig-admin-intro{display:flex;justify-content:space-between;align-items:center;gap:15px}.ig-admin-intro h1{font-size:22px;color:#203A5B;margin:4px 0}.ig-admin-intro p{font-size:13px;color:var(--ig-muted);margin:0}
+.ig-admin-intro{display:flex;justify-content:space-between;align-items:center;gap:15px}.ig-admin-intro h1{font-size:25px;line-height:1.25;color:#203A5B;margin:0 0 5px}.ig-admin-intro p{font-size:13px;color:var(--ig-muted);margin:0}
 .ig-admin-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.ig-admin-metrics>div{display:flex;align-items:center;gap:9px;flex-wrap:wrap;border:1px solid #DFE7F1;border-radius:13px;background:#fff;padding:19px}
 .ig-admin-metrics svg{color:#4267BD}.ig-admin-metrics strong{font-size:25px;color:#203A5B;letter-spacing:-.04em;line-height:1}.ig-admin-metrics span{width:100%;font-size:12px;color:var(--ig-muted)}
 .ig-admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}.ig-admin-form{display:grid;gap:15px}.ig-admin-form label{display:grid;gap:7px;color:#536A86;font-size:12px;font-weight:700}
@@ -186,3 +186,16 @@
 @media(prefers-reduced-motion:reduce){
  .ig-tabs button,.ig-cal-booking,.ig-booking-item{transition:none}
 }
+
+/* Operate-mode hierarchy: real page headings, real loading/error states. */
+.ig-card-head h1{font-size:24px;line-height:1.25;font-weight:730;letter-spacing:-.025em;margin:0 0 6px}
+.ig-cal-feedback{display:flex;align-items:flex-start;gap:13px;margin:17px 0;padding:24px;background:#F7F9FC;border:1px solid #DCE4EF;border-radius:11px;color:#52637B}
+.ig-cal-feedback>svg{flex:0 0 auto;color:#8D5B12;margin-top:2px}
+.ig-cal-feedback>div{flex:1;min-width:0}
+.ig-cal-feedback strong{display:block;color:#17243B;font-size:15px;line-height:1.4}
+.ig-cal-feedback p{margin:5px 0 0;font-size:13px;line-height:1.55;overflow-wrap:anywhere}
+.ig-cal-feedback button{white-space:nowrap;min-height:44px}
+.ig-cal-progress{width:19px;height:19px;flex:0 0 19px;border:2px solid #CFDAEB;border-top-color:var(--ig-primary);border-radius:50%;animation:ig-cal-spin .9s linear infinite}
+@keyframes ig-cal-spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){.ig-card-head h1,.ig-calendar-top h1{font-size:22px}.ig-cal-feedback{flex-wrap:wrap;padding:19px}.ig-cal-feedback button{width:100%}}
+@media(prefers-reduced-motion:reduce){.ig-cal-progress{animation:none}}
