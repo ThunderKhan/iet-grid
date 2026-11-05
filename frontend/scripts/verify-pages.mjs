@@ -10,6 +10,25 @@ const server=await createServer({server:{middlewareMode:true},appType:'custom',l
 try {
   const pages=await server.ssrLoadModule('/src/components/WorkspacePages.jsx');
   const {default: CampusExperience}=await server.ssrLoadModule('/src/components/CampusExperience.jsx');
+  const {default: TopNavigation}=await server.ssrLoadModule('/src/components/TopNavigation.jsx');
+  const {SlideTabs}=await server.ssrLoadModule('/src/components/TopNavigation.jsx');
+  const navigationItems=[['Explore rooms',()=>null],['Calendar',()=>null],['My bookings',()=>null],
+    ['Announcements',()=>null],['Admin',()=>null]];
+  const navHtml=renderToString(React.createElement(TopNavigation,{
+    items:navigationItems,active:'Explore rooms',onNavigate:()=>{},demo:true,noticeCount:2,
+    userName:'Demo Faculty',userRole:'faculty',onSignOut:()=>{}
+  }));
+  assert.ok(navHtml.includes('ig-topnav')&&navHtml.includes('ig-primary-nav'),'New global top bar must render');
+  assert.ok(navHtml.includes('ig-slide-track')&&navHtml.includes('ig-slide-cursor'),'Supplied slide-tabs animation must be represented');
+  assert.ok(navHtml.includes('aria-current="page"'),'Selected navigation item must be accessible');
+  assert.ok(navHtml.includes('Campus map')&&navHtml.includes('Calendar')&&navHtml.includes('My bookings'),
+    'Existing workspace destinations must remain available');
+  assert.ok(navHtml.includes('DEMO')&&navHtml.includes('Announcements'),
+    'Demo and announcement context must remain available');
+  assert.ok(navHtml.includes('Sign out'),'Sign-out action must remain available in navigation');
+  assert.ok(!navHtml.includes('sidebar')&&!navHtml.includes('side-profile'),'Old sidebar must not render');
+  assert.equal(typeof SlideTabs,'function');
+
   const {getActiveRoomSessions,sessionTimeIST}=await server.ssrLoadModule('/src/currentSessions.js');
   const reference=Date.parse('2026-11-05T10:00:00.000Z');
   const testEvents=[

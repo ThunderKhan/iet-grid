@@ -105,10 +105,11 @@ rounded:
   pill: "999px"
 components:
   app-shell:
-    sidebarBackground: "{colors.sidebar}"
+    navigationBackground: "{colors.sidebar}"
+    navigationActive: "{colors.primary}"
     pageBackground: "{colors.canvas}"
-    sidebarWidth: "248px"
-    headerHeight: "64px"
+    navigationHeight: "74px"
+    mobileNavigationHeight: "64px"
   primary-button:
     background: "{colors.primary}"
     foreground: "{colors.on-primary}"
@@ -272,10 +273,10 @@ Use full, descriptive dates where ambiguity matters, e.g. **Thu, 5 Nov · 11:00 
 
 ### Global application shell
 
-- Desktop: fixed/sticky **248px left sidebar**, **64px top utility bar**, scrolling content region. Main content max width **1440px**, horizontal padding **32px** on wide screens.
-- Sidebar: brand/institution at top, primary navigation, contextual building summary, signed-in identity at bottom. Active state uses a visible background, indicator, and label.
+- Desktop: sticky **74px top navigation**, no left sidebar. Main content max width **1540px**, responsive horizontal padding up to **38px** on wide screens.
+- Navigation: brand at left, single animated tab group in the center, demo/notification/account utilities at right. The active destination must have a legible cobalt pill and label; hover/focus moves the pill toward the target and restores it on pointer exit.
 - Navigation destinations: **Overview**, **Explore rooms**, **Calendar**, **My bookings**, **Announcements**, **Admin** (Admin only when role permits).
-- Header: breadcrumb/page context, active date or semester, persistent **DEMO DATA** indicator if applicable, notices control, profile.
+- Header: one consolidated top bar; do not render a redundant utility bar or breadcrumb above the campus map. Keep persistent **DEMO** indication for preview data, notices control, and a role-aware account/sign-out menu.
 - Keep global filters close to the page they affect. Do not repeat giant headers and hero art on every logged-in route.
 - Data cards: 1px border, white background, 14px radius, 20–24px padding, 16–24px gaps.
 - Use a 12-column desktop planning grid, but implement with simple responsive CSS grid as appropriate. Default page rhythm: heading → filters/context → main task content → secondary info.
@@ -284,9 +285,9 @@ Use full, descriptive dates where ambiguity matters, e.g. **Thu, 5 Nov · 11:00 
 
 | Viewport | Navigation | Content | Scheduling |
 |---|---|---|---|
-| Wide ≥ 1200px | Full 248px sidebar | 2-column work areas, 3–4 metric cards | 7-day weekly grid where legible |
-| 768–1199px | Collapsed 72px icon rail or accessible drawer | 2 columns only if room inspector fits | 3–5 day scrollable grid or agenda |
-| 375–767px | Top bar + accessible navigation drawer | Single-column, sticky task actions if useful | Day/agenda view with clear date switching |
+| Wide ≥ 1200px | Full top navigation with animated selected tab | Full-width floor-map work area | 7-day weekly grid where legible |
+| 768–1199px | Compact top bar with mobile navigation | 2 columns only if room inspector fits | 3–5 day scrollable grid or agenda |
+| 375–767px | Compact top bar + accessible dropdown navigation | Single-column, sticky task actions if useful | Day/agenda view with clear date switching |
 | 320–374px | Compact accessible drawer | Single-column; no clipped filters | Agenda/list fallback; horizontal map scroll permitted with instructions |
 
 Avoid arbitrary absolute widths that break at 320px. On narrow screens, the floor-plan can be horizontally scrollable **with visible cues and an equally capable room-list alternative**. Do not hide room details behind hover-only behavior.
@@ -361,7 +362,7 @@ Global shared query state (when available): `buildingId`, `floorId`, `roomId`, `
 
 ### Motion
 
-- Interaction transition: ~120–180ms ease-out on hover, focus and simple reveals.
+- Interaction transition: ~120–180ms ease-out on hover, focus and simple reveals. Sliding navigation selection uses the supplied Framer Motion cursor pattern with a ~180ms tween; hovering temporarily moves the cursor, while the selected tab remains authoritative. Disable movement under reduced-motion preferences.
 - Motion must communicate interaction or continuity; do not animate cards just to appear "premium."
 - No long entrance animations, parallax, spinning 3D rooms, or animated counter numbers in the task views.
 - Respect `prefers-reduced-motion: reduce`; essential state changes must remain understandable without animation.

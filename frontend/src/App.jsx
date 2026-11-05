@@ -3,6 +3,7 @@ import React,{useState,useEffect,useMemo} from 'react';
 import {LayoutDashboard,CalendarDays,Map as MapIcon,BookOpen,GraduationCap,Shield,Settings,Search,Bell,ChevronDown,ChevronLeft,ChevronRight,Plus,ArrowUpRight,Clock,Users,CheckCircle2,AlertTriangle,LogOut,Lock,Building2,Layers,PanelLeftClose,Command,Filter,MapPin,Sparkles,ArrowRight,DoorOpen,Check,Menu,X,Info,Send,BookMarked,RefreshCcw} from 'lucide-react';
 import {supabase,configured} from './supabase';
 import AuthScreen from './components/AuthScreen';
+import TopNavigation from './components/TopNavigation';
 import {CalendarPage,BookingsPage,AnnouncementsPage,AdminPage} from './components/WorkspacePages';
 import CampusExperience from './components/CampusExperience';
 import ReservationDialog from './components/ReservationDialog';
@@ -14,7 +15,7 @@ const menu=[['Explore rooms',MapIcon],['Calendar',CalendarDays],['My bookings',B
 const fmt=(v,opts)=>new Date(v).toLocaleString('en-IN',opts||{hour:'numeric',minute:'2-digit'});
 function IconTag({children}){return <span className="tag">{children}</span>}
 export default function App(){
-const [session,setSession]=useState(null);const [recovering,setRecovering]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='reset');const [guest,setGuest]=useState(()=>import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview')==='1');const [profile,setProfile]=useState(null);const [rooms,setRooms]=useState(configured&&!guest?[]:sampleRooms);const [bookings,setBookings]=useState(configured&&!guest?[]:demoBookings);const [notices,setNotices]=useState(configured&&!guest?[]:demoNotices);const [view,setView]=useState('Explore rooms');const [building,setBuilding]=useState('IET');const [floor,setFloor]=useState('First');const [date,setDate]=useState(initialDate);const [hour,setHour]=useState('11');const [duration,setDuration]=useState(1);const [capacity,setCapacity]=useState(75);const [requiredEquipment,setRequiredEquipment]=useState('');const [selected,setSelected]=useState('IET19');const [toast,setToast]=useState('');const [loading,setLoading]=useState(false);const [mobile,setMobile]=useState(false);const [showBooking,setShowBooking]=useState(false);const [bookingTitle,setBookingTitle]=useState('Extra lecture');const [bookingKind,setBookingKind]=useState('lecture');const [report,setReport]=useState(false);const [noticeTitle,setNoticeTitle]=useState('');const [noticeBody,setNoticeBody]=useState('');
+const [session,setSession]=useState(null);const [recovering,setRecovering]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='reset');const [guest,setGuest]=useState(()=>import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview')==='1');const [profile,setProfile]=useState(null);const [rooms,setRooms]=useState(configured&&!guest?[]:sampleRooms);const [bookings,setBookings]=useState(configured&&!guest?[]:demoBookings);const [notices,setNotices]=useState(configured&&!guest?[]:demoNotices);const [view,setView]=useState('Explore rooms');const [building,setBuilding]=useState('IET');const [floor,setFloor]=useState('First');const [date,setDate]=useState(initialDate);const [hour,setHour]=useState('11');const [duration,setDuration]=useState(1);const [capacity,setCapacity]=useState(75);const [requiredEquipment,setRequiredEquipment]=useState('');const [selected,setSelected]=useState('IET19');const [toast,setToast]=useState('');const [loading,setLoading]=useState(false);const [showBooking,setShowBooking]=useState(false);const [bookingTitle,setBookingTitle]=useState('Extra lecture');const [bookingKind,setBookingKind]=useState('lecture');const [report,setReport]=useState(false);const [noticeTitle,setNoticeTitle]=useState('');const [noticeBody,setNoticeBody]=useState('');
 const [cohorts,setCohorts]=useState([]);
 const [cohortId,setCohortId]=useState('');
 const [cohortError,setCohortError]=useState('');
@@ -362,8 +363,14 @@ function openRoomAt(roomId,startIso){
   setView('Explore rooms');
 }
 if(recovering||(!session&&!guest))return <AuthScreen recovery={recovering} onRecoveryComplete={finishRecovery} onRecoveryCancel={finishRecovery}/>;
-return <div className="app-shell"><aside className={'sidebar '+(mobile?'mobile-open':'')}><div className="side-brand"><div className="logo-mark"><Layers size={21}/></div><div><strong>IET Grid</strong><span>Campus operations</span></div><button className="mobile-close" onClick={()=>setMobile(false)}><X size={19}/></button></div><div className="side-label">WORKSPACE</div><nav>{menu.filter(([n])=>n!=='Admin'||canAdmin).map(([n,I])=> <button key={n} className={'nav-item '+(view===n?'active':'')} onClick={()=>{setView(n);setMobile(false)}}><I size={18}/><span>{n==='Explore rooms'?'Campus map':n}</span>{n==='Announcements'&&<i className="nav-count">{notices.length}</i>}</button>)}</nav><div className="side-bottom"><div className="side-profile"><div className="avatar">{(profile?.full_name||session?.user?.email||'Guest').slice(0,1).toUpperCase()}</div><div><b>{profile?.full_name|| (demo?'Demo Faculty':session?.user?.email?.split('@')[0])}</b><span>{demo?'Preview workspace':userRole+' account'}</span></div><button title="Sign out" onClick={()=>{if(demo)setGuest(false);else supabase.auth.signOut();setView('Explore rooms')}}><LogOut size={17}/></button></div></div></aside>
-<div className="workarea"><header className="topbar"><div className="topbar-left"><button className="mobile-trigger" onClick={()=>setMobile(true)}><Menu size={20}/></button><span className="breadcrumb">Workspace</span><ChevronRight size={13}/><b>{view==='Explore rooms'?'Campus map':view}</b></div><div className="topbar-right">{demo&&<span className="demo-label"><Info size={13}/> DEMO DATA</span>}<span className="today-pill"><Clock size={14}/> {new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span><button className="icon-button" onClick={()=>setView('Announcements')}><Bell size={18}/><i/></button><div className="avatar small">{(profile?.full_name||'G').slice(0,1).toUpperCase()}</div></div></header>
+return <div className="app-shell">
+<TopNavigation items={menu.filter(([name])=>name!=='Admin'||canAdmin)}
+  active={view} onNavigate={setView}
+  demo={demo} noticeCount={notices.length}
+  userName={profile?.full_name||(demo?'Demo Faculty':session?.user?.email?.split('@')[0]||'User')}
+  userRole={userRole}
+  onSignOut={()=>{if(demo)setGuest(false);else supabase.auth.signOut();setView('Explore rooms')}}/>
+<div className="workarea">
 <main className="main-content">
   {!demo&&liveDataError&&<p role="alert" className="form-error">{liveDataError}</p>}
   {view!=='Explore rooms'&&(<div className="page-intro"><div><div className="eyebrow">IET GRID / {view.toUpperCase()}</div>
@@ -407,7 +414,7 @@ return <div className="app-shell"><aside className={'sidebar '+(mobile?'mobile-o
     auditRows={auditRows} auditTotal={auditTotal} auditOffset={auditOffset} setAuditOffset={setAuditOffset}
     auditRoom={auditRoom} setAuditRoom={setAuditRoom} auditAction={auditAction} setAuditAction={setAuditAction}
     auditLoading={auditLoading} auditError={auditError}/>}
-</main></div>{mobile&&<div className="mobile-backdrop" onClick={()=>setMobile(false)}/>}
+</main></div>
 <ReservationDialog open={showBooking} onOpenChange={setShowBooking}
   room={current} date={date} hour={hour} duration={duration}
   bookingTitle={bookingTitle} setBookingTitle={setBookingTitle}
