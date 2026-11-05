@@ -1,6 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {ArrowRight,ArrowUpRight,Bell,BookOpen,CalendarDays,Check,CheckCheck,CheckCircle2,ChevronLeft,ChevronRight,Clock3,DoorOpen,Info,LockKeyhole,Plus,RefreshCcw,Send,Shield,Users,X} from 'lucide-react';
 import './WorkspacePages.css';
+import AITimetableImport from './AITimetableImport';
 
 const strDate = (value) => new Date(value).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Kolkata'});
 const strTime = (value) => new Date(value).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'Asia/Kolkata'});
@@ -122,7 +123,7 @@ export function AnnouncementsPage({notices,markNoticeRead,noticeReadBusy,setRepo
       <button className="ig-btn ig-btn-outline" type="button" onClick={()=>setReport(true)}>Report an issue <ArrowUpRight size={16}/></button></div>
   </section></div>;
 }
-export function AdminPage({canAdmin,userRole,rooms,bookings,notices,noticeTitle,setNoticeTitle,noticeBody,setNoticeBody,noticePriority,setNoticePriority,noticeBusy,addNotice,pendingQueue,pendingLoading,pendingError,reviewBusy,reviewPendingBooking,setRefreshTick,accountUuid,setAccountUuid,accountRole,setAccountRole,accountBusy,grantTestRole,apiWarning,apiAvailability,auditRows,auditTotal,auditOffset,setAuditOffset,auditRoom,setAuditRoom,auditAction,setAuditAction,auditLoading,auditError}) {
+export function AdminPage({apiFetch,canAdmin,userRole,rooms,bookings,notices,noticeTitle,setNoticeTitle,noticeBody,setNoticeBody,noticePriority,setNoticePriority,noticeBusy,addNotice,pendingQueue,pendingLoading,pendingError,reviewBusy,reviewPendingBooking,setRefreshTick,accountUuid,setAccountUuid,accountRole,setAccountRole,accountBusy,grantTestRole,apiWarning,apiAvailability,auditRows,auditTotal,auditOffset,setAuditOffset,auditRoom,setAuditRoom,auditAction,setAuditAction,auditLoading,auditError}) {
   return <div className="ig-page-stack">
     <section className="ig-admin-intro"><div><h1>Campus administration</h1><p>Review allocations, publish academic updates, and manage permitted access.</p></div><StatePill status={canAdmin?'available':'restricted'}>{canAdmin?'Verified operator':'Restricted access'}</StatePill></section>
     {!canAdmin?<section className="ig-card"><Empty icon={LockKeyhole} title="Administrator access required" body="These controls are limited to verified university administrators and coordinators."/></section>:<>
@@ -151,6 +152,7 @@ export function AdminPage({canAdmin,userRole,rooms,bookings,notices,noticeTitle,
           <p className="ig-note"><Info size={14}/> Server permissions and database conflict constraints are checked again on approval.</p>
         </section>
       </div>
+      <AITimetableImport apiFetch={apiFetch} onDone={()=>setRefreshTick(n=>n+1)}/>
       <div className="ig-admin-grid">
         {userRole==='admin'&&<section className="ig-card">
           <PanelHead eyebrow="IDENTITY & ACCESS" title="Provision test account" icon={Users} description="For previously registered, verified accounts only"/>
