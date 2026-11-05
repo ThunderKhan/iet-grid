@@ -42,17 +42,16 @@ The split-panel sign-in/sign-up experience lives in `src/components/AuthScreen.j
 
 ## Authenticated workspace redesign (DESIGN.md)
 
-The six views now use independent React page components in `src/components/WorkspacePages.jsx`, with shared styles in `WorkspacePages.css`. The global navigation, responsive shell and booking dialogs use `src/workspace-shell.css`. Design values and status rules follow the repository-root `DESIGN.md`.
+The five authenticated views use independent React page components in `src/components/WorkspacePages.jsx`, with shared styles in `WorkspacePages.css`. The global navigation, responsive shell and booking dialogs use `src/workspace-shell.css`. Design values and status rules follow the repository-root `DESIGN.md`.
 
-- **Overview:** task-focused campus overview, honest data-scoped statistics, room finder, schedule and notices.
-- **Explore rooms:** `FloorPlan.jsx` uses `react-zoom-pan-pinch@4.2.0` (MIT), SVG room hotspots, map/list switch, zoom and mobile pinch gestures. Room selection is connected to the existing reservation API and constraint-based recommendations.
-- **Room inspector:** persistent desktop context panel; on phone, `@radix-ui/react-dialog@1.3.1` (MIT) provides an accessible bottom sheet for room details and booking action. Layout is shadcn-style but does not introduce Tailwind or migrate the project stack.
+- **Campus map (landing view):** `BlueprintBoard.jsx` uses five original black-and-white floor drawing assets extracted losslessly from the event's supplied PDF, with accessible transparent hotspots aligned to source room positions. A plan/list switch and building/floor/date/time filters connect to the existing booking API and suggestions. The former `FloorPlan.jsx` zoom-card implementation and Overview dashboard were removed.
+- **Room inspector:** restrained side panel on desktop; on mobile, the existing `@radix-ui/react-dialog@1.3.1` (MIT) primitive provides an accessible bottom sheet. Reuses the established shadcn-style component conventions without introducing another UI framework.
 - **Calendar:** day/week/agenda view with IST timestamps and event navigation back to the selected room.
 - **Bookings:** filterable reservation records with separate confirmed, pending and past statuses.
 - **Announcements:** importance/unread filters, server-backed read receipts and reporting action.
 - **Admin:** existing server-backed review, announcement and authorized user-provisioning workflows in a cohesive workspace.
 
-**Data integrity:** The new room geometry is explicitly SCHEMATIC, NOT TO SCALE. The repository does not currently contain verified IET or Deeksha architectural SVG/PDF assets. Room IDs are source-preserved, but room placement, corridor geometry and capacities remain provisional; do not advertise a traced architectural map until official plan assets are available and room polygons are validated. Live availability is never inferred from an empty API response.
+**Data integrity:** The five **drawing images** come from the original event-supplied blueprint on page 1 of the problem statement, included in `public/floorplans`. Their walls/corridors/stairs are source-backed; the clickable room hotspot rectangles are manually aligned interaction bounds and must be reviewed for accuracy. Capacity data and per-room scheduling eligibility are separate and must be verified through institutional records. No visual status implies an API verification was successful. Live availability is never inferred from an empty API response.
 
 **Validation:** from `frontend/`, run `npm install`, `npm run build` and `node scripts/verify-pages.mjs`. The GitHub Actions workflow `.github/workflows/frontend-build.yml` repeats build and server-render smoke tests on UI changes. Successful builds do **not** replace browser-based mobile testing or real-user integration tests.
 

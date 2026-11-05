@@ -29,7 +29,6 @@ try {
     reviewBusy:'',reviewPendingBooking:noop,setRefreshTick:noop,accountUuid:'',setAccountUuid:noop,
     accountRole:'faculty',setAccountRole:noop,accountBusy:false,grantTestRole:noop};
   const views=[
-    ['Overview',pages.OverviewPage,'Quick room finder'],
     ['Explore rooms',pages.ExplorePage,'Campus map'],
     ['Calendar',pages.CalendarPage,'Campus timetable'],
     ['My bookings',pages.BookingsPage,'Classroom reservations'],

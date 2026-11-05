@@ -106,3 +106,12 @@
   .app-shell .toast{bottom:15px;right:13px;left:13px;max-width:none}
 }
 @media(prefers-reduced-motion:reduce){.app-shell .sidebar{transition:none}}
+
+/* Trim dashboard-era ornamentation: the map is the home page. */
+.app-shell .side-bottom{padding-top:14px}
+.app-shell .side-profile{border-top:1px solid #2D3D53;padding-top:16px}
+.app-shell .side-label{margin-top:8px}
+.app-shell .sidebar nav{gap:3px}
+.app-shell .nav-item{min-height:44px}
+.app-shell .topbar-left{gap:9px}
+.app-shell .page-intro h1{font-size:clamp(22px,2vw,30px)}
