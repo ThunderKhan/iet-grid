@@ -52,6 +52,7 @@ export default function ProfilePage({supabase,session,profile,role='student',dem
   const [busy,setBusy]=useState(false);
   const [feedback,setFeedback]=useState(null);
   const [passwordBusy,setPasswordBusy]=useState(false);
+  const [officialCohorts,setOfficialCohorts]=useState([]);
   const fileInput=useRef(null);
   const isStudent=role==='student';
   const fullName=form.fullName.trim()||'Campus member';
@@ -60,6 +61,26 @@ export default function ProfilePage({supabase,session,profile,role='student',dem
     ?[profile.branch,profile.academic_year?'Year '+profile.academic_year:'',profile.section?'Section '+profile.section:'']
        .filter(Boolean).join(' · '):'No institutional class assigned';
   const isVerified=!!profile?.verified&&!demo;
+  useEffect(()=>{
+    if(demo||role!=='student'||!supabase||!user?.id){setOfficialCohorts([]);return;}
+    let closed=false;
+    const load=async()=>{
+      const members=await supabase.from('student_memberships')
+        .select('cohort_id,verified,active').eq('user_id',user.id).eq('active',true);
+      if(members.error||!members.data?.length){if(!closed)setOfficialCohorts([]);return;}
+      const ids=members.data.map(row=>row.cohort_id);
+      const groups=await supabase.from('academic_cohorts')
+        .select('id,branch,academic_year,section,batch_start')
+        .in('id',ids);
+      if(closed||groups.error)return;
+      setOfficialCohorts((groups.data||[]).map(cohort=>({
+        ...cohort,
+        verified:members.data.some(m=>m.cohort_id===cohort.id&&m.verified),
+      })));
+    };
+    load();
+    return()=>{closed=true;};
+  },[demo,role,supabase,user?.id]);
 
   useEffect(()=>{
     setForm(profileFormFrom(profile,user,demo));
@@ -307,7 +328,13 @@ export default function ProfilePage({supabase,session,profile,role='student',dem
             <p>University-managed details</p></div></div>
           <div className="igp-official-body">
             <div className="igp-account-row"><span><Users size={15}/> Registered class</span></div>
-            <strong>{institutionalLine}</strong>
+            {officialCohorts.length>0?<div className="igp-cohort-list">
+              {officialCohorts.map(item=><div key={item.id} className="igp-cohort-row">
+                <strong>{[item.branch,'Year '+item.academic_year,
+                  item.section?'Section '+item.section:''].filter(Boolean).join(' · ')}</strong>
+                <small>{item.verified?'Verified enrollment':'Enrollment awaiting verification'}</small>
+              </div>)}
+            </div>:<strong>{institutionalLine}</strong>}
             <small>Changes to your official batch or section require verification by a campus administrator.</small>
           </div>
         </section>
