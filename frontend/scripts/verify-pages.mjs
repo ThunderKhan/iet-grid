@@ -10,6 +10,14 @@ const server=await createServer({server:{middlewareMode:true},appType:'custom',l
 try {
   const pages=await server.ssrLoadModule('/src/components/WorkspacePages.jsx');
   const {default: CampusExperience}=await server.ssrLoadModule('/src/components/CampusExperience.jsx');
+  const {default: VelarisGradient,VELARIS_VERTEX_SHADER,VELARIS_FRAGMENT_SHADER,hexToUnitRGB}=await server.ssrLoadModule('/src/components/VelarisGradient.jsx');
+  const shaderMarkup=renderToString(React.createElement(VelarisGradient,{className:'cx-gradient'}));
+  assert.ok(shaderMarkup.includes('cx-velaris-canvas')&&shaderMarkup.includes('<canvas'),
+    'Velaris should render a hero canvas for WebGL');
+  assert.ok(VELARIS_VERTEX_SHADER.includes('gl_Position'),'Missing WebGL vertex shader');
+  assert.ok(VELARIS_FRAGMENT_SHADER.includes('snoise(')&&VELARIS_FRAGMENT_SHADER.includes('u_colors[4]'),
+    'Velaris must use the supplied simplex-noise blending shader');
+  assert.equal(hexToUnitRGB('#315CE5').length,3,'Theme color conversion failed');
   const {default: BlueprintSitePlan}=await server.ssrLoadModule('/src/components/BlueprintSitePlan.jsx');
   const {default: ReservationDialog,AcademicGroupFields}=await server.ssrLoadModule('/src/components/ReservationDialog.jsx');
   const {previewCohorts,formatCohort,cohortBranchOptions,cohortYearOptions,cohortSectionOptions,cohortMatches}=await server.ssrLoadModule('/src/academicCohorts.js');

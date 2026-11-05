@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import * as Dialog from '@radix-ui/react-dialog';
-import {GrainGradient} from '@paper-design/shaders-react';
+import VelarisGradient from './VelarisGradient';
 import {ArrowRight, BookOpenText, Building2, CalendarDays, CheckCircle2, ChevronDown, Clock3, DoorOpen, Info, Layers3, List, Map as MapIcon, Settings2, SlidersHorizontal, Users, X} from 'lucide-react';
 import BlueprintSitePlan from './BlueprintSitePlan';
 import './CampusExperience.css';
@@ -11,22 +11,8 @@ const monthDay=d=>new Date(d+'T12:00:00Z').toLocaleDateString('en-IN',{day:'nume
 const clock=h=>String(h).padStart(2,'0')+':00';
 const statuses={available:'Available',occupied:'Occupied',restricted:'Not eligible',unknown:'Not verified',pending:'Approval pending'};
 function Badge({value}){const s=statuses[value]?value:'unknown';return <span className={'cx-status cx-status-'+s}><span className="cx-status-dot"/>{statuses[s]}</span>}
-function SiteGradient(){
-  const [active,setActive]=useState(false);
-  useEffect(()=>{
-    const query=window.matchMedia('(min-width: 900px) and (prefers-reduced-motion: no-preference)');
-    const update=()=>setActive(query.matches);
-    update();query.addEventListener?.('change',update);
-    return()=>query.removeEventListener?.('change',update);
-  },[]);
-  return <div className="cx-gradient" aria-hidden="true">
-    {active&&<GrainGradient className="cx-grain" speed={.35} scale={1} rotation={0} offsetX={0} offsetY={0}
-      softness={.58} intensity={.55} noise={.18} shape="corners"
-      colors={['#315CE5','#10213B','#6C8FF7','#CFDDFC']} colorBack="#07162C"/>}
-    <div className="cx-gradient-overlay"/>
-    <div className="cx-gradient-lines"><span/><span/><span/></div>
-  </div>;
-}
+// DESIGN.md: use navy/cobalt only. This is decorative, not a status indicator.
+const HERO_COLORS=['#315CE5','#10213B','#6C8FF7','#CFDDFC'];
 export default function CampusExperience({
   buildings,rooms,building,setBuilding,floor,setFloor,selected,setSelected,
   date,setDate,hour,setHour,duration,setDuration,capacity,setCapacity,
@@ -92,7 +78,9 @@ export default function CampusExperience({
   const buildingName=building==='IET'?'IET':'Deeksha Bhawan';
   return <div className="cx-page">
     <header className="cx-hero">
-      <SiteGradient/>
+      <VelarisGradient className="cx-gradient" colors={HERO_COLORS}
+        background="#07162C" speed={0.42} grain={0.16}/>
+      <div className="cx-gradient-overlay" aria-hidden="true"/>
       <div className="cx-hero-copy">
         <span className="cx-hero-overline">IET GRID · CAMPUS BOOKING</span>
         <h1>Find space for the next class.</h1>
