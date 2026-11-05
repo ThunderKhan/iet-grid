@@ -10,6 +10,15 @@ const server=await createServer({server:{middlewareMode:true},appType:'custom',l
 try {
   const pages=await server.ssrLoadModule('/src/components/WorkspacePages.jsx');
   const appSource=readFileSync('src/App.jsx','utf8');
+  // A removed demo-cohort variable caused the whole authenticated workspace
+  // to throw ReferenceError despite the Vite build passing.
+  assert.match(appSource,/cohorts=\\{cohorts\\}/,
+    'Reservation dialog must receive the real registered cohorts');
+  assert.doesNotMatch(appSource,/\\bavailableCohorts\\b/,
+    'Removed demo-cohort alias must never reappear in the authenticated page');
+  const entrySource=readFileSync('src/main.jsx','utf8');
+  assert.ok(entrySource.includes('<AppErrorBoundary><App/></AppErrorBoundary>'),
+    'A recoverable error panel must wrap the main app instead of a blank screen');
   const packageInfo=JSON.parse(readFileSync('package.json','utf8'));
   assert.match(packageInfo.scripts.dev,/--port 5123 --strictPort/,'Dev server must bind exact requested port');
   assert.ok(!appSource.includes('preview=1')&&!appSource.includes('sampleRooms')&&!appSource.includes('demoBookings'),

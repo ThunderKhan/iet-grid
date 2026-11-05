@@ -23,6 +23,8 @@ jobs:
           node-version: "22"
       - name: Install
         run: npm install --no-audit --no-fund
+      - name: Catch undefined variables in authenticated workspace
+        run: npm run lint
       - name: Build frontend
         run: npm run build
       - name: Smoke-test all six workspace pages
