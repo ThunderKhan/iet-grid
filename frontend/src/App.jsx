@@ -151,6 +151,7 @@ useEffect(()=>{
     try{
       const response=await apiFetch('/api/v1/calendar?start='+encodeURIComponent(startTime)
         +'&end='+encodeURIComponent(endTime));
+      if(!Array.isArray(response?.events))throw new Error('Unrecognized live schedule response');
       if(!cancelled){
         setRunningAllocations((response.events||[]).map(event=>({
           id:event.id,room_id:event.room_id,title:event.title,

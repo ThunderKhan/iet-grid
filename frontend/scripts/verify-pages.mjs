@@ -18,12 +18,13 @@ try {
     {room_id:'LH04',title:'Exam pending',starts_at:'2026-11-05T09:00:00.000Z',ends_at:'2026-11-05T11:00:00.000Z',status:'pending'},
     {room_id:'IET17',title:'Already finished',starts_at:'2026-11-05T08:00:00.000Z',ends_at:'2026-11-05T10:00:00.000Z',status:'confirmed'},
     {room_id:'IET19',title:'Later this day',starts_at:'2026-11-05T10:30:00.000Z',ends_at:'2026-11-05T11:00:00.000Z',status:'confirmed'},
+    {room_id:'IET22',title:'Occupied',kind:'block',details_visible:false,starts_at:'2026-11-05T09:00:00.000Z',ends_at:'2026-11-05T11:00:00.000Z',status:'confirmed'},
   ];
   const running=getActiveRoomSessions(testEvents,reference);
   assert.equal(running.IET18.title,'AI/ML · Computer Vision');
   assert.equal(running.IET20.title,'Occupied — class details unavailable');
   assert.equal(running.IET20.detailsVisible,false,'Hidden schedule titles must remain hidden');
-  for(const id of ['LH04','IET17','IET19'])
+  for(const id of ['LH04','IET17','IET19','IET22'])
     assert.equal(running[id],undefined,'Not-current or pending booking must not be shown as running');
   assert.ok(sessionTimeIST('2026-11-05T10:00:00.000Z').includes('3:30'),
     'Running class times must display IST, not browser-local time');

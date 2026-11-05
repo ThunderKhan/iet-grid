@@ -9,6 +9,8 @@ export function getActiveRoomSessions(events = [], nowMs = Date.now()) {
   const result = {};
   for (const item of events) {
     if (!item?.room_id || !item.starts_at || !item.ends_at) continue;
+    // Maintenance and institutional room blocks are occupancy, not classes.
+    if (item.kind === 'block') continue;
     if (item.status && item.status !== 'confirmed' && item.status !== 'scheduled') continue;
     const from = Date.parse(item.starts_at);
     const until = Date.parse(item.ends_at);
