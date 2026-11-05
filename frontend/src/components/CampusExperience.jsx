@@ -109,6 +109,8 @@ export default function CampusExperience({
         onSelect={selectRoom} getStatus={getStatus} mode={mode}
         floorOptions={floorOptions} onNavigateFloor={goToFloor} onModeChange={setMode}
         buildings={buildings} onBuildingChange={chooseBuilding} onFindRoom={selectAlternative}
+        slotSummary={monthDay(date)+' · '+clock(hour)+'–'+clock(Number(hour)+duration)+' IST'}
+        requiredSeats={capacity}
         activeSessions={activeSessions} nowScheduleState={nowScheduleState}/>
     </section>
     <div className="cx-lower-workspace">
