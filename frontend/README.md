@@ -24,3 +24,16 @@ The signup flow explicitly passes `options.emailRedirectTo` to Supabase, default
 In the dedicated Supabase project, set **Authentication → URL Configuration → Site URL** to `https://iet-grid.vercel.app` and include `https://iet-grid.vercel.app/**` in **Redirect URLs**. For local testing, add `http://localhost:5173/**` as a *development-only additional redirect*, not as the production Site URL. These dashboard Auth settings are separate from Vercel environment variables and cannot be changed by updating this code alone.
 
 After configuring, register a new disposable test account (using an authorized address) and verify that the generated email confirmation redirects directly to production without manual URL edits. Check template settings if a custom email template hardcodes localhost.
+
+## Authentication redesign
+
+The split-panel sign-in/sign-up experience lives in `src/components/AuthScreen.jsx` and is styled in `AuthScreen.css` using the root `DESIGN.md` tokens. It adapts the user-provided 21st.dev composition, including Paper Design's GrainGradient shader. The shader package is pinned to `0.0.82` (Apache-2.0); motion is reduced for users who request it.
+
+- Email/password sign-in and first/last name signup use Supabase Auth. Names are **profile metadata only**, never authorization claims; verified faculty and admin roles require trusted provisioning.
+- Forgot password sends a recovery email to `VITE_SITE_URL/?auth=reset`; the reset screen uses `supabase.auth.updateUser` after the valid recovery session is established.
+- Social buttons use `signInWithOAuth` and **appear only when configured**: enable Google and/or Apple in **Supabase Dashboard → Authentication → Providers**, set up provider credentials and approved callback URLs, then set `VITE_AUTH_GOOGLE_ENABLED=true` and/or `VITE_AUTH_APPLE_ENABLED=true` in frontend build environment. A frontend flag does not configure OAuth. Keep flags false until the provider is fully operational.
+- Add production `https://iet-grid.vercel.app/**` and any intended development or preview URLs to **Supabase Authentication → URL Configuration → Redirect URLs**. Recovery and signup redirects require these allowed URLs. Apple web OAuth also requires Apple Developer service configuration.
+- Sign-in does not expose elevated institutional privileges; the server/database authorize role-dependent capabilities.
+- The existing guest demo remains available from the art panel and remains clearly nonpersistent.
+
+**Validation still required:** a real, confirmed email signup, password reset and optional OAuth journey in the deployment. Do not claim these flows pass production acceptance solely because the components build.
