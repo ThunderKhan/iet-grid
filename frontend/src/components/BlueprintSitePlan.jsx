@@ -1,5 +1,5 @@
 import React, {useEffect, useId, useMemo, useRef, useState} from 'react';
-import {Building2, ChevronLeft, ChevronRight, DoorOpen, List, Map as MapIcon, Search, X} from 'lucide-react';
+import {Building2, ChevronLeft, ChevronRight, Clock3, DoorOpen, List, Map as MapIcon, Search, X} from 'lucide-react';
 import './BlueprintSitePlan.css';
 
 /* Source: DDUGU Build With AI brief, page 1, IET & Deeksha floor blueprint.
@@ -187,7 +187,7 @@ function Room({item,room,availability,selected,onSelect,activeSession}){
       +(hasLive?' · Currently running: '+activeTitle:'')}</title>
   </g>;
 }
-export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSelect,getStatus,mode='plan',onModeChange=()=>{},floorOptions=[],onNavigateFloor=()=>{},buildings=[],onBuildingChange=()=>{},onFindRoom=()=>{},activeSessions={},nowScheduleState='loading'}){
+export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSelect,getStatus,mode='plan',onModeChange=()=>{},floorOptions=[],onNavigateFloor=()=>{},buildings=[],onBuildingChange=()=>{},onFindRoom=()=>{},slotSummary='',requiredSeats=0,activeSessions={},nowScheduleState='loading'}){
   const layout=(layouts[building+':'+floor]||[]).filter(item=>Boolean(item.id));
   const filtered=rooms.filter(r=>r.building===building&&r.floor===floor);
   const byId=useMemo(()=>new Map(filtered.map(r=>[r.id,r])),[filtered]);
@@ -198,11 +198,6 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
   const isDeek=building==='DEEK';
   const availableFloors=floorOptions.length?floorOptions:[floor];
   const floorIndex=availableFloors.indexOf(floor);
-  const liveCount=filtered.filter(r=>Boolean(activeSessions[r.id])).length;
-  const liveLabel=nowScheduleState==='loading'?'Checking current classes…':
-    nowScheduleState==='unavailable'?'Current timetable unavailable':
-    liveCount===0?'No classes currently listed':
-    liveCount+' class'+(liveCount===1?'':'es')+' running now';
   return <section className="bp-board" aria-label={(isDeek?'Deeksha Bhawan':'IET')+' '+floor+' floor'}>
     <header className="bp-head">
       <div className="bp-head-copy">
@@ -216,7 +211,11 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
             </button>)}
           </div>}
         </div>
-
+        {slotSummary&&<p className="bp-slot-context">
+          <Clock3 size={13} aria-hidden="true"/>
+          <span>{slotSummary}</span>
+          {requiredSeats>0&&<span className="bp-slot-capacity">· {requiredSeats} seats minimum</span>}
+        </p>}
       </div>
       <div className="bp-head-actions">
         <RoomQuickFind rooms={rooms} onFindRoom={onFindRoom}/>
