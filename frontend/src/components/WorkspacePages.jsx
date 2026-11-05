@@ -1,4 +1,5 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
 import {ArrowRight, ArrowUpRight, Bell, BookOpen, Building2, CalendarDays, Check, CheckCheck, CheckCircle2, ChevronLeft, ChevronRight, Clock3, DoorOpen, Filter, Info, Layers, ListFilter, LockKeyhole, MapPin, Plus, RefreshCcw, Search, Send, Shield, SlidersHorizontal, Sparkles, Users, X} from 'lucide-react';
 import FloorPlan from './FloorPlan';
 import './WorkspacePages.css';
@@ -101,6 +102,18 @@ export function OverviewPage({rooms,bookings,notices,matching,buildings,selected
 const TIME_OPTIONS=Array.from({length:11},(_,i)=>i+8);
 function FieldSelect({label,value,onChange,children}){return <label className="ig-control-field"><span>{label}</span><select value={value} onChange={onChange}>{children}</select></label>}
 export function ExplorePage({buildings,rooms,building,setBuilding,floor,setFloor,selected,setSelected,date,setDate,hour,setHour,duration,setDuration,capacity,setCapacity,apiAvailability,apiWarning,isAvailable,matching,current,canBook,setShowBooking,setView,demo}) {
+  const [isMobile,setIsMobile]=useState(()=>typeof window!=='undefined' && window.matchMedia('(max-width:720px)').matches);
+  const [sheetOpen,setSheetOpen]=useState(false);
+  useEffect(()=>{
+    const media=window.matchMedia('(max-width:720px)');
+    const changed=(event)=>setIsMobile(event.matches);
+    media.addEventListener('change',changed);
+    return ()=>media.removeEventListener('change',changed);
+  },[]);
+  useEffect(()=>{
+    setSheetOpen(Boolean(isMobile&&selected));
+  },[selected,isMobile]);
+  const selectRoom=(room)=>{setSelected(room.id);if(isMobile)setSheetOpen(true)};
   const getStatus=(r)=>{
     if(!demo&&!apiAvailability)return 'unknown';
     const record=apiAvailability?.find(a=>a.id===r.id);
@@ -129,7 +142,7 @@ export function ExplorePage({buildings,rooms,building,setBuilding,floor,setFloor
     </section>
     {apiWarning&&<div className="ig-alert" role="alert"><Info size={18}/>{apiWarning}</div>}
     <div className="ig-explore-columns">
-      <section className="ig-map-column"><FloorPlan rooms={rooms} building={building} floor={floor} selected={selected} onSelect={r=>setSelected(r.id)} getStatus={getStatus}/></section>
+      <section className="ig-map-column"><FloorPlan rooms={rooms} building={building} floor={floor} selected={selected} onSelect={selectRoom} getStatus={getStatus}/></section>
       <aside className="ig-explore-inspector">
         <section className="ig-card ig-inspector-card">
           <PanelHead eyebrow="ROOM INSPECTOR" title="Selected space" icon={DoorOpen}/>
@@ -150,13 +163,43 @@ export function ExplorePage({buildings,rooms,building,setBuilding,floor,setFloor
         </section>
         <section className="ig-card ig-alternative-card">
           <PanelHead eyebrow="ALTERNATIVE SPACES" title="Recommended rooms" icon={Sparkles} description="Constraint-checked suggestions, not AI confidence"/>
-          <div className="ig-alternatives">{matching.slice(0,5).map((r,i)=><button key={r.id} className="ig-alternative" onClick={()=>{setBuilding(r.building);setFloor(r.floor);setSelected(r.id)}}>
+          <div className="ig-alternatives">{matching.slice(0,5).map((r,i)=><button key={r.id} className="ig-alternative" onClick={()=>{setBuilding(r.building);setFloor(r.floor);setSelected(r.id);if(isMobile)setSheetOpen(true)}}>
             <span className="ig-alternative-rank">{String(i+1).padStart(2,'0')}</span><span className="ig-alternative-meta"><b>{r.id}</b><small>{r.building} · {r.floor} · {r.capacity} seats</small></span>
             <span className="ig-fit">{typeof r.score==='number'?r.score+' fit':'Matched'}</span><ArrowUpRight size={16}/></button>)}
             {!matching.length&&<Empty icon={Search} title="No matching rooms" body="Try another date, start time, or capacity."/>}</div>
         </section>
       </aside>
     </div>
+    <Dialog.Root open={sheetOpen&&isMobile&&!!current} onOpenChange={setSheetOpen}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="ig-room-sheet-overlay"/>
+        <Dialog.Content className="ig-room-sheet" aria-describedby="ig-room-sheet-description">
+          <div className="ig-room-sheet-handle" aria-hidden="true"/>
+          <div className="ig-room-sheet-head">
+            <div><span className="ig-overline">CLASSROOM DETAILS</span>
+              <Dialog.Title>{current?.id || 'Selected room'}</Dialog.Title>
+            </div>
+            <Dialog.Close className="ig-icon-button" aria-label="Close room details"><X size={19}/></Dialog.Close>
+          </div>
+          <Dialog.Description id="ig-room-sheet-description">
+            {current?.building==='IET'?'IET':'Deeksha Bhawan'} · {current?.floor} floor · {dayLabel(date)} at {String(hour).padStart(2,'0')}:00 IST
+          </Dialog.Description>
+          {current&&<div className="ig-room-sheet-details">
+            <StatePill status={getCurrentStatus}/>
+            <div className="ig-room-sheet-stats">
+              <div><Users size={17}/><span>Capacity</span><b>{current.capacity}{current.verified?'':'*'} seats</b></div>
+              <div><Layers size={17}/><span>Room type</span><b className="ig-capitalize">{current.type}</b></div>
+              <div><Clock3 size={17}/><span>Duration</span><b>{duration} hour{duration>1?'s':''}</b></div>
+            </div>
+            {!current.verified&&<p className="ig-note"><Info size={14}/> Capacity is provisional until university validation.</p>}
+            <button className="ig-btn ig-btn-primary ig-btn-block" disabled={!eligible}
+              onClick={()=>{setSheetOpen(false);setShowBooking(true)}}>Reserve this room <ArrowRight size={17}/></button>
+            {!eligible&&<p className="ig-inspector-explain">{!canBook?'A verified faculty or operator role is required.':'Availability or eligibility is not verified for this interval.'}</p>}
+            <button className="ig-btn ig-btn-outline ig-btn-block" onClick={()=>{setSheetOpen(false);setView('Calendar')}}><CalendarDays size={16}/> View campus schedule</button>
+          </div>}
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   </div>;
 }
 export function CalendarPage({date,setDate,initialDate,calendarBookings,rooms,onOpenRoom}) {

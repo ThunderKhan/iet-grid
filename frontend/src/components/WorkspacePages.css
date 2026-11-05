@@ -109,3 +109,20 @@
 @media(max-width:720px){.ig-page-stack{gap:14px}.ig-card{padding:17px}.ig-card-head{flex-wrap:wrap}.ig-hero{grid-template-columns:1fr;min-height:0}.ig-hero-visual{display:none}.ig-hero-content{padding:30px 24px}.ig-hero h2{font-size:38px}.ig-hero-actions{gap:8px}.ig-bulletin-row{grid-template-columns:1fr}.ig-filter-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.ig-explore-inspector{grid-template-columns:1fr}.ig-cal-columns{overflow-x:auto;display:flex}.ig-cal-day-column{flex:1 0 156px}.ig-cal-columns.is-day .ig-cal-day-column{flex-basis:100%}.ig-calendar-top{flex-direction:column}.ig-booking-item{flex-wrap:wrap;gap:9px}.ig-booking-main{flex-basis:calc(100% - 62px)}.ig-booking-when{padding-left:57px;flex:1}.ig-booking-arrow{display:none}.ig-admin-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.ig-report-callout{align-items:flex-start;flex-direction:column}}
 @media(max-width:460px){.ig-hero h2{font-size:35px}.ig-hero-actions{display:grid}.ig-metric-grid{gap:9px}.ig-metric{padding:14px;min-height:124px}.ig-metric strong{font-size:23px}.ig-metric small{font-size:10px}.ig-mini-floor-grid{grid-template-columns:1fr 1fr}.ig-filter-title{flex-direction:column}.ig-filter-controls{grid-template-columns:1fr 1fr;gap:10px}.ig-building-select{width:100%}.ig-building-select button{flex:1;padding:9px 7px;font-size:11px;white-space:normal}.ig-control-field:nth-child(2){grid-column:span 2}.ig-card-head h2{font-size:16px}.ig-card-head-action{width:100%}.ig-card-head-action button{max-width:100%}.ig-tabs{width:100%}.ig-tabs button{flex:1;padding:9px 7px;font-size:11px}.ig-admin-metrics{grid-template-columns:1fr 1fr}.ig-agenda-event{gap:9px;flex-wrap:wrap}.ig-agenda-date{width:100%}.ig-agenda-event>div:nth-child(2){flex-basis:70%}.ig-notice-entry{gap:9px}.ig-notice-emblem{width:35px;height:35px}.ig-notice-heading h3{font-size:13px}}
 @media(prefers-reduced-motion:reduce){.ig-page-stack{animation:none}.ig-btn{transition:none}}
+
+/* shadcn-style room details sheet, implemented using accessible Radix Dialog. */
+.ig-room-sheet-overlay{position:fixed;inset:0;z-index:100;background:#0B1B32AA;animation:ig-fade .16s ease-out}
+.ig-room-sheet{position:fixed;inset:auto 0 0;z-index:101;max-height:89dvh;overflow:auto;background:#fff;border:1px solid #D7E2EF;border-radius:22px 22px 0 0;box-shadow:0 -20px 60px #0B1B323D;padding:14px 22px max(22px,env(safe-area-inset-bottom))}
+.ig-room-sheet-handle{height:5px;width:38px;background:#CED8E7;border-radius:99px;margin:0 auto 18px}
+.ig-room-sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px}
+.ig-room-sheet-head h2{font-size:28px;font-weight:750;letter-spacing:-.04em;color:#1E3653;margin:4px 0 2px}
+.ig-room-sheet>p{font-size:13px;line-height:1.55;color:#637A96;margin:8px 0 15px}
+.ig-room-sheet-details{display:grid;gap:13px}
+.ig-room-sheet-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.ig-room-sheet-stats>div{display:flex;align-items:flex-start;flex-direction:column;gap:6px;padding:12px;border:1px solid #E2EAF3;border-radius:10px;background:#F8FAFD}
+.ig-room-sheet-stats svg{color:#5273A1}.ig-room-sheet-stats span{font-size:10px;color:#6D809A}.ig-room-sheet-stats b{font-size:12px;color:#263B58;overflow-wrap:anywhere}
+.ig-room-sheet .ig-btn-block{margin-top:0;min-height:46px}
+@keyframes ig-fade{from{opacity:0}to{opacity:1}}
+@media(max-width:720px){.ig-explore-inspector>.ig-inspector-card{display:none}}
+@media(min-width:721px){.ig-room-sheet-overlay,.ig-room-sheet{display:none}}
+@media(prefers-reduced-motion:reduce){.ig-room-sheet-overlay{animation:none}}
