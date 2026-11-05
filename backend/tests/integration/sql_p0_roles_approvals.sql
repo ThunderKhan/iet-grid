@@ -68,9 +68,12 @@ END $student$;
 
 SELECT set_config('request.jwt.claim.sub','b2a46f74-ec04-4286-862c-bfb8cd94c7e1',true);
 DO $approval$
-DECLARE v_id uuid;v_notice uuid;d timestamptz;
+DECLARE v_id uuid;v_notice uuid;d timestamptz;v_conflict uuid;v_rejected uuid;v_notices_before int;v_notices_after int;
 BEGIN
  SELECT id,starts_at INTO v_id,d FROM public.bookings WHERE title='P0 minor examination';
+ -- A second pending exam is allowed before any booking is confirmed.
+ v_conflict:=public.request_room_booking('IET19','P0 conflicting pending exam',
+     d,d+interval '1 hour','exam',75,gen_random_uuid(),null);
  PERFORM public.review_room_booking(v_id,true);
  IF (SELECT status FROM public.bookings WHERE id=v_id)<>'confirmed' THEN
    RAISE EXCEPTION 'FAIL exam approval status';END IF;
@@ -80,7 +83,27 @@ BEGIN
  IF v_notice IS NULL THEN RAISE EXCEPTION 'FAIL missing automatic notice'; END IF;
  IF (SELECT priority FROM public.announcements WHERE id=v_notice)<>'high' THEN
   RAISE EXCEPTION 'FAIL expected high priority exam notice';END IF;
- RAISE NOTICE 'PASS: admin approval atomically confirmed exam and published high-priority notice';
+ SELECT count(*) INTO v_notices_before FROM public.announcements;
+ BEGIN
+   PERFORM public.review_room_booking(v_conflict,true);
+   RAISE EXCEPTION 'FAIL overlapping pending exam approved';
+ EXCEPTION WHEN exclusion_violation THEN NULL; END;
+ SELECT count(*) INTO v_notices_after FROM public.announcements;
+ IF v_notices_after<>v_notices_before THEN
+   RAISE EXCEPTION 'FAIL conflicting approval leaked confirmation notice';END IF;
+ IF (SELECT status FROM public.bookings WHERE id=v_conflict)<>'pending' THEN
+   RAISE EXCEPTION 'FAIL conflicting request changed state';END IF;
+ -- Rejection must release the request without any campus-wide confirmation.
+ v_rejected:=public.request_room_booking('IET19','P0 rejected pending exam',
+   d+interval '2 hours',d+interval '3 hours','exam',75,gen_random_uuid(),null);
+ PERFORM public.review_room_booking(v_rejected,false);
+ IF (SELECT status FROM public.bookings WHERE id=v_rejected)<>'rejected' THEN
+   RAISE EXCEPTION 'FAIL rejection status';END IF;
+ IF EXISTS(SELECT 1 FROM public.room_allocations WHERE source_id=v_rejected) THEN
+   RAISE EXCEPTION 'FAIL rejected request reserved room';END IF;
+ IF (SELECT count(*) FROM public.announcements)<>v_notices_before THEN
+   RAISE EXCEPTION 'FAIL rejected request published notice';END IF;
+ RAISE NOTICE 'PASS: approved exam/notice atomicity; conflict and rejection publish no notice';
 END $approval$;
 
 SELECT set_config('request.jwt.claim.sub','9efb03d9-2ca2-485b-9264-9a28090aca01',true);
