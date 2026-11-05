@@ -220,7 +220,9 @@ try {
     assert.ok(!html.includes('cx-floor-tabs'),'Old floor tabs must be removed');
     assert.ok(!html.includes('cx-floor-stepper'),'Old toolbar stepper must be removed');
     assert.ok(html.includes('bp-navigation-stage'),'Floor navigation must be attached to the map');
-    assert.ok(html.includes('Practical / laboratory'),
+    const campusSource=readFileSync('src/components/CampusExperience.jsx','utf8');
+    assert.ok(campusSource.includes('<option value="practical">Practical / laboratory</option>') &&
+      campusSource.includes('onChange={e=>setBookingKind(e.target.value)}'),
       'Session type must be editable before the booking dialog to unblock laboratory bookings');
     assert.ok(!html.includes('cx-floor-label'),'Redundant building heading row must be removed');
     assert.ok(!html.includes('cx-hero')&&!html.includes('Find space for the next class.'),
