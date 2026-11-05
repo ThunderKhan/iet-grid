@@ -31,9 +31,11 @@ The split-panel sign-in/sign-up experience lives in `src/components/AuthScreen.j
 
 - Email/password sign-in and first/last name signup use Supabase Auth. Names are **profile metadata only**, never authorization claims; verified faculty and admin roles require trusted provisioning.
 - Forgot password sends a recovery email to `VITE_SITE_URL/?auth=reset`; the reset screen uses `supabase.auth.updateUser` after the valid recovery session is established.
-- Social buttons use `signInWithOAuth` and **appear only when configured**: enable Google and/or Apple in **Supabase Dashboard → Authentication → Providers**, set up provider credentials and approved callback URLs, then set `VITE_AUTH_GOOGLE_ENABLED=true` and/or `VITE_AUTH_APPLE_ENABLED=true` in frontend build environment. A frontend flag does not configure OAuth. Keep flags false until the provider is fully operational.
+- **Continue with Google** is always visible on sign-in and sign-up. Clicking checks the public Auth-provider settings (when available); if Google is disabled it shows an actionable error instead of navigating to a broken OAuth flow. When the provider is enabled it calls `supabase.auth.signInWithOAuth({provider:'google'})` with a return URL. This UI does **not** configure Google OAuth.
+- To activate Google: create a Web Application OAuth client in **Google Cloud → Google Auth Platform**, add `https://iet-grid.vercel.app` as an authorized JavaScript origin and `https://cdzvtfahwbvlfnfmbilt.supabase.co/auth/v1/callback` as an authorized redirect URI. Add the Google Client ID and Client Secret to **IET Grid Supabase → Authentication → Providers → Google** and enable Google. **Never** put the client secret in Vite environment variables, GitHub, or frontend code.
+- Apple is optional and remains hidden until configured using `VITE_AUTH_APPLE_ENABLED=true` with its provider credentials in Supabase.
 - Add production `https://iet-grid.vercel.app/**` and any intended development or preview URLs to **Supabase Authentication → URL Configuration → Redirect URLs**. Recovery and signup redirects require these allowed URLs. Apple web OAuth also requires Apple Developer service configuration.
 - Sign-in does not expose elevated institutional privileges; the server/database authorize role-dependent capabilities.
-- The existing guest demo remains available from the art panel and remains clearly nonpersistent.
+- The auth gateway intentionally has **no guest-demo button**; the former decorative campus floor-map and demo CTA were removed.
 
 **Validation still required:** a real, confirmed email signup, password reset and optional OAuth journey in the deployment. Do not claim these flows pass production acceptance solely because the components build.

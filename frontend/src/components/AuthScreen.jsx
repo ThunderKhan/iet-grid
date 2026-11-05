@@ -1,10 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import {GrainGradient} from '@paper-design/shaders-react';
-import {ArrowRight, CheckCircle2, Eye, EyeOff, Layers3, LockKeyhole, ShieldAlert} from 'lucide-react';
+import {ArrowRight, CheckCircle2, Eye, EyeOff, Layers3, ShieldAlert} from 'lucide-react';
 import {configured, supabase} from '../supabase';
 import './AuthScreen.css';
 
-const googleEnabled = import.meta.env.VITE_AUTH_GOOGLE_ENABLED === 'true';
 const appleEnabled = import.meta.env.VITE_AUTH_APPLE_ENABLED === 'true';
 const redirectBase = () => (import.meta.env.VITE_SITE_URL?.trim() || window.location.origin).replace(/\/+$/, '') + '/';
 
@@ -42,17 +41,35 @@ export default function AuthScreen({recovery=false, onRecoveryComplete, onRecove
   const [showPassword,setShowPassword] = useState(false);
   const [busy,setBusy] = useState('');
   const [feedback,setFeedback] = useState(null);
-  const [reducedMotion, setReducedMotion] = useState(() =>
-    typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  // Avoid mounting a GPU shader at phone/tablet widths or when motion is reduced.
+  const shaderQuery = '(min-width: 851px) and (prefers-reduced-motion: no-preference)';
+  const [showShader, setShowShader] = useState(() =>
+    typeof window !== 'undefined' && !!window.matchMedia?.(shaderQuery).matches
   );
   useEffect(() => {
-    const preference = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    const preference = window.matchMedia?.(shaderQuery);
     if (!preference) return undefined;
-    const onChange = (event) => setReducedMotion(event.matches);
+    const onChange = (event) => setShowShader(event.matches);
     preference.addEventListener?.('change', onChange);
     return () => preference.removeEventListener?.('change', onChange);
   }, []);
   useEffect(() => { if(recovery) setMode('reset'); }, [recovery]);
+  // Surface OAuth denial/configuration failures returned by the provider.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.hash.startsWith('#') ? url.hash.slice(1) : '');
+    const reason = url.searchParams.get('error_description') || params.get('error_description')
+      || url.searchParams.get('error') || params.get('error');
+    if (!reason) return;
+    setFeedback({kind:'error', message:reason.replace(/\+/g, ' ')});
+    for (const key of ['error','error_code','error_description']) {
+      url.searchParams.delete(key);
+      params.delete(key);
+    }
+    // Preserve auth tokens that may exist in the fragment; only remove error parameters.
+    url.hash = params.toString() ? '#' + params.toString() : '';
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+  }, []);
 
   const signup = mode === 'signup', signin = mode === 'signin', forgot = mode === 'forgot', reset = mode === 'reset';
   const title = signup ? 'Create an account' : signin ? 'Welcome back' : forgot ? 'Reset your password' : 'Set a new password';
@@ -100,17 +117,39 @@ export default function AuthScreen({recovery=false, onRecoveryComplete, onRecove
   }
 
   async function signInWith(provider) {
-    if(!configured || busy || (provider === 'google' && !googleEnabled) || (provider === 'apple' && !appleEnabled)) return;
+    if(!configured || busy || (provider === 'apple' && !appleEnabled)) return;
     setBusy(provider); setFeedback(null);
     try {
-      const {error} = await supabase.auth.signInWithOAuth({provider,options:{redirectTo:redirectBase()}});
+      if (provider === 'google') {
+        // Public GoTrue settings prevent sending users to a disabled provider.
+        // If the check fails, allow Supabase itself to decide rather than
+        // mistakenly blocking an otherwise configured Google provider.
+        try {
+          const base = import.meta.env.VITE_SUPABASE_URL?.replace(/\/+$/, '');
+          const response = await fetch(base + '/auth/v1/settings', {
+            headers: {apikey: import.meta.env.VITE_SUPABASE_ANON_KEY},
+          });
+          if (response.ok) {
+            const settings = await response.json();
+            if (settings?.external?.google === false) {
+              throw new Error('Google sign-in needs to be enabled by the IET Grid administrator in Supabase Authentication → Providers.');
+            }
+          }
+        } catch(error) {
+          if (error?.message?.includes('needs to be enabled')) throw error;
+        }
+      }
+      const {error} = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {redirectTo:redirectBase()}
+      });
       if(error) throw error;
     } catch(error) {
       setFeedback({kind:'error',message:error?.message || 'Could not start social sign in.'});
     } finally {setBusy('');}
   }
 
-  return <main className="ig-auth-page">
+  return <main className="ig-auth-page" data-auth-mode={mode}>
     <div className="ig-auth-layout">
       <section className="ig-auth-form-panel" aria-labelledby="ig-auth-title">
         <div className="ig-auth-form-content">
@@ -121,10 +160,10 @@ export default function AuthScreen({recovery=false, onRecoveryComplete, onRecove
             <span className="ig-auth-eyebrow">INSTITUTE OF ENGINEERING & TECHNOLOGY</span>
             <h1 id="ig-auth-title">{title}</h1><p>{subtitle}</p>
           </div>
-          {(googleEnabled || appleEnabled) && (signin || signup) && <>
+          {(signin || signup) && <>
             <div className="ig-auth-socials">
-              {googleEnabled && <button type="button" className="ig-auth-social" onClick={() => signInWith('google')} disabled={!!busy || !configured}>
-                <GoogleIcon/> <span>Continue with Google</span></button>}
+              <button type="button" className="ig-auth-social" onClick={() => signInWith('google')} disabled={!!busy || !configured}>
+                <GoogleIcon/> <span>Continue with Google</span></button>
               {appleEnabled && <button type="button" className="ig-auth-social" onClick={() => signInWith('apple')} disabled={!!busy || !configured}>
                 <AppleIcon/> <span>Continue with Apple</span></button>}
             </div>
@@ -158,15 +197,14 @@ export default function AuthScreen({recovery=false, onRecoveryComplete, onRecove
               signup?<>Already registered? <button type="button" onClick={() => switchMode('signin')}>Sign in</button></>:
               <button type="button" onClick={() => switchMode('signin')}>Back to sign in</button>}
           </p>
-          <div className="ig-auth-policy"><LockKeyhole size={15}/> Institutional roles must be verified. Registration does not grant faculty or admin privileges.</div>
         </div>
       </section>
       <aside className="ig-auth-art-panel" aria-label="IET Grid campus introduction">
         <div className="ig-auth-art-fallback"/>
-        <GrainGradient className="ig-auth-shader" speed={reducedMotion ? 0 : 1} frame={2854.5}
+        {showShader && <GrainGradient className="ig-auth-shader" speed={1} frame={2854.5}
           fit="cover" width="100%" height="100%" scale={1} rotation={0} offsetX={0} offsetY={0}
           softness={0.55} intensity={0.65} noise={0.25} shape="corners"
-          colors={['#315CE5','#10213B','#6C8FF7','#CFDDFC']} colorBack="#07162C"/>
+          colors={['#315CE5','#10213B','#6C8FF7','#CFDDFC']} colorBack="#07162C"/>}
         <div className="ig-auth-art-veil"/>
         <div className="ig-auth-art-content">
           <div className="ig-auth-art-center">
