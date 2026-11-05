@@ -108,7 +108,7 @@ export default function CampusExperience({
       <BlueprintSitePlan rooms={rooms} building={building} floor={floor} selected={selected}
         onSelect={selectRoom} getStatus={getStatus} mode={mode}
         floorOptions={floorOptions} onNavigateFloor={goToFloor} onModeChange={setMode}
-        buildings={buildings} onBuildingChange={chooseBuilding}
+        buildings={buildings} onBuildingChange={chooseBuilding} onFindRoom={selectAlternative}
         activeSessions={activeSessions} nowScheduleState={nowScheduleState}/>
     </section>
     <div className="cx-lower-workspace">
