@@ -164,3 +164,7 @@
   .app-shell .ig-slide-cursor{transition:none;will-change:auto}
   .app-shell .ig-slide-tab,.app-shell .ig-topnav-logo{transition:none}
 }
+
+/* User-supplied profile photo stays clipped to its avatar slot. */
+.app-shell .ig-nav-avatar-image{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.app-shell .ig-profile-avatar{overflow:hidden}
