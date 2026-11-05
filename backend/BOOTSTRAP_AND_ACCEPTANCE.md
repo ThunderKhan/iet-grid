@@ -1,6 +1,6 @@
 # IET Grid — Trusted Administrator Bootstrap and Live Acceptance
 
-**Status:** The dedicated Supabase project has zero real users at the recorded baseline. Never create permanent fictitious university identities just to make a screenshot appear functional.
+**Status update (5 Nov 2026):** A real account has been registered in the dedicated project, but its administrator status must still be provisioned only after identity verification. Never create permanent fictitious university identities just to make a screenshot appear functional.
 
 ## Step 1 — Register and verify the intended first administrator
 
@@ -82,3 +82,7 @@ The second test directly exercises database functions and RLS but **does not** p
 - Frontend API origin is https://iet-grid-api.vercel.app.
 - Both frontend and backend are deployed on Vercel, but SQL migrations require a separate reviewed deployment to Supabase.
 - Do not describe unfinished student-dataset import, verified blueprint tracing, real-user acceptance or 100-user concurrency benchmarks as complete.
+
+## Authentication email redirect checklist (5 November 2026)
+
+An initial signup confirmation sent the user to localhost. The React signup now specifies `emailRedirectTo: https://iet-grid.vercel.app/` by default; **this does not replace Supabase-side configuration**. In the IET Grid Supabase project, configure **Authentication → URL Configuration → Site URL** = `https://iet-grid.vercel.app` and add `https://iet-grid.vercel.app/**` under **Redirect URLs**. Custom email templates must use Supabase's `{{ .ConfirmationURL }}` (or correctly constructed `{{ .RedirectTo }}`), not a literal localhost host. Verify with a fresh signup email; never manually edit token-bearing confirmation links as part of normal operation.
