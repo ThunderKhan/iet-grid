@@ -10,6 +10,23 @@ const server=await createServer({server:{middlewareMode:true},appType:'custom',l
 try {
   const pages=await server.ssrLoadModule('/src/components/WorkspacePages.jsx');
   const {default: CampusExperience}=await server.ssrLoadModule('/src/components/CampusExperience.jsx');
+  const {getActiveRoomSessions,sessionTimeIST}=await server.ssrLoadModule('/src/currentSessions.js');
+  const reference=Date.parse('2026-11-05T10:00:00.000Z');
+  const testEvents=[
+    {room_id:'IET18',title:'AI/ML · Computer Vision',starts_at:'2026-11-05T09:30:00.000Z',ends_at:'2026-11-05T10:30:00.000Z',status:'confirmed'},
+    {room_id:'IET20',title:'Protected subject',details_visible:false,starts_at:'2026-11-05T09:00:00.000Z',ends_at:'2026-11-05T11:00:00.000Z',status:'confirmed'},
+    {room_id:'LH04',title:'Exam pending',starts_at:'2026-11-05T09:00:00.000Z',ends_at:'2026-11-05T11:00:00.000Z',status:'pending'},
+    {room_id:'IET17',title:'Already finished',starts_at:'2026-11-05T08:00:00.000Z',ends_at:'2026-11-05T10:00:00.000Z',status:'confirmed'},
+    {room_id:'IET19',title:'Later this day',starts_at:'2026-11-05T10:30:00.000Z',ends_at:'2026-11-05T11:00:00.000Z',status:'confirmed'},
+  ];
+  const running=getActiveRoomSessions(testEvents,reference);
+  assert.equal(running.IET18.title,'AI/ML · Computer Vision');
+  assert.equal(running.IET20.title,'Occupied — class details unavailable');
+  assert.equal(running.IET20.detailsVisible,false,'Hidden schedule titles must remain hidden');
+  for(const id of ['LH04','IET17','IET19'])
+    assert.equal(running[id],undefined,'Not-current or pending booking must not be shown as running');
+  assert.ok(sessionTimeIST('2026-11-05T10:00:00.000Z').includes('3:30'),
+    'Running class times must display IST, not browser-local time');
   const {default: VelarisGradient,VELARIS_VERTEX_SHADER,VELARIS_FRAGMENT_SHADER,hexToUnitRGB}=await server.ssrLoadModule('/src/components/VelarisGradient.jsx');
   const shaderMarkup=renderToString(React.createElement(VelarisGradient,{className:'cx-gradient'}));
   assert.ok(shaderMarkup.includes('cx-velaris-canvas')&&shaderMarkup.includes('<canvas'),
@@ -33,6 +50,22 @@ try {
     assert.ok(!html.includes('WASHROOM')&&!html.includes('DRINKING WATER')&&!html.includes('STAIRS'), 'Non-bookable facilities leaked into SVG');
     console.log('PASS modern plan',building,floor,roomId);
   }
+  const sampleLiveMap=renderToString(React.createElement(BlueprintSitePlan,{
+    rooms:allRooms,building:'IET',floor:'First',selected:'IET18',
+    onSelect:()=>{},getStatus:()=> 'available',
+    activeSessions:running,nowScheduleState:'ready'
+  }));
+  assert.ok(sampleLiveMap.includes('LIVE NOW'),'Room plan must visibly identify running classes');
+  assert.ok(sampleLiveMap.includes('AI/ML · Computer Vision'),
+    'Authorized current class should be visible to the viewer');
+  assert.ok(sampleLiveMap.includes('Occupied — class details unavailable'),
+    'Restricted class titles must not leak');
+  const mobileListMap=renderToString(React.createElement(BlueprintSitePlan,{
+    rooms:allRooms,building:'IET',floor:'First',selected:'IET18',
+    onSelect:()=>{},getStatus:()=> 'available',
+    activeSessions:running,nowScheduleState:'ready',mode:'list'
+  }));
+  assert.ok(mobileListMap.includes('Running now'),'Room list must expose ongoing sessions');
   // Building name is a single visible heading; the floor arrows replace all tab buttons.
   for(const [whichBuilding,currentFloor,floors] of [
     ['IET','Ground',3],['IET','First',3],['IET','Second',3],
@@ -56,6 +89,11 @@ try {
     assert.ok(!html.includes('cx-floor-label'),'Redundant building heading row must be removed');
     assert.ok(!html.includes('cx-hero')&&!html.includes('Find space for the next class.'),
       'Removed hero banner must not render in Campus map');
+    const fullMapPosition=html.indexOf('cx-map-hero');
+    const toolbarPosition=html.indexOf('cx-nav"');
+    const detailPosition=html.indexOf('cx-aside"');
+    assert.ok(fullMapPosition>=0&&toolbarPosition>fullMapPosition&&detailPosition>toolbarPosition,
+      'Floor plan must render full-width first, with selector and booking details below');
     assert.ok(html.includes('cx-nav'), 'Building selector must remain after removing hero');
     assert.ok(html.includes('bp-view-toggle'),'Map/List switch must sit inside the floor plan card');
     assert.ok(html.indexOf('bp-head')<html.indexOf('bp-view-toggle') &&
