@@ -48,9 +48,11 @@ const [auditLoading,setAuditLoading]=useState(false);
 const [auditError,setAuditError]=useState('');
 async function apiFetch(route,opts={}){
  if(!API_BASE||!session?.access_token)throw new Error('IET Grid API or sign-in is unavailable');
+ const requestHeaders={'Authorization':'Bearer '+session.access_token,...(opts.headers||{})};
+ if(opts.body && !(opts.body instanceof FormData) && !requestHeaders['Content-Type'])
+   requestHeaders['Content-Type']='application/json';
  const response=await fetch(API_BASE.replace(/\/$/,'')+route,{
-   ...opts,headers:{'Authorization':'Bearer '+session.access_token,
-   'Content-Type':'application/json',...(opts.headers||{})}});
+   ...opts,headers:requestHeaders});
  const data=await response.json().catch(()=>({}));
  if(!response.ok)throw new Error(data?.error?.message||data?.detail||'Backend request failed');
  return data;
@@ -410,7 +412,7 @@ return <div className="app-shell">
     setView={setView} onOpenRoom={openRoomAt}/>}
   {view==='Announcements'&&<AnnouncementsPage notices={notices}
     markNoticeRead={markNoticeRead} noticeReadBusy={noticeReadBusy} setReport={setReport}/>}
-  {view==='Admin'&&<AdminPage canAdmin={canAdmin} userRole={userRole}
+  {view==='Admin'&&<AdminPage apiFetch={apiFetch} canAdmin={canAdmin} userRole={userRole}
     rooms={rooms} bookings={bookings} notices={notices} noticeTitle={noticeTitle}
     setNoticeTitle={setNoticeTitle} noticeBody={noticeBody} setNoticeBody={setNoticeBody}
     noticePriority={noticePriority} setNoticePriority={setNoticePriority}
