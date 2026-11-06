@@ -293,7 +293,7 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
     <footer className="bp-footer"><div className="bp-legend">
       {Object.entries(statuses).filter(([s])=>s!=='pending').map(([s,label])=><span key={s}><i className={'bp-dot bp-dot-'+s}/>{label}</span>)}
       <span><i className="bp-dot bp-dot-live"/>Running now</span>
-    </div><p className="bp-footnote">{mode==='source'?'Original source drawing · No live availability overlay':'Availability: selected slot · Live classes: current time · Interactive layout schematic, not to scale'}</p>
+    </div><p className="bp-footnote">{mode==='source'?'Original source drawing · No live availability overlay':'Availability: selected slot · Live classes: current time · Floor layout schematic, not to scale'}</p>
       {missing.length>0&&<p>{missing.length} room(s) are not on this drawing. Find them in List view.</p>}</footer>
   </section>;
 }
