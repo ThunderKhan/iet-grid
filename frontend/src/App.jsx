@@ -14,7 +14,7 @@ import {buildings,localDate,dateTimes} from './data';
 const initialDate=localDate();
 const menu=[['Explore rooms',MapIcon],['Calendar',CalendarDays],['My bookings',BookOpen],['Announcements',Bell],['Admin',Shield]];
 export default function App(){
-const [session,setSession]=useState(null);const [authReady,setAuthReady]=useState(!configured);const [recovering,setRecovering]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='reset');const [profile,setProfile]=useState(null);const [rooms,setRooms]=useState([]);const [bookings,setBookings]=useState([]);const [notices,setNotices]=useState([]);const [view,setView]=useState('Explore rooms');const [building,setBuilding]=useState('IET');const [floor,setFloor]=useState('First');const [date,setDate]=useState(initialDate);const [hour,setHour]=useState('11');const [duration,setDuration]=useState(1);const [capacity,setCapacity]=useState(75);const [requiredEquipment,setRequiredEquipment]=useState('');const [selected,setSelected]=useState('IET19');const [toast,setToast]=useState('');const [loading,setLoading]=useState(false);const [showBooking,setShowBooking]=useState(false);const [bookingTitle,setBookingTitle]=useState('Extra lecture');const [bookingKind,setBookingKind]=useState('lecture');const [report,setReport]=useState(false);const [noticeTitle,setNoticeTitle]=useState('');const [noticeBody,setNoticeBody]=useState('');
+const [session,setSession]=useState(null);const [authReady,setAuthReady]=useState(!configured);const [recovering,setRecovering]=useState(()=>new URLSearchParams(window.location.search).get('auth')==='reset');const [profile,setProfile]=useState(null);const [rooms,setRooms]=useState([]);const [bookings,setBookings]=useState([]);const [notices,setNotices]=useState([]);const [view,setView]=useState('Explore rooms');const [building,setBuilding]=useState('IET');const [floor,setFloor]=useState('First');const [date,setDate]=useState(initialDate);const [hour,setHour]=useState('11');const [duration,setDuration]=useState(1);const [capacity,setCapacity]=useState(75);const [requiredEquipment,setRequiredEquipment]=useState('');const [selected,setSelected]=useState('IET19');const [toast,setToast]=useState('');const [loading,setLoading]=useState(false);const [showBooking,setShowBooking]=useState(false);const [bookingTitle,setBookingTitle]=useState('Extra lecture');const [bookingKind,setBookingKind]=useState('lecture');const [report,setReport]=useState(false);const [reportDetails,setReportDetails]=useState('');const [noticeTitle,setNoticeTitle]=useState('');const [noticeBody,setNoticeBody]=useState('');
 const [cohorts,setCohorts]=useState([]);
 const [cohortId,setCohortId]=useState('');
 const [cohortError,setCohortError]=useState('');
@@ -335,7 +335,7 @@ async function doBook(){
  if(!isAvailable(current))return alert('This room is not verified as available at that time.');
  if(current.capacity<capacity)return alert('Requested capacity exceeds room size.');
  const selectedGroup=chosenCohort;
- if(bookingKind!=='event'&&!selectedGroup)return alert('Choose a registered academic group before submitting.');
+ if(bookingKind!=='event'&&!selectedGroup&&(cohorts.length>0||cohortError))return alert('Choose a registered academic group before submitting.');
  const rawTitle=bookingTitle.trim();
  if(rawTitle.length<3)return alert('Enter a session title of at least three characters.');
  const groupPrefix=selectedGroup?branchLabel(selectedGroup.branch)+' · ':'';
@@ -356,11 +356,14 @@ async function doBook(){
  finally{setLoading(false);if(success)setShowBooking(false)}
 }
 async function submitReport(){
+ const details=reportDetails.trim();
+ if(details.length<5)return alert('Explain the incorrect or outdated information.');
  try{
   await apiFetch('/api/v1/reports',{method:'POST',body:JSON.stringify({
-   details:'Potential incorrect schedule reported for '+(selected||'unselected room')+' on '+date
+   details:(details+' | Room: '+(selected||'not selected')+' | Date: '+date).slice(0,2000)
   })});
-  alert('Schedule issue submitted. Official bookings were not changed.');setReport(false);
+  alert('Schedule issue submitted. Official bookings were not changed.');
+  setReport(false);setReportDetails('');
  }catch(e){alert(e.message||'Could not submit report')}
 }
 async function addNotice(){
@@ -466,6 +469,9 @@ return <div className="app-shell">
   cohortError={cohortError} loading={loading} canBook={canBook}
   available={!!current&&isAvailable(current)&&current.capacity>=capacity}
   onConfirm={doBook}/>
-{report&&<div className="modal-overlay"><section className="modal" role="dialog" aria-modal="true" aria-labelledby="ig-report-title" aria-describedby="ig-report-description"><div className="modal-head"><h2 id="ig-report-title">Report an issue</h2><button type="button" aria-label="Close issue report" onClick={()=>setReport(false)}><X size={18}/></button></div><p id="ig-report-description" className="muted">Flag incorrect or outdated schedule information. This will not modify official bookings.</p><button type="button" className="button-primary" onClick={submitReport}>Submit schedule report</button></section></div>}
+{report&&<div className="modal-overlay"><section className="modal" role="dialog" aria-modal="true" aria-labelledby="ig-report-title" aria-describedby="ig-report-description"><div className="modal-head"><h2 id="ig-report-title">Report an issue</h2><button type="button" aria-label="Close issue report" onClick={()=>setReport(false)}><X size={18}/></button></div><p id="ig-report-description" className="muted">Describe the incorrect or outdated schedule information. Your report cannot edit official bookings.</p><label className="ig-report-details">What is incorrect?
+  <textarea rows={4} maxLength={1900} minLength={5} required value={reportDetails}
+    onChange={e=>setReportDetails(e.target.value)} placeholder="For example, the examination time for this room differs from the published notice."/>
+  </label><button type="button" className="button-primary" disabled={reportDetails.trim().length<5} onClick={submitReport}>Submit schedule report</button></section></div>}
 {toast&&<div className="toast" role="status" aria-live="polite"><Info size={17} aria-hidden="true"/><span>{toast}</span><button type="button" aria-label="Dismiss notification" onClick={()=>setToast('')}><X size={18}/></button></div>}</div>
 }
