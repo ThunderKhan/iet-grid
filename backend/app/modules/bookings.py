@@ -35,6 +35,17 @@ class CancelRequest(BaseModel):
     reason: str = Field(min_length=3, max_length=500)
 
 
+class RescheduleRequest(BaseModel):
+    starts_at: datetime
+    ends_at: datetime
+    reason: str = Field(min_length=3, max_length=500)
+
+    @model_validator(mode="after")
+    def check_time(self):
+        validate_interval(self.starts_at, self.ends_at)
+        return self
+
+
 class ApprovalRequest(BaseModel):
     approve: bool
 
@@ -112,6 +123,25 @@ async def cancel_booking(booking_id: UUID, body: CancelRequest,
         "p_booking_id": str(booking_id), "p_reason": body.reason
     })
     return {"id": booking_id, "status": "cancelled"}
+
+
+@router.post("/bookings/{booking_id}/reschedule")
+async def reschedule_booking(booking_id: UUID, body: RescheduleRequest,
+                             request: Request, me: Principal = Depends(require_staff)):
+    """Same-room time changes are validated atomically by PostgreSQL.
+
+    Exam/event bookings need a new approval request rather than a silent move.
+    A student must never access this endpoint.
+    """
+    db = Gateway(request, me.token)
+    await db.rpc("reschedule_room_booking", {
+        "p_booking_id": str(booking_id),
+        "p_new_starts_at": body.starts_at.isoformat(),
+        "p_new_ends_at": body.ends_at.isoformat(),
+        "p_reason": body.reason,
+    })
+    return {"id": booking_id, "status": "confirmed",
+            "note": "Room, faculty and cohort conflicts rechecked atomically"}
 
 
 @router.post("/admin/bookings/{booking_id}/review")
