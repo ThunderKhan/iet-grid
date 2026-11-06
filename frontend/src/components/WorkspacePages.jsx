@@ -70,9 +70,16 @@ export function CalendarPage({date,setDate,initialDate,calendarBookings,rooms,on
     <p className="ig-note"><Info size={14}/> Select a scheduled event to locate its room on the floor board. The backend remains authoritative for overlaps and approval status.</p>
   </section></div>;
 }
-export function BookingsPage({bookings,rooms,setView,onOpenRoom}) {
+export function BookingsPage({bookings,rooms,setView,onOpenRoom,userId,bookingBusy='',onCancelBooking,onRescheduleBooking}) {
   const [filter,setFilter]=useState('upcoming');
+  const [editing,setEditing]=useState(null);
+  const [action,setAction]=useState('cancel');
+  const [reason,setReason]=useState('');
+  const [newStart,setNewStart]=useState('');
+  const [newEnd,setNewEnd]=useState('');
+  const [changeError,setChangeError]=useState('');
   const now=Date.now();
+  const asIstField=value=>new Date(value).toLocaleString('sv-SE',{timeZone:'Asia/Kolkata',hour12:false}).replace(' ','T').slice(0,16);
   const matches=(booking,tab)=>{
     if(tab==='pending')return booking.status==='pending';
     if(tab==='past')return new Date(booking.ends_at).getTime()<now||['cancelled','rejected'].includes(booking.status);
@@ -84,6 +91,21 @@ export function BookingsPage({bookings,rooms,setView,onOpenRoom}) {
   const bookingCounts=Object.fromEntries(['upcoming','pending','past','all'].map(tab=>[
     tab,bookings.filter(b=>matches(b,tab)).length
   ]));
+  const startEdit=(booking,nextAction)=>{
+    setEditing(booking.id);setAction(nextAction);setReason('');setChangeError('');
+    setNewStart(asIstField(booking.starts_at));setNewEnd(asIstField(booking.ends_at));
+  };
+  async function submitChange(event,booking){
+    event.preventDefault();
+    setChangeError('');
+    try{
+      if(action==='cancel')await onCancelBooking(booking,reason.trim());
+      else await onRescheduleBooking(booking,{
+        starts_at:newStart+':00+05:30',ends_at:newEnd+':00+05:30',reason:reason.trim()
+      });
+      setEditing(null);
+    }catch(error){setChangeError(error.message||String(error));}
+  }
   return <div className="ig-page-stack"><section className="ig-card ig-booking-page">
     <PanelHead level={1} title="Classroom reservations" description="All bookings visible to your account under institutional access rules." icon={BookOpen}
       action={<button type="button" className="ig-btn ig-btn-primary ig-btn-small" onClick={()=>setView('Explore rooms')}><Plus size={16}/> New reservation</button>}/>
@@ -92,11 +114,40 @@ export function BookingsPage({bookings,rooms,setView,onOpenRoom}) {
     ].map(([key,label])=><button key={key} type="button" className={filter===key?'active':''}
       aria-pressed={filter===key} onClick={()=>setFilter(key)}>{label}
       <span className="ig-tab-counter">{bookingCounts[key]}</span></button>)}</div>
-    {filtered.length?<div className="ig-booking-list">{filtered.map(b=><button type="button" className="ig-booking-item" key={b.id} onClick={()=>onOpenRoom(b.room_id,b.starts_at)}>
-      <span className="ig-booking-room"><DoorOpen size={18}/></span>
-      <span className="ig-booking-main"><b>{b.title}</b><small>{b.room_id} · {b.kind||'lecture'}</small></span>
-      <span className="ig-booking-when"><b>{strDate(b.starts_at)}</b><small>{strTime(b.starts_at)} – {strTime(b.ends_at)}</small></span>
-      <StatePill status={b.status}/><ArrowUpRight size={16} className="ig-booking-arrow"/></button>)}</div>:
+    {filtered.length?<div className="ig-booking-list">{filtered.map(b=>{
+      const ownBooking=Boolean(userId&&b.created_by===userId);
+      const active=ownBooking&&['confirmed','pending'].includes(b.status);
+      const canReschedule=active&&b.status==='confirmed'&&['lecture','practical'].includes(b.kind);
+      return <div key={b.id} className="ig-booking-entry">
+        <button type="button" className="ig-booking-item" onClick={()=>onOpenRoom(b.room_id,b.starts_at)}>
+          <span className="ig-booking-room"><DoorOpen size={18}/></span>
+          <span className="ig-booking-main"><b>{b.title}</b><small>{b.room_id} · {b.kind||'lecture'}</small></span>
+          <span className="ig-booking-when"><b>{strDate(b.starts_at)}</b><small>{strTime(b.starts_at)} – {strTime(b.ends_at)}</small></span>
+          <StatePill status={b.status}/><ArrowUpRight size={16} className="ig-booking-arrow"/>
+        </button>
+        {active&&<div className="ig-booking-actions">
+          {canReschedule&&<button type="button" className="ig-btn ig-btn-outline ig-btn-small" disabled={!!bookingBusy} onClick={()=>startEdit(b,'reschedule')}>Reschedule</button>}
+          <button type="button" className="ig-btn ig-btn-outline ig-btn-small" disabled={!!bookingBusy} onClick={()=>startEdit(b,'cancel')}>Cancel reservation</button>
+        </div>}
+        {editing===b.id&&<form className="ig-booking-change" onSubmit={event=>submitChange(event,b)}>
+          <h3>{action==='cancel'?'Cancel reservation':'Reschedule same room'}</h3>
+          {action==='reschedule'&&<div className="ig-booking-change-times">
+            <label>New start (IST)<input type="datetime-local" required value={newStart} onChange={e=>setNewStart(e.target.value)}/></label>
+            <label>New end (IST)<input type="datetime-local" required value={newEnd} onChange={e=>setNewEnd(e.target.value)}/></label>
+          </div>}
+          <label>Reason<input required minLength={3} maxLength={500} value={reason} onChange={e=>setReason(e.target.value)}
+            placeholder={action==='cancel'?'Why is the room no longer needed?':'Why is the time changing?'}/></label>
+          {action==='reschedule'&&<p className="ig-note">The original room stays selected. A conflicting slot will be rejected by the database. Exams and events require a new approval request.</p>}
+          {changeError&&<p className="ig-alert" role="alert">{changeError}</p>}
+          <div className="ig-booking-actions">
+            <button type="submit" className="ig-btn ig-btn-primary ig-btn-small" disabled={!!bookingBusy||reason.trim().length<3}>
+              {bookingBusy===b.id?'Saving…':action==='cancel'?'Confirm cancellation':'Confirm new time'}
+            </button>
+            <button type="button" className="ig-btn ig-btn-outline ig-btn-small" disabled={!!bookingBusy} onClick={()=>setEditing(null)}>Keep reservation</button>
+          </div>
+        </form>}
+      </div>;
+    })}</div>:
       <Empty icon={BookOpen} title="Nothing in this category" body="When bookings match this status, they will appear here." action={<button type="button" className="ig-btn ig-btn-outline" onClick={()=>setView('Explore rooms')}>Find a room <ArrowRight size={16}/></button>}/>}
   </section></div>;
 }
