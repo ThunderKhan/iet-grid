@@ -130,3 +130,23 @@
  .ig-calendar-actions input,.ig-admin-form input,.ig-admin-form select,.ig-admin-form textarea,
  .ig-audit-filters input,.ig-audit-filters select{font-size:16px}
 }
+
+
+/* Booking lifecycle: actions are siblings of the room-opening button, never nested controls. */
+.ig-booking-entry{border-bottom:1px solid var(--ig-border)}
+.ig-booking-entry:last-child{border-bottom:0}
+.ig-booking-entry>.ig-booking-item{border-bottom:0}
+.ig-booking-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 4px 12px}
+.ig-booking-change{display:grid;gap:12px;margin:0 4px 14px;padding:16px;
+  border:1px solid var(--ig-border);border-radius:10px;background:var(--ig-canvas)}
+.ig-booking-change h3{font-size:15px;font-weight:700;margin:0;color:var(--ig-text)}
+.ig-booking-change label{display:grid;gap:6px;font-size:13px;color:var(--ig-text);font-weight:600}
+.ig-booking-change input{width:100%;min-width:0;min-height:44px;padding:9px 11px;
+  border:1px solid var(--ig-border-strong,#B9C7DA);border-radius:8px;background:#fff;color:var(--ig-text);font-size:14px}
+.ig-booking-change-times{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ig-booking-change .ig-booking-actions{padding:0}
+@media(max-width:720px){
+ .ig-booking-change{padding:12px}
+ .ig-booking-change-times{grid-template-columns:1fr}
+ .ig-booking-change input{font-size:16px}
+}
