@@ -61,3 +61,12 @@ a{text-decoration:none;color:inherit}
 .button-outline:hover:not(:disabled){background:#F1F4F9}
 .button-primary.compact,.button-outline.compact{min-height:42px;padding:10px 16px}
 .muted{color:var(--ig-muted);font-size:14px;line-height:1.55}
+
+
+/* Student issue reporting requires an actual description, never a placeholder submission. */
+.ig-report-details{display:grid;gap:7px;font-weight:650;font-size:13px;margin:14px 0;color:var(--ig-text,#17243B)}
+.ig-report-details textarea{display:block;width:100%;min-height:112px;resize:vertical;
+  padding:12px;border:1px solid var(--ig-border,#DCE4EF);border-radius:9px;
+  background:#fff;color:var(--ig-text,#17243B);font:inherit;font-size:14px;line-height:1.5}
+.ig-report-details textarea:focus-visible{outline:3px solid #ACBEFF;outline-offset:1px}
+@media(max-width:720px){.ig-report-details textarea{font-size:16px}}
