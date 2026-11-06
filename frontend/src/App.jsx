@@ -55,6 +55,17 @@ async function apiFetch(route,opts={}){
  if(!response.ok)throw new Error(data?.error?.message||data?.detail||'Backend request failed');
  return data;
 }
+async function importCohorts(csv,dryRun=true){
+  const result=await apiFetch('/api/v1/admin/cohorts/import?dry_run='+String(dryRun),{
+    method:'POST',headers:{'Content-Type':'text/csv'},body:csv
+  });
+  if(!dryRun){
+    const data=await apiFetch('/api/v1/cohorts');
+    setCohorts((data.cohorts||[]).filter(c=>c.active!==false&&c.id));
+    setRefreshTick(n=>n+1);
+  }
+  return result;
+}
 useEffect(()=>{
   if(!session?.access_token){setCohorts([]);setCohortError('');return;}
   let cancelled=false;
@@ -419,7 +430,8 @@ return <div className="app-shell">
     reviewBusy={reviewBusy} reviewPendingBooking={reviewPendingBooking}
     setRefreshTick={setRefreshTick} accountUuid={accountUuid} setAccountUuid={setAccountUuid}
     accountRole={accountRole} setAccountRole={setAccountRole} accountBusy={accountBusy}
-    grantTestRole={grantTestRole} apiWarning={apiWarning} apiAvailability={apiAvailability}
+    grantTestRole={grantTestRole} onImportCohorts={importCohorts}
+    apiWarning={apiWarning} apiAvailability={apiAvailability}
     auditRows={auditRows} auditTotal={auditTotal} auditOffset={auditOffset} setAuditOffset={setAuditOffset}
     auditRoom={auditRoom} setAuditRoom={setAuditRoom} auditAction={auditAction} setAuditAction={setAuditAction}
     auditLoading={auditLoading} auditError={auditError}/>}
