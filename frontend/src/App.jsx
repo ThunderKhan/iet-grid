@@ -29,6 +29,7 @@ const [accountUuid,setAccountUuid]=useState('');
 const [accountRole,setAccountRole]=useState('faculty');
 const [accountBusy,setAccountBusy]=useState(false);
 const [noticeReadBusy,setNoticeReadBusy]=useState('');
+const [bookingBusy,setBookingBusy]=useState('');
 
 const chosenCohort=cohorts.find(c=>c.id===cohortId)||null;
 const [liveDataError,setLiveDataError]=useState('');
@@ -311,6 +312,24 @@ async function markNoticeRead(noticeId){
  finally{setNoticeReadBusy('');}
 }
 
+async function mutateExistingBooking(booking,action,body){
+ if(bookingBusy)return;
+ setBookingBusy(booking.id);
+ try{
+   await apiFetch('/api/v1/bookings/'+encodeURIComponent(booking.id)+'/'+action,{
+     method:'POST',body:JSON.stringify(body)
+   });
+   const [bookingsResponse,noticeResponse]=await Promise.all([
+     supabase.from('bookings').select('*').order('starts_at'),
+     apiFetch('/api/v1/announcements')
+   ]);
+   if(bookingsResponse.error)throw bookingsResponse.error;
+   setBookings(bookingsResponse.data||[]);
+   setNotices(noticeResponse.announcements||[]);
+   setRefreshTick(n=>n+1);
+   alert(action==='cancel'?'Reservation cancelled.':'Reservation rescheduled and conflict-checked.');
+ }finally {setBookingBusy('');}
+}
 async function doBook(){
  if(!current)return;
  if(!isAvailable(current))return alert('This room is not verified as available at that time.');
@@ -418,7 +437,10 @@ return <div className="app-shell">
     calendarBookings={calendarBookings} rooms={rooms} onOpenRoom={openRoomAt}
     loading={calendarLoading} error={calendarError} onRetry={()=>setRefreshTick(n=>n+1)}/>}
   {view==='My bookings'&&<BookingsPage bookings={bookings} rooms={rooms}
-    setView={setView} onOpenRoom={openRoomAt}/>}
+    setView={setView} onOpenRoom={openRoomAt} userId={session?.user?.id}
+    bookingBusy={bookingBusy}
+    onCancelBooking={(b,reason)=>mutateExistingBooking(b,'cancel',{reason})}
+    onRescheduleBooking={(b,body)=>mutateExistingBooking(b,'reschedule',body)}/>}
   {view==='Announcements'&&<AnnouncementsPage notices={notices}
     markNoticeRead={markNoticeRead} noticeReadBusy={noticeReadBusy} setReport={setReport}/>}
   {view==='Admin'&&<AdminPage canAdmin={canAdmin} userRole={userRole}
