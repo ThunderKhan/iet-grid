@@ -213,6 +213,10 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
   const sorted=useMemo(()=>[...filtered].sort((a,b)=>sortBy==='capacity'?b.capacity-a.capacity:a.id.localeCompare(b.id)),[filtered,sortBy]);
   const stateOf=r=>status(r?getStatus(r):'unknown');
   const isDeek=building==='DEEK';
+  const originalBlueprint={
+    IET:{Ground:'iet-ground.png',First:'iet-first.png',Second:'iet-second.png'},
+    DEEK:{Ground:'deeksha-ground.png',First:'deeksha-first.png'}
+  }[building]?.[floor];
   const availableFloors=floorOptions.length?floorOptions:[floor];
   const floorIndex=availableFloors.indexOf(floor);
   return <section className="bp-board" aria-label={(isDeek?'Deeksha Bhawan':'IET')+' '+floor+' floor'}>
@@ -241,6 +245,8 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
           onClick={()=>onModeChange('plan')}><MapIcon size={15}/> Map</button>
         <button type="button" aria-pressed={mode==='list'} className={mode==='list'?'active':''}
           onClick={()=>onModeChange('list')}><List size={15}/> List</button>
+        <button type="button" aria-pressed={mode==='source'} className={mode==='source'?'active':''}
+          onClick={()=>onModeChange('source')}><Building2 size={15}/> Original plan</button>
       </div>
       </div>
     </header>
@@ -260,7 +266,12 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
             <small className="bp-list-live-title">{activeSessions[r.id].title}</small></>:statuses[stateOf(r)]}
         </span>
       </button>)}{!sorted.length&&<p className="bp-list-empty">No rooms loaded for this floor.</p>}</div>
-    </div>:<div className="bp-viewport" ref={viewportRef}>
+    </div>:mode==='source'?<figure className="bp-source-plan">
+      {originalBlueprint?<img src={'/floorplans/'+originalBlueprint}
+        alt={(isDeek?'Deeksha Bhawan':'IET')+' '+floor+' floor architectural drawing supplied by the hackathon organizers'}/>:
+        <p role="alert">No source drawing is available for this floor.</p>}
+      <figcaption>Organizer-supplied architectural drawing · Room labels and corridors shown as provided. Switch to Map to select a room and check live availability.</figcaption>
+    </figure>:<div className="bp-viewport" ref={viewportRef}>
       <svg viewBox={isDeek?'0 70 940 455':'0 80 940 335'} className="bp-svg" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Interactive classroom floor plan. Use Tab and Enter to select a room.">
         <Shell building={building} floor={floor}/>
         {layout.map(item=><Room key={item.id} item={item} room={byId.get(item.id)} availability={stateOf(byId.get(item.id))}
@@ -282,7 +293,7 @@ export default function BlueprintSitePlan({rooms=[],building,floor,selected,onSe
     <footer className="bp-footer"><div className="bp-legend">
       {Object.entries(statuses).filter(([s])=>s!=='pending').map(([s,label])=><span key={s}><i className={'bp-dot bp-dot-'+s}/>{label}</span>)}
       <span><i className="bp-dot bp-dot-live"/>Running now</span>
-    </div><p className="bp-footnote">Availability: selected slot · Live classes: current time · Floor layout schematic, not to scale</p>
+    </div><p className="bp-footnote">{mode==='source'?'Original source drawing · No live availability overlay':'Availability: selected slot · Live classes: current time · Interactive layout schematic, not to scale'}</p>
       {missing.length>0&&<p>{missing.length} room(s) are not on this drawing. Find them in List view.</p>}</footer>
   </section>;
 }
