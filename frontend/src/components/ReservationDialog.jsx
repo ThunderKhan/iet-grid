@@ -75,7 +75,7 @@ export default function ReservationDialog({
   cohortError,loading,canBook,available,onConfirm
 }) {
   const group=cohorts.find(c=>c.id===cohortId);
-  const groupRequired=bookingKind!=='event';
+  const groupRequired=bookingKind!=='event'&&(cohorts.length>0||Boolean(cohortError));
   const valid=!!room&&canBook&&available&&bookingTitle.trim().length>=3&&bookingTitle.trim().length<=150
     &&(!groupRequired||!!group)&&!loading;
   return <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -101,10 +101,10 @@ export default function ReservationDialog({
         </div>
         <div className="rc-section">
           <span className="rc-label">Academic group {groupRequired?'(required)':'(optional)'}</span>
-          <AcademicGroupFields open={open} cohorts={cohorts} cohortId={cohortId}
-            setCohortId={setCohortId} groupRequired={groupRequired}/>
+          {cohorts.length>0&&<AcademicGroupFields open={open} cohorts={cohorts} cohortId={cohortId}
+            setCohortId={setCohortId} groupRequired={groupRequired}/>}
           <p className="rc-helper">{group?'This booking will be linked to the registered cohort.':
-            cohortError||(!cohorts.length?'No registered academic cohorts were returned. Contact a coordinator.':'Select the class this booking is for.')}</p>
+            cohortError||(!cohorts.length?'No official cohorts have been imported. This booking can be created without cohort linkage; personalized student updates will remain unavailable.':'Select the class this booking is for.')}</p>
         </div>
         <div className="rc-section">
           <label className="rc-label" htmlFor="rc-session-title">Session title</label>
